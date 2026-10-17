@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Adult Fun Finder</title>
+<meta name="theme-color" content="#0d0b16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff4fd8'/%3E%3Cstop offset='1' stop-color='%239d7bff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle'%3E%F0%9F%8E%89%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends within about 2 hours of West Orange, NJ.">
 <meta property="og:title" content="Adult Fun Finder">
 <meta property="og:description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends within about 2 hours of West Orange, NJ.">
@@ -233,13 +239,87 @@
     .card { padding:8px; }
     .leaflet-popup-content { margin:10px 12px; }
   }
+
+  /* ================= NIGHT OUT THEME ================= */
+  :root:not(#night) { color-scheme:dark;
+    --bg:#0d0b16; --panel:#17132a; --fg:#f4f0ff; --muted:#a99fd0; --line:rgba(255,255,255,.12);
+    --accent:#ff4fd8; --accent-fg:#ffffff; --free:#b6ff4a; --free-bg:rgba(182,255,74,.14);
+    --pink:#ff4fd8; --violet:#9d7bff; --cyan:#4be3ff; --lime:#b6ff4a; --grad:linear-gradient(90deg,#ff4fd8,#9d7bff); }
+  body { background:radial-gradient(110% 55% at 0% 0%, #2b0f45 0%, rgba(13,11,22,0) 60%), radial-gradient(90% 40% at 100% 10%, rgba(75,227,255,.10) 0%, rgba(13,11,22,0) 60%), #0d0b16;
+    background-attachment:fixed; color:var(--fg); font-family:Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1, h2, h3, .list .name, #whos-list .wname, #sheet h3 { font-family:"Bricolage Grotesque", Inter, system-ui, sans-serif; }
+
+  /* Hero */
+  header.hero { padding:6px 0 14px; }
+  header.hero .kicker { font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--pink); font-weight:600; }
+  header.hero h1 { font-weight:800; font-size:clamp(38px, 9vw, 64px); line-height:.92; margin:6px 0 10px; letter-spacing:-.01em;
+    background:linear-gradient(90deg,#ff4fd8,#9d7bff 55%,#4be3ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  header.hero .stats { font-size:15px; color:#d6cff2; margin-bottom:6px; }
+  header.hero .stats b { color:var(--lime); font-weight:700; }
+  header.hero .sub { font-size:.84rem; color:var(--muted); margin:0; max-width:760px; }
+
+  /* Chips */
+  .chips button { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#e8e2ff; transition:transform .15s, box-shadow .2s; }
+  .chips button:hover { border-color:rgba(255,79,216,.5); }
+  .chips button.on { background:var(--grad); border-color:transparent; color:#fff; box-shadow:0 0 18px rgba(255,79,216,.40); }
+  .count { color:var(--muted); }
+
+  /* Cards and list */
+  .card { background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.10); box-shadow:0 10px 30px rgba(0,0,0,.25); }
+  .list li { border-bottom-color:rgba(255,255,255,.08); }
+  .list li:hover, .list li.sel { background:rgba(157,123,255,.10); }
+  .list .name { font-weight:800; font-size:1.02rem; }
+  .list .when { color:#b9b0dc; }
+  .tag { background:rgba(255,255,255,.07); border-color:transparent; color:#d8d0f5; }
+  .tag.free { background:rgba(182,255,74,.14); color:var(--lime); }
+  .tag.hot { background:rgba(255,79,216,.18); color:#ff8be6; font-weight:600; }
+  .dir { color:var(--cyan); border-color:rgba(75,227,255,.35); background:transparent; }
+  .vote, .save { background:transparent; border-color:rgba(255,255,255,.22); color:#e8e2ff; }
+  .vote.on { background:var(--grad); border-color:transparent; color:#fff; box-shadow:0 0 16px rgba(255,79,216,.45); }
+  .save.on { border-color:#ffd36b; color:#ffd36b; }
+  .voters { color:#a99fd0; }
+  @keyframes vote-pop { 0% { transform:scale(1); } 35% { transform:scale(1.18); } 70% { transform:scale(.96); } 100% { transform:scale(1); } }
+  .vote.pop { animation:vote-pop .45s ease; }
+
+  /* Map: dark street map, glowing pins */
+  .leaflet-container { background:#15122a !important; }
+  .leaflet-tile-pane { filter:invert(1) hue-rotate(185deg) brightness(.92) contrast(.88) saturate(.75); }
+  .emoji-pin { background:#1a1530 !important; box-shadow:0 0 12px rgba(157,123,255,.55), 0 2px 6px rgba(0,0,0,.6); }
+  .emoji-pin.home { background:var(--grad) !important; border-color:#fff !important; box-shadow:0 0 16px rgba(255,79,216,.75); }
+  .leaflet-control-zoom a, .leaflet-control-zoom { background:#17132a; color:#f4f0ff; border-color:rgba(255,255,255,.15); }
+  .leaflet-control-attribution { background:rgba(13,11,22,.7) !important; color:#8c84b0 !important; }
+  .leaflet-control-attribution a { color:#b9b0dc !important; }
+  #map, #fallback-map { border:1px solid rgba(157,123,255,.25); }
+  #fallback-map { background:#15122a; }
+  #fallback-map .fpin circle { fill:#1a1530; }
+  .town-label { color:#c9c1e8 !important; text-shadow:0 0 3px #000, 0 0 3px #000 !important; }
+
+  /* Details card, Who's in, dialogs */
+  #sheet { background:#17132a; border-color:rgba(157,123,255,.35); box-shadow:0 8px 30px rgba(0,0,0,.6), 0 0 24px rgba(157,123,255,.18); }
+  #sheet-close, #whos-close { background:#0d0b16; color:#f4f0ff; }
+  #whos-in h2 { font-weight:800; }
+  #whos-in .me { background:rgba(255,255,255,.05); }
+  #whos-in .me button { background:transparent; color:var(--cyan); border-color:rgba(75,227,255,.4); }
+  #whos-list li:hover { background:rgba(157,123,255,.10); }
+  #whos-list .wcount { color:var(--lime); font-size:1rem; }
+  @media (max-width: 1099px) {
+    body.votes-on #whos-btn { background:var(--lime); color:#0d0b16; box-shadow:0 0 22px rgba(182,255,74,.55); }
+    #whos-in { background:#17132a; }
+  }
+  #name-dialog .box { background:#17132a; border:1px solid rgba(157,123,255,.35); }
+  #name-dialog button.primary { background:var(--grad); border:none; }
+  #name-warn { background:rgba(255,211,107,.12) !important; color:#ffd36b !important; }
+  #vote-note { color:#ffd36b; }
+  .note { color:#8c84b0; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Adult Fun Finder</h1>
-    <p>Things to do over the next few weekends within about 2 hours of West Orange, NJ. Pick one or more weekends below. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
+  <header class="hero">
+    <div class="kicker" id="hero-kicker">This weekend</div>
+    <h1>Adult Fun<br>Finder</h1>
+    <div class="stats" id="hero-stats"></div>
+    <p class="sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
   </header>
 
   <div class="chips" id="weekend-filters"></div>
@@ -936,6 +1016,7 @@ function renderList() {
     li.querySelector(".name").textContent = t.emoji + " " + ev.name;
     li.querySelector(".when").textContent = ev.when;
     const row = li.querySelector(".row");
+    if (voteCount(ev) >= POPULAR_AT) { const h = document.createElement("span"); h.className = "tag hot"; h.textContent = "🔥 Popular"; row.appendChild(h); }
     const tg = document.createElement("span"); tg.className = "tag"; tg.textContent = t.label; row.appendChild(tg);
     if (selectedWeekends.size > 1) {
       (ev.weekends || []).filter(w => selectedWeekends.has(w)).forEach(w => {
@@ -1005,6 +1086,7 @@ function showSheet(ev) {
   const t = TYPES[ev.type];
   const tags = document.getElementById("sheet-tags");
   tags.innerHTML = "";
+  if (voteCount(ev) >= POPULAR_AT) { const h = document.createElement("span"); h.className = "tag hot"; h.textContent = "🔥 Popular"; tags.appendChild(h); }
   const a = document.createElement("span"); a.className = "tag"; a.textContent = t.emoji + " " + t.label; tags.appendChild(a);
   if (ev.free) { const f = document.createElement("span"); f.className = "tag free"; f.textContent = "Free"; tags.appendChild(f); }
   document.getElementById("sheet-title").textContent = ev.name;
@@ -1068,7 +1150,7 @@ function fillActions(box, ev) {
   if (votesOnline) {
     const v = document.createElement("button"); v.type = "button";
     const n = voteCount(ev), on = mine.has(ev.id);
-    v.className = "vote" + (on ? " on" : "");
+    v.className = "vote" + (on ? " on" : "") + (ev.id === justVoted ? " pop" : "");
     v.textContent = (on ? "👍 You're in" : "👍 I'm in") + (n ? " · " + n : "");
     v.onclick = e => { e.stopPropagation(); toggleVote(ev); };
     box.appendChild(v);
@@ -1161,6 +1243,7 @@ document.getElementById("whos-close").onclick = () => document.body.classList.re
 document.getElementById("whos-backdrop").onclick = () => document.body.classList.remove("whos-open");
 
 function refreshEventUI() {
+  renderHero();
   renderWhosIn();
   renderFilters();
   renderList();
@@ -1227,6 +1310,7 @@ async function toggleVote(ev) {
     myName = n; store.set("aff-name", myName);
   }
   const was = mine.has(ev.id);
+  if (!was) { justVoted = ev.id; setTimeout(() => { if (justVoted === ev.id) justVoted = null; }, 600); }
   // Show the change right away, then confirm with the database
   if (was) {
     mine.delete(ev.id);
@@ -1279,7 +1363,30 @@ loadVotes();
 setInterval(() => { if (!document.hidden) loadVotes(); }, 30000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) loadVotes(); });
 
-function render(fit) { renderFilters(); renderMarkers(fit); renderList(); renderFallbackMap(); }
+const POPULAR_AT = 3;      // votes needed for the 🔥 Popular badge
+let justVoted = null;
+
+function renderHero() {
+  const w = WEEKENDS[0];
+  if (!w) return;
+  const evs = EVENTS.filter(e => (e.weekends || []).includes(w));
+  const free = evs.filter(e => e.free).length;
+  const friends = new Set();
+  Object.entries(votes).forEach(([id, names]) => {
+    const ev = EVENTS.find(e => e.id === id);
+    if (ev && upcomingWeekendsOf(ev).length) names.forEach(n => friends.add(n.trim().toLowerCase()));
+  });
+  document.getElementById("hero-kicker").textContent =
+    (ALL_PAST ? "Last weekend" : isThisWeekend(w) ? "This weekend" : "Next weekend") + " · " + weekendLabel(w);
+  const box = document.getElementById("hero-stats");
+  box.innerHTML = "";
+  const add = (n, label) => { if (box.childNodes.length) box.appendChild(document.createTextNode(" · ")); const b = document.createElement("b"); b.textContent = n; box.appendChild(b); box.appendChild(document.createTextNode(" " + label)); };
+  add(evs.length, "things to do");
+  add(free, "free");
+  if (votesOnline) add(friends.size, friends.size === 1 ? "friend in" : "friends in");
+}
+
+function render(fit) { renderHero(); renderFilters(); renderMarkers(fit); renderList(); renderFallbackMap(); }
 render(true);
 </script>
 </body>
