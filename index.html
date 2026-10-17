@@ -414,6 +414,7 @@
   .cmts button[type=submit] { font:inherit; font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:999px; border:none; background:var(--grad); color:#fff; cursor:pointer; }
   .cmts button[type=submit]:disabled { opacity:.5; }
   .tag.cmt { background:rgba(157,123,255,.16); color:#c9b8ff; }
+  .tag.fri { background:rgba(75,227,255,.12); color:#8beeff; }
 
   /* Latest comments feed in the Who's in panel */
   #feed[hidden], #tab-votes[hidden], .ptabs[hidden] { display:none; }
@@ -552,7 +553,9 @@
 /* ============================================================
    EDIT HERE: add, remove or change events.
    type:  one of the keys in TYPES
-   day:   "sat", "sun" or "both"
+   day:   "fri" (Friday evening), "sat", "sun", "both" (Sat & Sun),
+          "fri-sat" or "fri-sun". A weekend runs Friday evening to Sunday
+          and is named by its Saturday date in `weekends`.
    free:  true only when the listing says it's free
    lat / lng place the pin (right-click a spot in Google Maps to copy them)
    ============================================================ */
@@ -708,8 +711,8 @@ const EVENTS = [
     where: "600 S Broad St, Kennett Square, PA",
     cost: "Free.",
     about: "Nearly 100 vintage and handmade vendors, food trucks, beer and wine, and live music. At the far edge of a 2-hour drive." },
-  { id: "great-jack-o-lantern-blaze", url: "https://travelhudsonvalley.com/event/the-great-jack-olantern-blaze/", name: "Great Jack O'Lantern Blaze", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
-    lat: 41.1915853, lng: -73.8764701, when: "Select evenings through Nov 8, timed entry",
+  { id: "great-jack-o-lantern-blaze", url: "https://travelhudsonvalley.com/event/the-great-jack-olantern-blaze/", name: "Great Jack O'Lantern Blaze", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "fri-sun", free: false, far: true,
+    lat: 41.1915853, lng: -73.8764701, when: "Nightly through Nov 8, timed entry",
     where: "Van Cortlandt Manor, 525 S Riverside Ave, Croton-on-Hudson, NY",
     cost: "Timed tickets from $24.",
     about: "Thousands of hand-carved jack-o'-lanterns lit up along a nighttime trail. A great evening out with friends. Check which nights are open. About 1 hr." },
@@ -753,7 +756,7 @@ const EVENTS = [
     where: "Hamilton Park, 25 W Hamilton Pl, Jersey City",
     cost: "Free. Bring chairs or a blanket.",
     about: "An outdoor zombie opera-theater performance in the park. Fun and spooky with friends. About 25 min." },
-  { id: "the-ghost-of-uncle-joe-s", url: "https://www.hobokengirl.com/ghost-uncle-joes-jersey-city-2026/", name: "The Ghost of Uncle Joe's", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
+  { id: "the-ghost-of-uncle-joe-s", url: "https://www.hobokengirl.com/ghost-uncle-joes-jersey-city-2026/", name: "The Ghost of Uncle Joe's", weekends: ["2026-10-24"], type: "fall", day: "fri-sat", free: false, far: false,
     lat: 40.7271289, lng: -74.0551971, when: "Fri, Oct 23 & Sat, Oct 24",
     where: "Harsimus Cemetery, 435 Newark Ave, Jersey City",
     cost: "Not listed; proceeds support the historic site.",
@@ -913,7 +916,7 @@ const EVENTS = [
     where: "Old York Cellars, 80 Old York Rd, Ringoes, NJ",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up at a winery, with wine flights and food before the show. About 1 hr." },
-  { id: "aaron-weber", name: "Aaron Weber", weekends: ["2026-10-31"], type: "comedy", day: "both", free: false, far: false,
+  { id: "aaron-weber", name: "Aaron Weber", weekends: ["2026-10-31"], type: "comedy", day: "fri-sun", free: false, far: false,
     lat: 40.8114968, lng: -74.1040834, when: "Fri–Sun, Oct 30–Nov 1",
     where: "Bananas Comedy Club, 801 Rutherford Ave, Rutherford",
     cost: "Ticketed; check the venue for prices.",
@@ -953,7 +956,7 @@ const EVENTS = [
     where: "The Clairidge (486 Bloomfield Ave), The Bellevue, and Wellmont Theater, Montclair",
     cost: "Ticketed; check the venue for prices.",
     about: "One of the region's biggest film festivals, with premieres, documentaries, and filmmaker Q&As about 10 minutes from home. Easy to catch a couple of films and dinner on Bloomfield Ave." },
-  { id: "warwick-drive-in", outdoor: true, url: "https://drive-ins.com/theater/nytwarw/warwick-drive-in-theater", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
+  { id: "warwick-drive-in", outdoor: true, url: "https://drive-ins.com/theater/nytwarw/warwick-drive-in-theater", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "fri-sun", free: false, far: false,
     lat: 41.2348937, lng: -74.3792495, when: "Nightly double features on 3 screens; open into the winter",
     where: "5 Warwick Turnpike, Warwick, NY",
     cost: "Not listed; check the drive-in's site.",
@@ -963,7 +966,7 @@ const EVENTS = [
     where: "Williams Center, 15 Sylvan St, Rutherford",
     cost: "Ticketed; check the venue for prices.",
     about: "Cult and horror classics on the big screen all October, including Night of the Living Dead and Trick 'r Treat on Halloween. About 20 min." },
-  { id: "the-rocky-horror-picture-show", url: "https://www.montclairfilm.org/events/the-rocky-horror-picture-show/", name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+  { id: "the-rocky-horror-picture-show", url: "https://www.montclairfilm.org/events/the-rocky-horror-picture-show/", name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "fri-sat", free: false, far: false,
     lat: 40.814344, lng: -74.218509, when: "Fri & Sat, Oct 30–31",
     where: "The Clairidge, 486 Bloomfield Ave, Montclair",
     cost: "Ticketed; check the venue for prices.",
@@ -1007,7 +1010,72 @@ const EVENTS = [
     lat: 40.0831533, lng: -75.2194871, when: "Sundays",
     where: "9201 Germantown Ave, Philadelphia (Chestnut Hill)",
     cost: "Free on Sundays (donations welcome).",
-    about: "Philadelphia-area art and outdoor sculptures in a leafy neighborhood. About 1 hr 30 min." }
+    about: "Philadelphia-area art and outdoor sculptures in a leafy neighborhood. About 1 hr 30 min." },
+  { id: "trombone-shorty-mavis-staples", url: "https://www.njpac.org/event/trombone-shorty/", name: "Trombone Shorty & Orleans Avenue with Mavis Staples", weekends: ["2026-10-24"], type: "show", day: "fri", free: false, far: false,
+    lat: 40.7397652, lng: -74.1673071, when: "Friday, Oct 23, 8 PM",
+    where: "NJPAC, 1 Center St, Newark",
+    cost: "Check the listing.",
+    about: "New Orleans funk and brass from Trombone Shorty plus soul legend Mavis Staples. A big, danceable Friday night about 20 min away." },
+  { id: "darren-fleet", url: "https://www.njpac.org/event/darren-fleet/", name: "Darren Fleet", weekends: ["2026-10-24"], type: "comedy", day: "fri", free: false, far: false,
+    lat: 40.7397652, lng: -74.1673071, when: "Friday, Oct 23, 8 PM",
+    where: "NJPAC, 1 Center St, Newark",
+    cost: "Check the listing.",
+    about: "High-energy stand-up known for relatable rants about everyday life, with credits including the BET Awards and Essence Fest. About 20 min." },
+  { id: "the-living-tombstone", url: "https://concertfix.com/concerts/montclair-nj+wellmont-theatre", name: "The Living Tombstone", weekends: ["2026-10-24"], type: "show", day: "fri", free: false, far: false,
+    lat: 40.8126474, lng: -74.2166355, when: "Friday, Oct 23, 8 PM",
+    where: "The Wellmont Theater, 5 Seymour St, Montclair",
+    cost: "Ticketed; check the listing.",
+    about: "The electronic-rock act famous for its viral video-game songs, live in Montclair. About 15 min." },
+  { id: "bbq-bonfires-beer", url: "https://www.njfamily.com/events/bbq-bonfires-beer/2026-10-23/", name: "BBQ, Bonfires & Beer (21+)", weekends: ["2026-10-24"], type: "food", day: "fri", free: false, far: false,
+    lat: 40.3024597, lng: -74.4823074, when: "Friday, Oct 23, 5 to 9 PM",
+    where: "Linwood Fields at Pop's Farm Market, 238 Cranbury Station Rd, Monroe Township",
+    cost: "$15 per person; adults 21+ only.",
+    about: "An adults-only farm night with bonfires, Bearded One BBQ, Old Hights Brewing beer, lawn games, a movie, a night market and a flashlight corn maze. About 50 min." },
+  { id: "haunted-wild-west-city", url: "https://wildwestcity.com/hauntedwildwestcity/", name: "Haunted Wild West City", weekends: ["2026-10-24",  "2026-10-31"], type: "fall", day: "fri-sat", free: false, far: false,
+    lat: 40.9348314, lng: -74.7105851, when: "Fri & Sat evenings through Oct 31, 6:30 to 10 PM",
+    where: "Wild West City, 50 Lackawanna Dr, Stanhope",
+    cost: "$30 online in advance, $35 at the door.",
+    about: "A haunted train ride and scare trail through an old Western town after dark. PG-13 scares; fun with a group. About 45 min." },
+  { id: "scare-farm-norz-hill", url: "https://www.njfamily.com/events/scare-farm-at-norz-hill-farm-the-final-ride/2026-10-23/", name: "Scare Farm: The Final Ride", weekends: ["2026-10-24",  "2026-10-31"], type: "fall", day: "fri-sun", free: false, far: false,
+    lat: 40.535789, lng: -74.6956375, when: "Fri\u2013Sun evenings through Nov 1; timeslots from 7 PM",
+    where: "Norz Hill Farm, 120 South Branch Rd, Hillsborough",
+    cost: "Not listed; check the listing. Ages 13+.",
+    about: "The farewell season of Scare Farm's haunted attractions on a working farm. A classic group scare night. About 50 min." },
+  { id: "jon-bramnick-vinnie-brand", url: "https://www.njpac.org/event/jon-bramnick/", name: "Jon Bramnick with Vinnie Brand", weekends: ["2026-10-31"], type: "comedy", day: "fri", free: false, far: false,
+    lat: 40.7397652, lng: -74.1673071, when: "Friday, Oct 30, 7:30 PM",
+    where: "NJPAC, 1 Center St, Newark",
+    cost: "Check the listing.",
+    about: "New Jersey's comedian-politician Jon Bramnick with special guest Vinnie Brand. A local stand-up night about 20 min away." },
+  { id: "justin-moore-wellmont", url: "https://concertfix.com/concerts/montclair-nj+wellmont-theatre", name: "Justin Moore", weekends: ["2026-10-31"], type: "show", day: "fri", free: false, far: false,
+    lat: 40.8126474, lng: -74.2166355, when: "Friday, Oct 30, 8 PM",
+    where: "The Wellmont Theater, 5 Seymour St, Montclair",
+    cost: "Ticketed; check the listing.",
+    about: "Country star Justin Moore in a theater-sized room in Montclair. About 15 min." },
+  { id: "hoboken-halloween-bar-crawl-fri", url: "https://www.hobokengirl.com/halloween-hoboken-jersey-city-nj-2026/", name: "Hoboken Halloween Bar Crawl (Friday)", weekends: ["2026-10-31"], type: "show", day: "fri", free: false, far: false,
+    lat: 40.73673, lng: -74.0291321, when: "Friday, Oct 30, 6 PM to 1 AM",
+    where: "Starts at Mike's Wild Moose Saloon, 92 River St, Hoboken",
+    cost: "Wristband required; price not listed. 21+.",
+    about: "Costumes on and bar-hopping around Hoboken the night before Halloween. About 30 min." },
+  { id: "choir-choir-choir", url: "https://outpostintheburbs.thundertix.com/events/261808", name: "Choir! Choir! Choir! Epic Anthems Sing-Along", weekends: ["2026-11-07"], type: "show", day: "fri", free: false, far: false,
+    lat: 40.8124603, lng: -74.2186371, when: "Friday, Nov 6, 8 PM (doors 7 PM)",
+    where: "Outpost in the Burbs at First Congregational Church, 40 S Fullerton Ave, Montclair",
+    cost: "$36 plus fees.",
+    about: "A giant crowd sing-along of epic anthems led by Toronto's Choir! Choir! Choir!. No singing experience needed; a fun, different night out with friends. About 15 min." },
+  { id: "niladri-kumaar", url: "https://www.njpac.org/event/niladri-kumaar/", name: "Niladri Kumaar: Honoring Zakir Hussain", weekends: ["2026-11-07"], type: "show", day: "fri", free: false, far: false,
+    lat: 40.7397652, lng: -74.1673071, when: "Friday, Nov 6, 7:30 PM",
+    where: "NJPAC, 1 Center St, Newark",
+    cost: "Check the listing.",
+    about: "Sitar virtuoso Niladri Kumaar's \"The Space Between the Notes,\" a tribute to tabla great Zakir Hussain. About 20 min." },
+  { id: "joe-list", url: "https://www.njarts.net/130425", name: "Joe List", weekends: ["2026-11-07"], type: "comedy", day: "fri-sun", free: false, far: false,
+    lat: 40.4959369, lng: -74.4435773, when: "Fri\u2013Sun, Nov 6\u20138",
+    where: "Stress Factory Comedy Club, 90 Church St, New Brunswick",
+    cost: "Check the listing.",
+    about: "Sharp, self-deprecating stand-up from Joe List. About 45 min." },
+  { id: "philadelphia-art-museum-friday-nights", url: "https://www.phillyvoice.com/philadelphia-museum-art-pay-what-you-wish-friday-nights-2027/", name: "Philadelphia Art Museum Pay-What-You-Wish Friday Nights", weekends: ["2026-10-24",  "2026-10-31",  "2026-11-07"], type: "art", day: "fri", free: false, far: true,
+    lat: 39.9655697, lng: -75.1809661, when: "Fridays after 5 PM",
+    where: "2600 Benjamin Franklin Pkwy, Philadelphia",
+    cost: "Pay what you wish.",
+    about: "Friday-night entry to the permanent collection with events and music, for whatever you want to pay. About 1 hr 30 min." }
 ];
 /* ============================================================ */
 
@@ -1037,8 +1105,11 @@ let indoorOnly = false;   // the list item that's tapped open, kept open when th
 let dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
 
 // Weekends are named by their Saturday (YYYY-MM-DD). Past weekends are hidden.
+// Which days of its weekend an event happens: any of "fri", "sat", "sun"
+const DAY_SETS = { fri: ["fri"], sat: ["sat"], sun: ["sun"], both: ["sat", "sun"], "fri-sat": ["fri", "sat"], "fri-sun": ["fri", "sat", "sun"] };
+const dayList = ev => DAY_SETS[ev.day] || ["sat", "sun"];
 function weekendLabel(sat) {
-  const a = new Date(sat + "T12:00:00"), b = new Date(a); b.setDate(a.getDate() + 1);
+  const a = new Date(sat + "T12:00:00"), b = new Date(a); a.setDate(a.getDate() - 1); b.setDate(b.getDate() + 1);   // Fri–Sun
   const m = d => d.toLocaleString("en-US", { month: "short" });
   return a.getMonth() === b.getMonth() ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()}–${m(b)} ${b.getDate()}`;
 }
@@ -1110,7 +1181,7 @@ function visibleEvents() {
   return EVENTS.filter(e =>
     (e.weekends || []).some(w => selectedWeekends.has(w)) &&
     (!activeTypes.size || activeTypes.has(TYPES[e.type].group)) &&
-    (dayFilter === "any" || e.day === dayFilter || e.day === "both") &&
+    (dayFilter === "any" || dayList(e).includes(dayFilter)) &&
     (!freeOnly || e.free) &&
     (!savedOnly || saved.has(e.id)) &&
     (distFilter === "any" || (distFilter === "near") === !e.far) &&
@@ -1169,7 +1240,8 @@ function renderFilters() {
     render(true);
   }));
   const x = document.getElementById("extra-filters"); x.innerHTML = "";
-  chip(x, "Both days", dayFilter === "any", () => { dayFilter = "any"; render(true); });
+  chip(x, "All days", dayFilter === "any", () => { dayFilter = "any"; render(true); });
+  chip(x, "🌙 Friday night", dayFilter === "fri", () => { dayFilter = "fri"; render(true); });
   chip(x, "Saturday", dayFilter === "sat", () => { dayFilter = "sat"; render(true); });
   chip(x, "Sunday", dayFilter === "sun", () => { dayFilter = "sun"; render(true); });
   chip(x, "💸 Free only", freeOnly, () => { freeOnly = !freeOnly; render(true); });
@@ -1224,6 +1296,7 @@ function renderList() {
     const row = li.querySelector(".row");
     if (voteCount(ev) >= POPULAR_AT) { const h = document.createElement("span"); h.className = "tag hot"; h.textContent = "🔥 Popular"; row.appendChild(h); }
     const tg = document.createElement("span"); tg.className = "tag"; tg.textContent = t.label; row.appendChild(tg);
+    if (dayList(ev).includes("fri")) { const fr = document.createElement("span"); fr.className = "tag fri"; fr.textContent = "🌙 Fri night"; row.appendChild(fr); }
     if (selectedWeekends.size > 1) {
       (ev.weekends || []).filter(w => selectedWeekends.has(w)).forEach(w => {
         const wt = document.createElement("span"); wt.className = "tag"; wt.textContent = weekendLabel(w); row.appendChild(wt);
@@ -1305,6 +1378,7 @@ function showSheet(ev) {
   if (voteCount(ev) >= POPULAR_AT) { const h = document.createElement("span"); h.className = "tag hot"; h.textContent = "🔥 Popular"; tags.appendChild(h); }
   const a = document.createElement("span"); a.className = "tag"; a.textContent = t.emoji + " " + t.label; tags.appendChild(a);
   if (ev.free) { const f = document.createElement("span"); f.className = "tag free"; f.textContent = "Free"; tags.appendChild(f); }
+  if (dayList(ev).includes("fri")) { const fr = document.createElement("span"); fr.className = "tag fri"; fr.textContent = "🌙 Fri night"; tags.appendChild(fr); }
   addRainTag(tags, ev);
   document.getElementById("sheet-title").textContent = ev.name;
   document.getElementById("sheet-when").textContent = ev.when;
@@ -1750,7 +1824,8 @@ const isoAddDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDat
 function shownWeekendOf(ev) { return (ev.weekends || []).find(w => selectedWeekends.has(w) && WEEKENDS.includes(w)) || upcomingWeekendsOf(ev)[0] || ev.weekends[0]; }
 function eventDays(ev, sat) {
   const sun = isoAddDays(sat, 1);
-  return ev.day === "sat" ? [sat] : ev.day === "sun" ? [sun] : [sat, sun];
+  const date = { fri: isoAddDays(sat, -1), sat, sun };
+  return dayList(ev).map(d => date[d]);
 }
 // Reads times like "10 AM to 4 PM", "2 to 6 PM", "noon to 8 PM" or "7:30 AM" from the listing
 function parseTimes(when) {
@@ -1873,7 +1948,7 @@ function fillSheetWeather(ev) {
 }
 function renderHeroWeather() {
   const el = document.getElementById("hero-wx"), w = WEEKENDS[0];
-  const line = WX && w && !ALL_PAST ? wxLine(HOME.lat, HOME.lng, [w, isoAddDays(w, 1)].filter(d => d >= todayIso())) : "";
+  const line = WX && w && !ALL_PAST ? wxLine(HOME.lat, HOME.lng, [isoAddDays(w, -1), w, isoAddDays(w, 1)].filter(d => d >= todayIso())) : "";
   el.hidden = !line;
   el.textContent = line ? "Forecast near HQ: " + line : "";
 }

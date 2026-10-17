@@ -18,7 +18,7 @@ Events are refreshed every Thursday evening. Listings come from web searches, so
 
 ## Features
 
-- Map and list with filters for weekend, category, day, cost, indoor, distance and saved events, plus a search box.
+- Weekends run Friday evening to Sunday. Map and list with filters for weekend, category, day (Friday night, Saturday, Sunday), cost, indoor, distance and saved events, plus a search box.
 - Each event has its web page (or a web search), a share link that opens the site on that event (`?e=event-id`), and an add-to-calendar button (Google Calendar or a calendar file).
 - Weekend weather from Open-Meteo, with a ☔ tag on outdoor events when rain is likely.
 - Shared "I'm in" votes, a "Who's in" sidebar, comments on each event, and a form for friends to suggest events.
