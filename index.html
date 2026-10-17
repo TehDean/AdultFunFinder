@@ -135,6 +135,41 @@
 
   .note { margin-top:10px; color:var(--muted); font-size:.8rem; }
 
+  /* "Who's in" sidebar: a column on wide screens, a slide-in panel on phones */
+  #whos-in { display:none; }
+  body.votes-on #whos-in { display:block; }
+  #whos-in h2 { margin:0 0 2px; font-size:1.05rem; }
+  #whos-in .sub { color:var(--muted); font-size:.8rem; margin:0 0 10px; }
+  #whos-in .me { display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:.85rem; margin:0 0 12px; padding:8px 10px; border-radius:10px; background:var(--bg); }
+  #whos-in .me button { font:inherit; font-size:.8rem; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--accent); cursor:pointer; }
+  #whos-list { list-style:none; margin:0; padding:0; }
+  #whos-list li { padding:10px 8px; border-bottom:1px solid var(--line); border-radius:10px; cursor:pointer; }
+  #whos-list li:last-child { border-bottom:none; }
+  #whos-list li:hover { background:var(--bg); }
+  #whos-list .wname { font-weight:600; font-size:.9rem; }
+  #whos-list .wmeta { color:var(--muted); font-size:.78rem; margin:2px 0 4px; }
+  #whos-list .wpeople { font-size:.82rem; }
+  #whos-list .wcount { float:right; font-weight:700; font-size:.85rem; color:var(--accent); margin-left:8px; }
+  #whos-list .empty { cursor:default; color:var(--muted); font-size:.88rem; }
+  #whos-btn { display:none; }
+  #whos-close { display:none; }
+  #whos-backdrop { display:none; }
+  @media (min-width: 1100px) {
+    body.votes-on .layout { grid-template-columns:minmax(220px,260px) minmax(0,1.5fr) minmax(0,1fr); }
+    #whos-in { position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; }
+  }
+  @media (max-width: 1099px) {
+    body.votes-on #whos-btn { display:inline-flex; position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom)); z-index:1500;
+      align-items:center; gap:6px; font:inherit; font-weight:600; font-size:.92rem; padding:12px 16px; border-radius:999px; border:none;
+      background:var(--accent); color:var(--accent-fg); box-shadow:0 4px 16px rgba(0,0,0,.3); cursor:pointer; }
+    #whos-in { position:fixed; top:0; right:0; bottom:0; width:min(340px, 88vw); z-index:2500; border-radius:14px 0 0 14px;
+      overflow:auto; transform:translateX(105%); transition:transform .25s ease; padding:16px 14px calc(16px + env(safe-area-inset-bottom)); }
+    body.whos-open #whos-in { transform:none; }
+    #whos-close { display:inline-flex; position:absolute; top:10px; right:10px; width:34px; height:34px; border-radius:50%; align-items:center; justify-content:center;
+      border:1px solid var(--line); background:var(--bg); color:var(--fg); font-size:20px; cursor:pointer; }
+    body.whos-open #whos-backdrop { display:block; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:2400; }
+  }
+
   /* Votes and saves */
   .vote, .save { font:inherit; font-size:.82rem; min-height:32px; padding:5px 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
   .vote.on { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
@@ -213,6 +248,13 @@
   <div id="vote-note" hidden></div>
 
   <div class="layout">
+    <aside class="card" id="whos-in" aria-label="Who's in">
+      <button type="button" id="whos-close" aria-label="Close">×</button>
+      <h2>🙋 Who's in</h2>
+      <p class="sub">What friends have voted for, most popular first. Tap one to see it on the map.</p>
+      <div class="me" id="whos-me"></div>
+      <ul id="whos-list"></ul>
+    </aside>
     <div class="card">
       <div class="map-wrap">
         <div id="map"></div>
@@ -241,6 +283,8 @@
   <p class="note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
 </div>
 
+<button type="button" id="whos-btn">🙋 Who's in</button>
+<div id="whos-backdrop"></div>
 <div id="name-dialog" hidden>
   <div class="box" role="dialog" aria-labelledby="name-title">
     <h3 id="name-title">What's your name?</h3>
@@ -1033,7 +1077,83 @@ function fillActions(box, ev) {
   s.onclick = e => { e.stopPropagation(); toggleSave(ev); };
   box.appendChild(s);
 }
+function upcomingWeekendsOf(ev) { return (ev.weekends || []).filter(w => WEEKENDS.includes(w)); }
+
+function renderWhosIn() {
+  const me = document.getElementById("whos-me");
+  me.innerHTML = "";
+  const label = document.createElement("span");
+  label.textContent = myName ? "👤 You're voting as " : "👤 You haven't picked a name yet";
+  me.appendChild(label);
+  if (myName) { const b = document.createElement("strong"); b.textContent = myName; me.appendChild(b); }
+  const btn = document.createElement("button"); btn.type = "button";
+  btn.textContent = myName ? "Change name" : "Set name";
+  btn.onclick = changeName;
+  me.appendChild(btn);
+
+  const list = document.getElementById("whos-list");
+  list.innerHTML = "";
+  const voted = EVENTS.filter(ev => voteCount(ev) > 0 && upcomingWeekendsOf(ev).length)
+    .sort((a, b) => voteCount(b) - voteCount(a) || a.name.localeCompare(b.name));
+  const total = voted.reduce((n, ev) => n + voteCount(ev), 0);
+  document.getElementById("whos-btn").textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "");
+  if (!voted.length) {
+    list.innerHTML = '<li class="empty">No one\'s in yet. Tap 👍 I\'m in on anything that looks fun and it will show up here for everyone.</li>';
+    return;
+  }
+  voted.forEach(ev => {
+    const t = TYPES[ev.type];
+    const li = document.createElement("li");
+    li.innerHTML = '<span class="wcount"></span><div class="wname"></div><div class="wmeta"></div><div class="wpeople"></div>';
+    li.querySelector(".wcount").textContent = voteCount(ev);
+    li.querySelector(".wname").textContent = t.emoji + " " + ev.name;
+    li.querySelector(".wmeta").textContent = upcomingWeekendsOf(ev).map(weekendLabel).join(", ") + (ev.free ? " · Free" : "");
+    li.querySelector(".wpeople").textContent = (votes[ev.id] || []).join(", ");
+    li.onclick = () => jumpToEvent(ev);
+    list.appendChild(li);
+  });
+}
+
+// Show an event from the sidebar, adjusting filters so it's visible
+function jumpToEvent(ev) {
+  const wk = upcomingWeekendsOf(ev);
+  if (!wk.some(w => selectedWeekends.has(w))) selectedWeekends.add(wk[0]);
+  if (!visibleEvents().includes(ev)) { activeType = "all"; dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false; }
+  document.body.classList.remove("whos-open");
+  render(false);
+  const li = document.querySelector(`.list li[data-idx="${EVENTS.indexOf(ev)}"]`);
+  if (hasMap) {
+    document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "start" });
+    map.flyTo([ev.lat, ev.lng], 13, { duration: 0.8 });
+    showSheet(ev);
+  } else if (li) {
+    if (!li.classList.contains("open")) li.click();
+    li.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+async function changeName() {
+  const n = await askName(!!myName);
+  if (!n || n === myName) return;
+  const old = myName;
+  myName = n; store.set("aff-name", myName);
+  // Update the name on every vote this device has cast
+  Object.keys(votes).forEach(id => { if (mine.has(id)) votes[id] = votes[id].map(x => x === old ? myName : x); });
+  refreshEventUI();
+  try {
+    await Promise.all([...mine].map(id => db("rpc/cast_vote", { p_event: id, p_device: DEVICE, p_name: myName })));
+  } catch (e) {
+    showVoteNote("Couldn't update your name on every vote. Check your connection and try again.");
+  }
+  loadVotes();
+}
+
+document.getElementById("whos-btn").onclick = () => document.body.classList.add("whos-open");
+document.getElementById("whos-close").onclick = () => document.body.classList.remove("whos-open");
+document.getElementById("whos-backdrop").onclick = () => document.body.classList.remove("whos-open");
+
 function refreshEventUI() {
+  renderWhosIn();
   renderFilters();
   renderList();
   if (sheetEvent) {
@@ -1048,7 +1168,11 @@ function toggleSave(ev) {
   if (savedOnly) render(false); else refreshEventUI();
 }
 
-function askName() {
+function askName(renaming) {
+  document.getElementById("name-title").textContent = renaming ? "Change your name" : "What's your name?";
+  document.querySelector("#name-dialog p").textContent = renaming
+    ? "Your new name will show on all the events you've said you're in for."
+    : "So your friends can see who's in. You only need to do this once on this device.";
   return new Promise(resolve => {
     const dlg = document.getElementById("name-dialog"), inp = document.getElementById("name-input");
     inp.value = myName || ""; dlg.hidden = false; setTimeout(() => inp.focus(), 50);
@@ -1100,6 +1224,8 @@ async function loadVotes() {
     } catch (e) { /* keep the local copy */ }
     const first = !votesOnline;
     votesOnline = true;
+    document.body.classList.add("votes-on");
+    if (first && hasMap) setTimeout(() => map.invalidateSize(), 50);
     showVoteNote("");
     if (first) renderFilters();
     refreshEventUI();
