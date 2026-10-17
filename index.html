@@ -355,6 +355,10 @@
   .hero-btns button { font:inherit; font-weight:600; font-size:.88rem; padding:8px 14px; border-radius:999px; cursor:pointer;
     border:1px solid rgba(182,255,74,.45); background:rgba(182,255,74,.08); color:var(--lime); }
   .hero-btns button[hidden] { display:none; }
+  .hero-btns .panel-btn { border-color:rgba(255,79,216,.5); background:rgba(255,79,216,.12); color:#ff9be9; }
+  /* Wide screens show the panel as a column; phones use the floating button */
+  @media (min-width: 1100px), (max-width: 860px) { .hero-btns .panel-btn { display:none !important; } }
+  @media (min-width: 861px) and (max-width: 1099px) { body.votes-on #whos-btn { display:none !important; } }
 
   /* Pop-up dialogs (suggest, calendar choice) */
   .modal { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:3000; padding:16px; }
@@ -431,7 +435,7 @@
     <h1>Adult Fun<br>Finder</h1>
     <div class="stats" id="hero-stats"></div>
     <div id="hero-wx" hidden></div>
-    <div class="hero-btns"><button type="button" id="install-btn" hidden>📲 Install app</button><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
+    <div class="hero-btns"><button type="button" id="hero-whos" class="panel-btn" hidden>🙋 Who's in</button><button type="button" id="hero-cmts" class="panel-btn" hidden>💬 Comments</button><button type="button" id="install-btn" hidden>📲 Install app</button><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
     <p class="sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
   </header>
 
@@ -1452,6 +1456,9 @@ function renderWhosIn() {
     .sort((a, b) => voteCount(b) - voteCount(a) || a.name.localeCompare(b.name));
   const total = voted.reduce((n, ev) => n + voteCount(ev), 0);
   document.getElementById("whos-btn").textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "") + (feedFresh ? " · 💬 " + feedFresh : "");
+  const hw = document.getElementById("hero-whos"), hc = document.getElementById("hero-cmts");
+  hw.hidden = !votesOnline; hw.textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "");
+  hc.hidden = !commentsOn;  hc.textContent = "💬 Comments" + (feedFresh ? " · " + feedFresh : "");
   if (!voted.length) {
     list.innerHTML = '<li class="empty">No one\'s in yet. Tap 👍 I\'m in on anything that looks fun and it will show up here for everyone.</li>';
     return;
@@ -1513,6 +1520,8 @@ async function changeName() {
 }
 
 document.getElementById("whos-btn").onclick = () => document.body.classList.add("whos-open");
+document.getElementById("hero-whos").onclick = () => { showPanelTab("votes"); document.body.classList.add("whos-open"); };
+document.getElementById("hero-cmts").onclick = () => { showPanelTab("feed"); document.body.classList.add("whos-open"); };
 document.getElementById("whos-close").onclick = () => document.body.classList.remove("whos-open");
 document.getElementById("whos-backdrop").onclick = () => document.body.classList.remove("whos-open");
 
