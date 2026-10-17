@@ -390,7 +390,7 @@
     <h1>Adult Fun<br>Finder</h1>
     <div class="stats" id="hero-stats"></div>
     <div id="hero-wx" hidden></div>
-    <div class="hero-btns"><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
+    <div class="hero-btns"><button type="button" id="install-btn" hidden>📲 Install app</button><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
     <p class="sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
   </header>
 
@@ -436,7 +436,7 @@
     </div>
   </div>
 
-  <p class="note" id="install-tip">📲 Keep Fun Finder on your phone like an app: on iPhone tap Share, then <b>Add to Home Screen</b>; on Android tap ⋮, then <b>Add to Home screen</b>.</p>
+  <p class="note" id="install-tip">📲 Keep Fun Finder on your phone like an app: on iPhone tap Share, then <b>Add to Home Screen</b>; on Android tap the <b>📲 Install app</b> button at the top, or tap ⋮ and choose <b>Install and create shortcut</b> (older Chrome: <b>Add to Home screen</b>).</p>
   <p class="note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
 </div>
 
@@ -1833,6 +1833,21 @@ async function loadMySuggestions() {
 (function () {
   const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
   if (IS_PUBLIC_SITE && !standalone && /iphone|ipad|ipod|android/i.test(navigator.userAgent)) document.body.classList.add("show-install");
+
+  // Android Chrome (and desktop Chrome/Edge) offer a one-tap install; show our button when they do
+  let installEvt = null;
+  const btn = document.getElementById("install-btn");
+  window.addEventListener("beforeinstallprompt", e => {
+    if (!IS_PUBLIC_SITE) return;
+    e.preventDefault(); installEvt = e; btn.hidden = false;
+  });
+  btn.onclick = async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    try { await installEvt.userChoice; } catch (e) {}
+    installEvt = null; btn.hidden = true;
+  };
+  window.addEventListener("appinstalled", () => { btn.hidden = true; document.body.classList.remove("show-install"); toast("Fun Finder is on your home screen."); });
 })();
 
 render(true);
