@@ -12,11 +12,13 @@ Events are refreshed every Thursday evening. Listings come from web searches, so
 - `build_public.py` – rebuilds `index.html` from the Claude-hosted dashboard page, swapping in a live street map.
 - `supabase_setup.sql` – one-time database setup for shared votes (run in the Supabase SQL Editor).
 - `supabase_suggestions.sql` – one-time database setup for the "Suggest an event" form. Replace the placeholder review key before running it, and keep the real key private.
+- `supabase_comments.sql` – one-time database setup for comments on events.
+- `og-image.jpg` – the preview picture shown when the site's link is shared in chats.
 - `manifest.webmanifest`, `icon-*.png` – let people add the site to their phone's home screen like an app.
 
 ## Features
 
-- Map and list with filters for weekend, category, day, cost, distance and saved events, plus a search box.
+- Map and list with filters for weekend, category, day, cost, indoor, distance and saved events, plus a search box.
 - Each event has its web page (or a web search), a share link that opens the site on that event (`?e=event-id`), and an add-to-calendar button (Google Calendar or a calendar file).
 - Weekend weather from Open-Meteo, with a ☔ tag on outdoor events when rain is likely.
-- Shared "I'm in" votes, a "Who's in" sidebar, and a form for friends to suggest events.
+- Shared "I'm in" votes, a "Who's in" sidebar, comments on each event, and a form for friends to suggest events.

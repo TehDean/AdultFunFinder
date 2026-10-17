@@ -19,7 +19,14 @@
 <meta property="og:title" content="Adult Fun Finder">
 <meta property="og:description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends within about 2 hours of West Orange, NJ.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+<meta property="og:url" content="https://tehdean.github.io/AdultFunFinder/">
+<meta property="og:site_name" content="Adult Fun Finder">
+<meta property="og:image" content="https://tehdean.github.io/AdultFunFinder/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Adult Fun Finder: things to do on weekends near West Orange, NJ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://tehdean.github.io/AdultFunFinder/og-image.jpg">
 
 <!-- Map library (Leaflet), loaded from the internet when the page opens. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -380,6 +387,22 @@
   #toast[hidden] { display:none; }
   #toast input { width:100%; margin-top:6px; font:inherit; font-size:14px; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
   #install-tip { display:none; }
+
+  /* Comments */
+  .cmts { margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,.08); cursor:default; }
+  .cmts h4 { margin:0 0 6px; font-size:.85rem; font-weight:700; color:#d6cff2; }
+  .cmts ul { list-style:none; margin:0 0 8px; padding:0; }
+  .cmts li { padding:5px 0 !important; border:none !important; border-radius:0 !important; cursor:default !important; background:none !important; font-size:.86rem; line-height:1.35; }
+  .cmts .who { font-weight:700; color:#f4f0ff; margin-right:4px; }
+  .cmts .ago { color:#8c84b0; font-size:.75rem; margin-left:4px; }
+  .cmts .del { font:inherit; font-size:.75rem; background:none; border:none; color:#ff8be6; cursor:pointer; padding:0 0 0 6px; }
+  .cmts .none { color:#8c84b0; font-size:.82rem; margin:0 0 8px; }
+  .cmts form { display:flex; gap:6px; }
+  .cmts input { flex:1; min-width:0; font:inherit; font-size:16px; padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.05); color:var(--fg); }
+  .cmts input:focus { outline:none; border-color:rgba(255,79,216,.6); }
+  .cmts button[type=submit] { font:inherit; font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:999px; border:none; background:var(--grad); color:#fff; cursor:pointer; }
+  .cmts button[type=submit]:disabled { opacity:.5; }
+  .tag.cmt { background:rgba(157,123,255,.16); color:#c9b8ff; }
   body.show-install #install-tip { display:block; }
 </style>
 </head>
@@ -424,6 +447,7 @@
           <p id="sheet-about"></p>
           <div class="actions" id="sheet-actions"></div>
           <div class="voters" id="sheet-voters"></div>
+          <div class="cmts" id="sheet-comments" hidden></div>
           <a class="dir" id="sheet-dir" target="_blank" rel="noopener">Directions ↗</a>
         </div>
       </div>
@@ -590,7 +614,7 @@ const EVENTS = [
     where: "Ulster County Fairgrounds, 249 Libertyville Rd, New Paltz, NY",
     cost: "Check the festival site.",
     about: "100+ vendors, pickling competitions, and a Pickle Triathlon. A quirky food festival that's fun with a group. About 1 hr 30 min." },
-  { id: "the-burning-of-kingston", url: "https://burningofkingston.com/", name: "The Burning of Kingston", weekends: ["2026-10-17"], type: "show", day: "both", free: false, far: true,
+  { id: "the-burning-of-kingston", outdoor: true, url: "https://burningofkingston.com/", name: "The Burning of Kingston", weekends: ["2026-10-17"], type: "show", day: "both", free: false, far: true,
     lat: 41.9342135, lng: -74.0189955, when: "Oct 15–18",
     where: "Stockade District, Kingston, NY",
     cost: "Not listed.",
@@ -620,7 +644,7 @@ const EVENTS = [
     where: "Main Street, Manayunk, Philadelphia",
     cost: "Free. The Mac n' Cheese Crawl that afternoon (noon to 4) is ticketed.",
     about: "50+ vendors, food trucks, live music, glassblowing, and a pumpkin patch. Add the mac and cheese tasting crawl for a fun group afternoon. About 1 hr 30 min." },
-  { id: "philly-coffee-festival", url: "https://www.phillyvoice.com/philly-coffee-festival-23rd-street-armory-2026/", name: "Philly Coffee Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
+  { id: "philly-coffee-festival", outdoor: false, url: "https://www.phillyvoice.com/philly-coffee-festival-23rd-street-armory-2026/", name: "Philly Coffee Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
     lat: 39.9532355, lng: -75.1781096, when: "Sat & Sun, timed sessions",
     where: "23rd Street Armory, 22 S 23rd St, Philadelphia",
     cost: "Ticketed; price not listed.",
@@ -660,7 +684,7 @@ const EVENTS = [
     where: "Von Thun Farms, 438 NJ-57, Washington, NJ",
     cost: "Admission charged; check the farm's site.",
     about: "Fall festival weekends on a big farm with seasonal activities, food, and picking. About 55 min." },
-  { id: "longwood-gardens-chrysanthemum-festival", url: "https://longwoodgardens.org/gardens/our-seasons/chrysanthemum-festival", name: "Longwood Gardens Chrysanthemum Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
+  { id: "longwood-gardens-chrysanthemum-festival", outdoor: false, url: "https://longwoodgardens.org/gardens/our-seasons/chrysanthemum-festival", name: "Longwood Gardens Chrysanthemum Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
     lat: 39.8735119, lng: -75.6734217, when: "Oct 16 to Nov 15, timed tickets",
     where: "Longwood Gardens, 1001 Longwood Rd, Kennett Square, PA",
     cost: "Included with regular admission; timed tickets required.",
@@ -685,7 +709,7 @@ const EVENTS = [
     where: "Paramus Park, 700 Paramus Park, Paramus",
     cost: "Admission not listed; food is paid.",
     about: "18 gourmet food trucks, a beer garden, and a costume contest with cash prizes. About 30 min." },
-  { id: "zombie-opera-7", name: "Zombie Opera 7", weekends: ["2026-10-24"], type: "show", day: "sat", free: true, far: false,
+  { id: "zombie-opera-7", outdoor: true, name: "Zombie Opera 7", weekends: ["2026-10-24"], type: "show", day: "sat", free: true, far: false,
     lat: 40.7277047, lng: -74.0469034, when: "Saturday, Oct 24, 6:30 to 8:30 PM",
     where: "Hamilton Park, 25 W Hamilton Pl, Jersey City",
     cost: "Free. Bring chairs or a blanket.",
@@ -715,17 +739,17 @@ const EVENTS = [
     where: "Cherry Street Pier, 121 N Christopher Columbus Blvd, Philadelphia",
     cost: "Not listed.",
     about: "Adobo, lumpia, lechon, traditional music and dance, and a marketplace on the waterfront. About 1 hr 30 min." },
-  { id: "pennsylvania-chocolate-coffee-festival", url: "https://www.phillyvoice.com/pennsylvania-chocolate-coffee-festival-oaks-october-2026/", name: "Pennsylvania Chocolate & Coffee Festival", weekends: ["2026-10-24"], type: "food", day: "both", free: false, far: true,
+  { id: "pennsylvania-chocolate-coffee-festival", outdoor: false, url: "https://www.phillyvoice.com/pennsylvania-chocolate-coffee-festival-oaks-october-2026/", name: "Pennsylvania Chocolate & Coffee Festival", weekends: ["2026-10-24"], type: "food", day: "both", free: false, far: true,
     lat: 40.1238562, lng: -75.4580644, when: "Sat & Sun, Oct 24–25",
     where: "Greater Philadelphia Expo Center, 100 Station Ave, Oaks, PA",
     cost: "Ticketed; free parking.",
     about: "150+ exhibitors with chocolate and coffee tastings. About 1 hr 45 min." },
-  { id: "head-of-the-schuylkill-regatta", url: "https://www.hosr.org/", name: "Head of the Schuylkill Regatta", weekends: ["2026-10-24"], type: "show", day: "both", free: false, far: true,
+  { id: "head-of-the-schuylkill-regatta", outdoor: true, url: "https://www.hosr.org/", name: "Head of the Schuylkill Regatta", weekends: ["2026-10-24"], type: "show", day: "both", free: false, far: true,
     lat: 39.9806089, lng: -75.1979938, when: "Sat & Sun, Oct 24–25",
     where: "Along Kelly Drive (at Fountain Green Dr), Philadelphia",
     cost: "Spectating along the river appears open; check the regatta site.",
     about: "Two days of rowing races with 260+ clubs and colleges. Walk or bike the river trail while you watch. About 1 hr 30 min." },
-  { id: "meat-market-challenge", name: "Meat Market Challenge", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: true,
+  { id: "meat-market-challenge", outdoor: true, name: "Meat Market Challenge", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: true,
     lat: 39.9533, lng: -75.159, when: "Saturday, Oct 24",
     where: "Filbert St outside Reading Terminal Market, 1136 Arch St, Philadelphia (pin is approximate)",
     cost: "Not listed.",
@@ -755,7 +779,7 @@ const EVENTS = [
     where: "House of Independents, 572 Cookman Ave, Asbury Park",
     cost: "Ticketed; usually sells out.",
     about: "A 21+ party with live DJs and a $1,500 costume contest. About 55 min." },
-  { id: "heritage-india-festival", name: "Heritage India Festival", weekends: ["2026-10-31"], type: "food", day: "both", free: false, far: true,
+  { id: "heritage-india-festival", outdoor: false, name: "Heritage India Festival", weekends: ["2026-10-31"], type: "food", day: "both", free: false, far: true,
     lat: 40.1238562, lng: -75.4580644, when: "Sat & Sun, Oct 31–Nov 1",
     where: "Greater Philadelphia Expo Center, 100 Station Ave, Oaks, PA",
     cost: "$5 per person per day, cash only.",
@@ -765,7 +789,7 @@ const EVENTS = [
     where: "Peddler's Village, 100 Peddlers Village, Lahaska, PA",
     cost: "Free admission and parking; food is pay-as-you-go. Bring cash.",
     about: "Apple cider, fritters, donuts, live music, and 65 shops. About 1 hr 15 min." },
-  { id: "contemporary-craft-show", url: "https://pmacraftshow.org/", name: "Contemporary Craft Show", weekends: ["2026-11-07"], type: "fair", day: "both", free: false, far: true,
+  { id: "contemporary-craft-show", outdoor: false, url: "https://pmacraftshow.org/", name: "Contemporary Craft Show", weekends: ["2026-11-07"], type: "fair", day: "both", free: false, far: true,
     lat: 39.9551235, lng: -75.1626429, when: "Nov 6–8",
     where: "Pennsylvania Convention Center, 1101 Arch St, Philadelphia",
     cost: "Ticketed.",
@@ -875,12 +899,12 @@ const EVENTS = [
     where: "Prudential Hall at NJPAC, 1 Center St, Newark",
     cost: "Ticketed; check the venue for prices.",
     about: "A comedy-and-magic show at NJPAC. About 20 min." },
-  { id: "alba-vineyard-live-music-foliage-helicopter-ride", url: "https://explorewarren.org/node/12213", name: "Alba Vineyard: live music & foliage helicopter rides", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "brew", day: "both", free: false, far: true,
+  { id: "alba-vineyard-live-music-foliage-helicopter-ride", outdoor: true, url: "https://explorewarren.org/node/12213", name: "Alba Vineyard: live music & foliage helicopter rides", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "brew", day: "both", free: false, far: true,
     lat: 40.6140493, lng: -75.1633218, when: "Live music most Sat & Sun afternoons through Nov 1; helicopter rides Oct 17–18 (rain dates Oct 24–25); tasting class Sun, Nov 8, 3 PM",
     where: "Alba Vineyard, 269 County Rd 627, Milford, NJ",
     cost: "Music price not listed. Helicopter ride $65 (21+), includes a glass of wine.",
     about: "A hilltop winery with brick-oven pizza and afternoon bands. The 5–7 minute foliage helicopter flights are a fun group splurge. About 1 hr 10 min." },
-  { id: "hamilton-oktoberfest", url: "https://www.hamiltonnj.com/Oktoberfest", name: "Hamilton Oktoberfest", weekends: ["2026-10-17"], type: "brew", day: "sun", free: true, far: false,
+  { id: "hamilton-oktoberfest", outdoor: true, url: "https://www.hamiltonnj.com/Oktoberfest", name: "Hamilton Oktoberfest", weekends: ["2026-10-17"], type: "brew", day: "sun", free: true, far: false,
     lat: 40.2044737, lng: -74.6774508, when: "Sunday, Oct 18, 11 AM to 5 PM",
     where: "Veterans Park, 2206 Kuser Rd, Hamilton Township, NJ",
     cost: "Free to attend.",
@@ -890,7 +914,7 @@ const EVENTS = [
     where: "The Clairidge (486 Bloomfield Ave), The Bellevue, and Wellmont Theater, Montclair",
     cost: "Ticketed; check the venue for prices.",
     about: "One of the region's biggest film festivals, with premieres, documentaries, and filmmaker Q&As about 10 minutes from home. Easy to catch a couple of films and dinner on Bloomfield Ave." },
-  { id: "warwick-drive-in", url: "https://drive-ins.com/theater/nytwarw/warwick-drive-in-theater", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
+  { id: "warwick-drive-in", outdoor: true, url: "https://drive-ins.com/theater/nytwarw/warwick-drive-in-theater", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
     lat: 41.2348937, lng: -74.3792495, when: "Nightly double features on 3 screens; open into the winter",
     where: "5 Warwick Turnpike, Warwick, NY",
     cost: "Not listed; check the drive-in's site.",
@@ -969,7 +993,8 @@ const TOWNS = [
 
 let activeTypes = new Set();   // selected categories; empty means All
 let searchText = "";
-let openEventId = null;   // the list item that's tapped open, kept open when the list refreshes
+let openEventId = null;
+let indoorOnly = false;   // the list item that's tapped open, kept open when the list refreshes
 let dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
 
 // Weekends are named by their Saturday (YYYY-MM-DD). Past weekends are hidden.
@@ -1050,6 +1075,7 @@ function visibleEvents() {
     (!freeOnly || e.free) &&
     (!savedOnly || saved.has(e.id)) &&
     (distFilter === "any" || (distFilter === "near") === !e.far) &&
+    (!indoorOnly || !isOutdoor(e)) &&
     matchesSearch(e));
 }
 
@@ -1062,7 +1088,7 @@ function matchesSearch(e) {
 }
 function clearFilters() {
   selectedWeekends = new Set(WEEKENDS); activeTypes.clear();
-  dayFilter = "any"; freeOnly = false; savedOnly = false; distFilter = "any";
+  dayFilter = "any"; freeOnly = false; savedOnly = false; distFilter = "any"; indoorOnly = false;
   render(true);
 }
 
@@ -1108,6 +1134,7 @@ function renderFilters() {
   chip(x, "Saturday", dayFilter === "sat", () => { dayFilter = "sat"; render(true); });
   chip(x, "Sunday", dayFilter === "sun", () => { dayFilter = "sun"; render(true); });
   chip(x, "💸 Free only", freeOnly, () => { freeOnly = !freeOnly; render(true); });
+  chip(x, "🏠 Indoor", indoorOnly, () => { indoorOnly = !indoorOnly; render(true); });
   chip(x, "⭐ Saved (" + saved.size + ")", savedOnly, () => { savedOnly = !savedOnly; render(true); });
   if (votesOnline) chip(x, "🏆 Most votes", sortByVotes, () => { sortByVotes = !sortByVotes; render(false); });
   const d = document.getElementById("dist-filters"); d.innerHTML = "";
@@ -1165,17 +1192,23 @@ function renderList() {
     }
     if (ev.free) { const f = document.createElement("span"); f.className = "tag free"; f.textContent = "Free"; row.appendChild(f); }
     addRainTag(row, ev);
+    const nc = (comments[ev.id] || []).length;
+    if (commentsOn && nc) { const c = document.createElement("span"); c.className = "tag cmt"; c.textContent = "💬 " + nc; row.appendChild(c); }
     const a = document.createElement("a"); a.className = "dir"; a.href = directionsUrl(ev); a.target = "_blank"; a.rel = "noopener"; a.textContent = "Directions ↗";
     a.onclick = e => e.stopPropagation();
     row.appendChild(a);
     const act = document.createElement("div"); act.className = "actions"; fillActions(act, ev); li.appendChild(act);
     const vs = document.createElement("div"); vs.className = "voters"; vs.textContent = votersText(ev); li.appendChild(vs);
+    const cm = document.createElement("div"); cm.className = "cmts"; cm.hidden = true; li.appendChild(cm);
+    if (ev.id === openEventId) fillComments(cm, ev);
     li.onclick = () => {
       const wasOpen = li.classList.contains("open");
       document.querySelectorAll(".list li").forEach(x => x.classList.remove("sel", "open"));
       li.classList.add("sel");
       if (!wasOpen) li.classList.add("open");
       openEventId = wasOpen ? null : ev.id;
+      document.querySelectorAll(".list li .cmts").forEach(c => { if (!c.closest("li.open")) c.hidden = true; });
+      if (!wasOpen) fillComments(li.querySelector(".cmts"), ev);
       if (hasMap && !wasOpen) {
         document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "start" });
         map.flyTo([ev.lat, ev.lng], 13, { duration: 0.8 });
@@ -1221,6 +1254,7 @@ document.addEventListener("click", e => {
   document.querySelectorAll(".list li").forEach(x => x.classList.remove("sel", "open"));
   li.classList.add("sel", "open");
   openEventId = EVENTS[+btn.dataset.idx].id;
+  fillComments(li.querySelector(".cmts"), EVENTS[+btn.dataset.idx]);
   li.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
@@ -1239,6 +1273,7 @@ function showSheet(ev) {
   document.getElementById("sheet-cost").textContent = ev.cost;
   document.getElementById("sheet-about").textContent = ev.about;
   fillSheetWeather(ev);
+  fillComments(document.getElementById("sheet-comments"), ev);
   document.getElementById("sheet-dir").href = directionsUrl(ev);
   fillActions(document.getElementById("sheet-actions"), ev);
   document.getElementById("sheet-voters").textContent = votersText(ev);
@@ -1370,7 +1405,7 @@ function jumpToEvent(ev) {
   const wk = upcomingWeekendsOf(ev);
   if (!wk.some(w => selectedWeekends.has(w))) selectedWeekends.add(wk[0]);
   if (!visibleEvents().includes(ev)) {
-    activeTypes.clear(); dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false;
+    activeTypes.clear(); dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false; indoorOnly = false;
     if (!matchesSearch(ev)) { searchText = ""; document.getElementById("search").value = ""; document.getElementById("search-clear").hidden = true; }
   }
   document.body.classList.remove("whos-open");
@@ -1401,6 +1436,7 @@ async function changeName() {
   refreshEventUI();
   try {
     await Promise.all([...mine].map(id => db("rpc/cast_vote", { p_event: id, p_device: DEVICE, p_name: myName })));
+    if (commentsOn) { await db("rpc/rename_my_comments", { p_device: DEVICE, p_name: myName }); loadComments(); }
   } catch (e) {
     showVoteNote("Couldn't update your name on every vote. Check your connection and try again.");
   }
@@ -1411,7 +1447,11 @@ document.getElementById("whos-btn").onclick = () => document.body.classList.add(
 document.getElementById("whos-close").onclick = () => document.body.classList.remove("whos-open");
 document.getElementById("whos-backdrop").onclick = () => document.body.classList.remove("whos-open");
 
+let refreshPending = false;
+const typingComment = () => !!(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("cmt-input"));
 function refreshEventUI() {
+  if (typingComment()) { refreshPending = true; return; }
+  refreshPending = false;
   renderHero();
   renderWhosIn();
   renderFilters();
@@ -1419,6 +1459,7 @@ function refreshEventUI() {
   if (sheetEvent) {
     fillActions(document.getElementById("sheet-actions"), sheetEvent);
     document.getElementById("sheet-voters").textContent = votersText(sheetEvent);
+    fillComments(document.getElementById("sheet-comments"), sheetEvent);
   }
 }
 
@@ -1523,6 +1564,7 @@ async function loadVotes() {
     showVoteNote("");
     if (first) renderFilters();
     refreshEventUI();
+    loadComments();
   } catch (e) {
     if (!votesOnline) showVoteNote("Voting isn't available on this copy of the page. Use tehdean.github.io/AdultFunFinder to vote. Saving still works.");
   }
@@ -1768,7 +1810,9 @@ async function loadWeather() {
       next[keys[i]] = d;
     });
     WX = next;
-    renderHeroWeather(); renderFilters(); renderList();
+    renderHeroWeather();
+    if (typingComment()) { refreshPending = true; return; }
+    renderFilters(); renderList();
     if (sheetEvent) showSheet(sheetEvent);
   } catch (e) { /* no forecast on this copy; everything else still works */ }
 }
@@ -1826,6 +1870,95 @@ async function loadMySuggestions() {
     } finally { btn.disabled = false; btn.textContent = "Send suggestion"; }
   };
 })();
+
+/* ============================================================
+   COMMENTS ON EVENTS
+   Stored in the votes database. Anyone can read them; each phone
+   can delete its own. Needs supabase_comments.sql to be run once.
+   ============================================================ */
+let comments = {};          // event id -> [{ id, author, body, created_at }]
+let myComments = new Set(); // ids of comments posted from this phone
+let commentsOn = false;     // becomes true once the database answers
+const drafts = {};          // unsent comment text per event
+let lastCommentsJson = "";
+async function loadComments() {
+  try {
+    const rows = await db("comment_list?select=id,event_id,author,body,created_at&order=created_at.asc&limit=3000");
+    try { const m = await db("rpc/my_comment_ids", { p_device: DEVICE }); myComments = new Set((m || []).map(x => typeof x === "object" ? x.id : x)); } catch (e) {}
+    const next = {};
+    (rows || []).forEach(r => (next[r.event_id] = next[r.event_id] || []).push(r));
+    const json = JSON.stringify(next), first = !commentsOn;
+    comments = next; commentsOn = true;
+    if (first || json !== lastCommentsJson) { lastCommentsJson = json; refreshEventUI(); }
+  } catch (e) { /* comments aren't switched on in the database yet */ }
+}
+function timeAgo(iso) {
+  const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (m < 1) return "just now";
+  if (m < 60) return m + "m ago";
+  const h = Math.round(m / 60); if (h < 24) return h + "h ago";
+  const d = Math.round(h / 24); return d < 7 ? d + "d ago" : new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+function fillComments(box, ev) {
+  if (!box) return;
+  box.hidden = !commentsOn;
+  if (!commentsOn) return;
+  box.innerHTML = "";
+  box.onclick = e => e.stopPropagation();   // typing here shouldn't close the event
+  const list = comments[ev.id] || [];
+  const h = document.createElement("h4"); h.textContent = "💬 Comments" + (list.length ? " (" + list.length + ")" : ""); box.appendChild(h);
+  if (!list.length) { const n = document.createElement("p"); n.className = "none"; n.textContent = "Carpooling, tickets, meeting spot? Leave a note for the group."; box.appendChild(n); }
+  else {
+    const ul = document.createElement("ul");
+    list.slice(-20).forEach(c => {
+      const li = document.createElement("li");
+      const w = document.createElement("span"); w.className = "who"; w.textContent = c.author; li.appendChild(w);
+      li.appendChild(document.createTextNode(c.body));
+      const a = document.createElement("span"); a.className = "ago"; a.textContent = "· " + timeAgo(c.created_at); li.appendChild(a);
+      if (myComments.has(c.id)) {
+        const d = document.createElement("button"); d.type = "button"; d.className = "del"; d.textContent = "Delete";
+        d.onclick = () => deleteComment(ev, c.id);
+        li.appendChild(d);
+      }
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+  const f = document.createElement("form");
+  const inp = document.createElement("input"); inp.className = "cmt-input"; inp.maxLength = 280; inp.placeholder = "Add a comment…";
+  inp.enterKeyHint = "send"; inp.value = drafts[ev.id] || "";
+  inp.oninput = () => { drafts[ev.id] = inp.value; };
+  inp.onblur = () => { setTimeout(() => { if (refreshPending && !typingComment()) refreshEventUI(); }, 300); };
+  const b = document.createElement("button"); b.type = "submit"; b.textContent = "Post";
+  f.appendChild(inp); f.appendChild(b);
+  f.onsubmit = e => { e.preventDefault(); postComment(ev, inp, b); };
+  box.appendChild(f);
+}
+async function postComment(ev, inp, btn) {
+  const text = inp.value.trim().slice(0, 280);
+  if (!text) { inp.focus(); return; }
+  if (!myName) { const n = await askName(); if (!n) return; myName = n; store.set("aff-name", myName); renderWhosIn(); }
+  btn.disabled = true;
+  try {
+    const id = await db("rpc/add_comment", { p_event: ev.id, p_device: DEVICE, p_name: myName, p_body: text });
+    drafts[ev.id] = "";
+    (comments[ev.id] = comments[ev.id] || []).push({ id, author: myName, body: text, created_at: new Date().toISOString() });
+    myComments.add(id);
+    inp.value = ""; inp.blur();
+    refreshPending = false; refreshEventUI();
+    loadComments();
+  } catch (e) {
+    toast(/too many/i.test(String(e && e.message)) ? "That's a lot of comments for one day. Try again tomorrow." : "Couldn't post that. Check your connection and try again.");
+  } finally { btn.disabled = false; }
+}
+async function deleteComment(ev, id) {
+  try {
+    await db("rpc/delete_comment", { p_id: id, p_device: DEVICE });
+    comments[ev.id] = (comments[ev.id] || []).filter(c => c.id !== id);
+    myComments.delete(id);
+    refreshEventUI(); toast("Comment deleted.");
+  } catch (e) { toast("Couldn't delete that. Try again."); }
+}
 
 /* ============================================================
    HOME-SCREEN APP TIP (public website only)
