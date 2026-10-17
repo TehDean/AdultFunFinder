@@ -135,6 +135,11 @@
   .emoji-pin { width:38px; height:38px; border-radius:50%; background:#fff; border:3px solid #555;
                display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 2px 6px rgba(0,0,0,.35); }
   .emoji-pin.home { background:#2f6fed; border-color:#fff; }
+  /* One pin for a place with several events: emoji plus a count badge */
+  .emoji-pin.multi { position:relative; }
+  .emoji-pin .n { position:absolute; top:-8px; right:-10px; min-width:20px; height:20px; padding:0 5px; box-sizing:border-box;
+                  border-radius:999px; background:#e0245e; color:#fff; font:700 11px/20px system-ui, sans-serif; text-align:center;
+                  border:2px solid #fff; }
 
   /* Popups */
   .pop h3 { margin:0 0 4px; font-size:1rem; }
@@ -217,6 +222,13 @@
   #sheet h3 { margin:6px 0 4px; font-size:1rem; }
   #sheet p { margin:3px 0; line-height:1.35; }
   #sheet .dir { margin:8px 0 0; display:inline-flex; }
+  #sheet-back { border:none; background:none; color:var(--accent); font:inherit; font-size:.82rem; padding:2px 0; cursor:pointer; }
+  #sheet-back[hidden], #sheet-ev[hidden], #sheet-venue[hidden] { display:none; }
+  #venue-list { list-style:none; margin:6px 0 0; padding:0; }
+  #venue-list li { padding:8px 6px; border-top:1px solid var(--line); cursor:pointer; border-radius:8px; }
+  #venue-list li:hover { background:var(--bg); }
+  #venue-list .vn { font-weight:600; }
+  #venue-list .vw { color:var(--muted); font-size:.8rem; margin-top:2px; }
   #sheet-close { position:absolute; top:6px; right:6px; width:32px; height:32px; border-radius:50%;
                  border:1px solid var(--line); background:var(--bg); color:var(--fg); font-size:20px; line-height:1; cursor:pointer; }
 
@@ -235,6 +247,12 @@
   #fallback-map .fpin circle { fill:#fff; stroke-width:3; }
   #fallback-map .fpin text { font-size:14px; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
   #fallback-map .ftown { font-size:11px; fill:var(--muted); text-anchor:middle; }
+
+  /* Day headings in the list */
+  .list li.day-head { cursor:default; padding:14px 6px 4px; border-bottom:none; border-radius:0; background:none !important;
+                      font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+  .list li.day-head.wk { font-size:.9rem; color:var(--fg); letter-spacing:0; text-transform:none; padding-top:18px; }
+  .list li.day-head:first-child { padding-top:4px; }
 
   /* Expandable details in the list */
   .details { display:none; margin-top:8px; font-size:.88rem; }
@@ -478,6 +496,13 @@
         <div id="map"></div>
         <div id="sheet" role="dialog" aria-label="Event details" hidden>
           <button id="sheet-close" type="button" aria-label="Close">×</button>
+          <div id="sheet-venue" hidden>
+            <h3 id="venue-title"></h3>
+            <p id="venue-where"></p>
+            <ul id="venue-list"></ul>
+          </div>
+          <div id="sheet-ev">
+          <button id="sheet-back" type="button" hidden></button>
           <div class="row" id="sheet-tags"></div>
           <h3 id="sheet-title"></h3>
           <p><strong>When:</strong> <span id="sheet-when"></span></p>
@@ -489,6 +514,7 @@
           <div class="voters" id="sheet-voters"></div>
           <div class="cmts" id="sheet-comments" hidden></div>
           <a class="dir" id="sheet-dir" target="_blank" rel="noopener">Directions ↗</a>
+          </div>
         </div>
       </div>
       <svg id="fallback-map" viewBox="0 0 600 640" role="img" aria-label="Map of events"></svg>
@@ -1344,11 +1370,36 @@ function renderFilters() {
   chip(d, "🛣️ 1–2 hrs", distFilter === "far", () => { distFilter = "far"; render(true); });
 }
 
+// Events at the same spot (within about 100 m) share one pin
+const venueKey = ev => ev.lat.toFixed(3) + "," + ev.lng.toFixed(3);
+function venueGroups(list) {
+  const g = new Map();
+  list.forEach(ev => { const k = venueKey(ev); if (!g.has(k)) g.set(k, []); g.get(k).push(ev); });
+  return [...g.values()].map(evs => sortByTime(evs));
+}
+function mostCommonType(evs) {
+  // A place's own ongoing listing (like a taproom) decides its pin; otherwise the most common kind of event there
+  const own = evs.find(e => dayList(e).length > 1 && (e.weekends || []).length > 1);
+  if (own) return TYPES[own.type];
+  const c = {}; evs.forEach(e => c[e.type] = (c[e.type] || 0) + 1);
+  return TYPES[Object.keys(c).sort((a, b) => c[b] - c[a])[0]];
+}
+const venueMarkers = [];
 function renderMarkers(fit) {
   if (!hasMap) return;
   const shown = visibleEvents();
   map.closePopup(); hideSheet();
-  markers.forEach((m, ev) => { if (shown.includes(ev)) m.addTo(map); else m.remove(); });
+  markers.forEach(m => m.remove());
+  venueMarkers.splice(0).forEach(m => m.remove());
+  venueGroups(shown).forEach(evs => {
+    if (evs.length === 1) { markers.get(evs[0]).addTo(map); return; }
+    const t = mostCommonType(evs);
+    const icon = L.divIcon({ className: "", iconSize: [38, 38], iconAnchor: [19, 19],
+      html: `<div class="emoji-pin multi" style="border-color:${t.color}">${t.emoji}<span class="n">${evs.length}</span></div>` });
+    const m = L.marker([evs[0].lat, evs[0].lng], { icon, title: evs.length + " events: " + evs.map(e => e.name).join(", "), zIndexOffset: 1100 });
+    m.on("click", () => { if (sheetVenue && sheetVenue[0] === evs[0] && !sheetEvent) hideSheet(); else showVenue(evs); });
+    m.addTo(map); venueMarkers.push(m);
+  });
   if (fit) {
     const pts = shown.map(e => [e.lat, e.lng]).concat([[HOME.lat, HOME.lng]]);
     if (pts.length > 1) map.fitBounds(pts, { padding: [30, 30], maxZoom: 13 });
@@ -1370,8 +1421,12 @@ function renderList() {
     ul.appendChild(li);
     return;
   }
-  if (sortByVotes) shown.sort((a, b) => voteCount(b) - voteCount(a));
-  shown.forEach(ev => {
+  listSections(shown).forEach(item => {
+    if (item.head) {
+      const h = document.createElement("li"); h.className = "day-head" + (item.wk ? " wk" : "");
+      h.textContent = item.head; ul.appendChild(h); return;
+    }
+    const ev = item;
     const t = TYPES[ev.type];
     const li = document.createElement("li");
     li.innerHTML = '<div class="name"></div><div class="when"></div><div class="row"></div>' +
@@ -1421,6 +1476,39 @@ function renderList() {
   });
 }
 
+// List order: Friday night, Saturday, Sunday, then all-weekend and multi-day things; by start time within each
+const startMin = ev => { if (dayList(ev).length > 1) return 9999; const t = parseTimes(ev.when); return t ? t.start : 9998; };
+const DAY_ORDER = { fri: 0, sat: 1, sun: 2 };
+const firstShownWeekend = ev => { const w = (ev.weekends || []).filter(x => selectedWeekends.has(x)).sort()[0]; return w || "9"; };
+function sortByTime(evs) {
+  return evs.slice().sort((a, b) => (sortByVotes ? voteCount(b) - voteCount(a) : 0) ||
+    firstShownWeekend(a).localeCompare(firstShownWeekend(b)) ||
+    (DAY_ORDER[dayList(a)[0]] - DAY_ORDER[dayList(b)[0]]) * (dayList(a).length === 1 && dayList(b).length === 1) ||
+    startMin(a) - startMin(b) || a.name.localeCompare(b.name));
+}
+const shortDate = iso => new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function listSections(shown) {
+  const wks = WEEKENDS.filter(w => selectedWeekends.has(w));
+  const several = wks.length > 1, out = [], repeat = [];
+  const byWeek = new Map(wks.map(w => [w, []]));
+  shown.forEach(ev => {
+    const mine = wks.filter(w => (ev.weekends || []).includes(w));
+    if (several && mine.length > 1) repeat.push(ev); else byWeek.get(mine[0] || wks[0]).push(ev);
+  });
+  byWeek.forEach((evs, w) => {
+    if (!evs.length) return;
+    if (several) out.push({ head: "📅 " + weekendLabel(w), wk: true });
+    const fri = isoAddDays(w, -1), sun = isoAddDays(w, 1);
+    [["fri", "🌙 Friday night · " + shortDate(fri)], ["sat", "Saturday · " + shortDate(w)], ["sun", "Sunday · " + shortDate(sun)], ["all", "🗓️ All weekend & multi-day"]]
+      .forEach(([k, label]) => {
+        const sec = sortByTime(evs.filter(ev => { const d = dayList(ev); return k === "all" ? d.length > 1 : d.length === 1 && d[0] === k; }));
+        if (sec.length) out.push({ head: label }, ...sec);
+      });
+  });
+  if (repeat.length) out.push({ head: "🔁 On more than one of these weekends", wk: true }, ...sortByTime(repeat));
+  return out;
+}
+
 // Map drawn without the map library (used only if the library can't load)
 function renderFallbackMap() {
   if (hasMap) return;
@@ -1433,12 +1521,16 @@ function renderFallbackMap() {
   TOWNS.forEach(([n, la, ln]) => { const [x, y] = xy(la, ln); svg.appendChild(mk("text", { x, y, class: "ftown" }, n)); });
   const [hx, hy] = xy(HOME.lat, HOME.lng);
   svg.appendChild(mk("circle", { cx: hx, cy: hy, r: 8, fill: "#2f6fed" }));
-  visibleEvents().forEach(ev => {
-    const t = TYPES[ev.type], [x, y] = xy(ev.lat, ev.lng);
+  venueGroups(visibleEvents()).forEach(evs => {
+    const ev = evs[0], t = mostCommonType(evs), [x, y] = xy(ev.lat, ev.lng);
     const g = mk("g", { class: "fpin" });
     g.appendChild(mk("circle", { cx: x, cy: y, r: 14, stroke: t.color }));
     g.appendChild(mk("text", { x, y }, t.emoji));
-    g.appendChild(mk("title", {}, ev.name));
+    if (evs.length > 1) {
+      g.appendChild(mk("circle", { cx: x + 12, cy: y - 12, r: 9, fill: "#e0245e", stroke: "#fff", "stroke-width": 2 }));
+      g.appendChild(mk("text", { x: x + 12, y: y - 12, fill: "#fff", style: "font-size:10px;font-weight:700" }, evs.length));
+    }
+    g.appendChild(mk("title", {}, evs.map(e => e.name).join("\n")));
     g.onclick = () => {
       const li = document.querySelector(`.list li[data-idx="${EVENTS.indexOf(ev)}"]`);
       if (li && !li.classList.contains("open")) li.click();
@@ -1461,7 +1553,32 @@ document.addEventListener("click", e => {
 });
 
 let sheetEvent = null;   // the event whose card is open, if any
-function showSheet(ev) {
+let sheetVenue = null;   // the events at the place whose list is open, if any
+function showVenue(evs) {
+  sheetVenue = evs; sheetEvent = null;
+  document.getElementById("sheet-ev").hidden = true;
+  document.getElementById("sheet-venue").hidden = false;
+  const whereCount = {}; evs.forEach(e => whereCount[e.where] = (whereCount[e.where] || 0) + 1);
+  document.getElementById("venue-title").textContent = evs.length + " events at this spot";
+  document.getElementById("venue-where").textContent = Object.keys(whereCount).sort((a, b) => whereCount[b] - whereCount[a])[0];
+  const ul = document.getElementById("venue-list"); ul.innerHTML = "";
+  evs.forEach(ev => {
+    const li = document.createElement("li");
+    li.innerHTML = '<div class="vn"></div><div class="vw"></div>';
+    li.querySelector(".vn").textContent = TYPES[ev.type].emoji + " " + ev.name;
+    li.querySelector(".vw").textContent = ev.when;
+    li.onclick = e => { e.stopPropagation(); showSheet(ev, true); };
+    ul.appendChild(li);
+  });
+  const sh = document.getElementById("sheet"); sh.hidden = false; sh.scrollTop = 0;
+}
+function showSheet(ev, fromVenue) {
+  if (!fromVenue) sheetVenue = null;
+  document.getElementById("sheet-venue").hidden = true;
+  document.getElementById("sheet-ev").hidden = false;
+  const back = document.getElementById("sheet-back");
+  back.hidden = !sheetVenue;
+  if (sheetVenue) back.textContent = "‹ All " + sheetVenue.length + " events here";
   const t = TYPES[ev.type];
   const tags = document.getElementById("sheet-tags");
   tags.innerHTML = "";
@@ -1484,8 +1601,9 @@ function showSheet(ev) {
   sh.hidden = false; sh.scrollTop = 0;
   sheetEvent = ev;
 }
-function hideSheet() { document.getElementById("sheet").hidden = true; sheetEvent = null; }
+function hideSheet() { document.getElementById("sheet").hidden = true; sheetEvent = null; sheetVenue = null; }
 document.getElementById("sheet-close").onclick = hideSheet;
+document.getElementById("sheet-back").onclick = e => { e.stopPropagation(); if (sheetVenue) showVenue(sheetVenue); };
 if (hasMap) map.on("click", hideSheet);
 
 /* ============================================================
@@ -2063,7 +2181,7 @@ async function loadWeather() {
     renderHeroWeather();
     if (typingComment()) { refreshPending = true; return; }
     renderFilters(); renderList();
-    if (sheetEvent) showSheet(sheetEvent);
+    if (sheetEvent) showSheet(sheetEvent, !!sheetVenue);
   } catch (e) { /* no forecast on this copy; everything else still works */ }
 }
 
