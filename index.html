@@ -856,7 +856,8 @@ const TOWNS = [
   ["Toms River", 39.9537, -74.1979], ["Atlantic City", 39.3643, -74.4229]
 ];
 
-let activeType = "all", dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
+let activeTypes = new Set();   // selected categories; empty means All
+let dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
 
 // Weekends are named by their Saturday (YYYY-MM-DD). Past weekends are hidden.
 function weekendLabel(sat) {
@@ -931,7 +932,7 @@ if (hasMap) {
 function visibleEvents() {
   return EVENTS.filter(e =>
     (e.weekends || []).some(w => selectedWeekends.has(w)) &&
-    (activeType === "all" || TYPES[e.type].group === activeType) &&
+    (!activeTypes.size || activeTypes.has(TYPES[e.type].group)) &&
     (dayFilter === "any" || e.day === dayFilter || e.day === "both") &&
     (!freeOnly || e.free) &&
     (!savedOnly || saved.has(e.id)) &&
@@ -968,8 +969,13 @@ function isThisWeekend(sat) {
 function renderFilters() {
   renderWeekendFilters();
   const t = document.getElementById("type-filters"); t.innerHTML = "";
-  chip(t, "All", activeType === "all", () => { activeType = "all"; render(true); });
-  Object.entries(GROUPS).forEach(([k, g]) => chip(t, g.emoji + " " + g.label, activeType === k, () => { activeType = k; render(true); }));
+  chip(t, "All", !activeTypes.size, () => { activeTypes.clear(); render(true); });
+  // Tap categories to add or remove them; turning them all off goes back to All
+  Object.entries(GROUPS).forEach(([k, g]) => chip(t, g.emoji + " " + g.label, activeTypes.has(k), () => {
+    if (activeTypes.has(k)) activeTypes.delete(k); else activeTypes.add(k);
+    if (activeTypes.size === Object.keys(GROUPS).length) activeTypes.clear();
+    render(true);
+  }));
   const x = document.getElementById("extra-filters"); x.innerHTML = "";
   chip(x, "Both days", dayFilter === "any", () => { dayFilter = "any"; render(true); });
   chip(x, "Saturday", dayFilter === "sat", () => { dayFilter = "sat"; render(true); });
@@ -1203,7 +1209,7 @@ function renderWhosIn() {
 function jumpToEvent(ev) {
   const wk = upcomingWeekendsOf(ev);
   if (!wk.some(w => selectedWeekends.has(w))) selectedWeekends.add(wk[0]);
-  if (!visibleEvents().includes(ev)) { activeType = "all"; dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false; }
+  if (!visibleEvents().includes(ev)) { activeTypes.clear(); dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false; }
   document.body.classList.remove("whos-open");
   render(false);
   const li = document.querySelector(`.list li[data-idx="${EVENTS.indexOf(ev)}"]`);
