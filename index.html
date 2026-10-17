@@ -403,6 +403,18 @@
   .cmts button[type=submit] { font:inherit; font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:999px; border:none; background:var(--grad); color:#fff; cursor:pointer; }
   .cmts button[type=submit]:disabled { opacity:.5; }
   .tag.cmt { background:rgba(157,123,255,.16); color:#c9b8ff; }
+
+  /* Latest comments feed in the Who's in panel */
+  #feed { margin-top:18px; padding-top:14px; border-top:1px solid rgba(255,255,255,.1); }
+  #feed[hidden] { display:none; }
+  #feed-list { list-style:none; margin:0; padding:0; }
+  #feed-list li { padding:9px 8px; border-bottom:1px solid rgba(255,255,255,.08); border-radius:10px; cursor:pointer; font-size:.84rem; line-height:1.35; }
+  #feed-list li:last-child { border-bottom:none; }
+  #feed-list li:hover { background:rgba(157,123,255,.10); }
+  #feed-list .fmeta { color:#a99fd0; font-size:.76rem; margin-bottom:2px; }
+  #feed-list .fmeta b { color:#f4f0ff; }
+  #feed-list .fbody { color:#e8e2ff; overflow-wrap:anywhere; }
+  #feed-list .empty { cursor:default; color:var(--muted); }
   body.show-install #install-tip { display:block; }
 </style>
 </head>
@@ -432,6 +444,11 @@
       <p class="sub">What friends have voted for, most popular first. Tap one to see it on the map.</p>
       <div class="me" id="whos-me"></div>
       <ul id="whos-list"></ul>
+      <div id="feed" hidden>
+        <h2>💬 Latest comments</h2>
+        <p class="sub">What people are saying across all events. Tap one to open that event.</p>
+        <ul id="feed-list"></ul>
+      </div>
     </aside>
     <div class="card">
       <div class="map-wrap">
@@ -1365,7 +1382,34 @@ function fillActions(box, ev) {
 }
 function upcomingWeekendsOf(ev) { return (ev.weekends || []).filter(w => WEEKENDS.includes(w)); }
 
+// Newest comments from every event that's still on the list
+function renderFeed() {
+  const box = document.getElementById("feed"), ul = document.getElementById("feed-list");
+  box.hidden = !commentsOn;
+  if (!commentsOn) return;
+  ul.innerHTML = "";
+  const byId = new Map(EVENTS.map(e => [e.id, e]));
+  const recent = Object.values(comments).flat()
+    .filter(c => byId.has(c.event_id) && upcomingWeekendsOf(byId.get(c.event_id)).length)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 15);
+  if (!recent.length) {
+    ul.innerHTML = '<li class="empty">No comments yet. Open any event to start the conversation.</li>';
+    return;
+  }
+  recent.forEach(c => {
+    const ev = byId.get(c.event_id), li = document.createElement("li");
+    const m = document.createElement("div"); m.className = "fmeta";
+    const who = document.createElement("b"); who.textContent = c.author; m.appendChild(who);
+    m.appendChild(document.createTextNode(" on " + TYPES[ev.type].emoji + " " + ev.name + " · " + timeAgo(c.created_at)));
+    const t = document.createElement("div"); t.className = "fbody"; t.textContent = c.body;
+    li.appendChild(m); li.appendChild(t);
+    li.onclick = () => jumpToEvent(ev);
+    ul.appendChild(li);
+  });
+}
+
 function renderWhosIn() {
+  renderFeed();
   const me = document.getElementById("whos-me");
   me.innerHTML = "";
   const label = document.createElement("span");
