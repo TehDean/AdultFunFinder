@@ -242,7 +242,7 @@ const TYPES = {
   holiday: { emoji: "🎄", label: "Holiday",              color: "#be123c" }
 };
 
-const HOME = { name: "West Orange (home)", lat: 40.7948, lng: -74.2391 };
+const HOME = { name: "Dean's Castle", lat: 40.7948, lng: -74.2391 };
 
 const EVENTS = [
   { name: "South Mountain Reservation hikes", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: true,
@@ -712,7 +712,7 @@ if (hasMap) {
     iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -19]
   });
 
-  L.marker([HOME.lat, HOME.lng], { icon: pinIcon("🏠", null, "home"), zIndexOffset: 1000 })
+  L.marker([HOME.lat, HOME.lng], { icon: pinIcon("🏰", null, "home"), zIndexOffset: 1000 })
     .addTo(map).bindPopup(`<div class="pop"><h3>${esc(HOME.name)}</h3></div>`);
 
   EVENTS.forEach(ev => {
