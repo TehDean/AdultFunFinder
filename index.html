@@ -135,6 +135,23 @@
 
   .note { margin-top:10px; color:var(--muted); font-size:.8rem; }
 
+  /* Votes and saves */
+  .vote, .save { font:inherit; font-size:.82rem; min-height:32px; padding:5px 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
+  .vote.on { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+  .save.on { border-color:#e0a800; color:#a16207; }
+  .voters { color:var(--muted); font-size:.8rem; margin-top:6px; }
+  .actions { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; }
+  #vote-note { color:var(--muted); font-size:.8rem; margin:-4px 0 10px; }
+  #name-dialog { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:3000; padding:16px; }
+  #name-dialog[hidden] { display:none; }
+  #name-dialog .box { background:var(--panel); color:var(--fg); border-radius:14px; padding:18px; width:100%; max-width:340px; box-shadow:0 8px 30px rgba(0,0,0,.3); }
+  #name-dialog h3 { margin:0 0 6px; font-size:1.05rem; }
+  #name-dialog p { margin:0 0 12px; color:var(--muted); font-size:.88rem; }
+  #name-dialog input { width:100%; font:inherit; font-size:16px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+  #name-dialog .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+  #name-dialog button { font:inherit; padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--fg); cursor:pointer; }
+  #name-dialog button.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+
   /* Event details card along the bottom of the map */
   .map-wrap { position:relative; }
   #sheet { position:absolute; left:8px; right:8px; bottom:8px; z-index:1000; max-width:400px;
@@ -193,6 +210,7 @@
   <div class="chips" id="extra-filters"></div>
   <div class="chips" id="dist-filters"></div>
   <div class="count" id="count"></div>
+  <div id="vote-note" hidden></div>
 
   <div class="layout">
     <div class="card">
@@ -206,6 +224,8 @@
           <p><strong>Where:</strong> <span id="sheet-where"></span></p>
           <p><strong>Cost:</strong> <span id="sheet-cost"></span></p>
           <p id="sheet-about"></p>
+          <div class="actions" id="sheet-actions"></div>
+          <div class="voters" id="sheet-voters"></div>
           <a class="dir" id="sheet-dir" target="_blank" rel="noopener">Directions ↗</a>
         </div>
       </div>
@@ -219,6 +239,15 @@
   </div>
 
   <p class="note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
+</div>
+
+<div id="name-dialog" hidden>
+  <div class="box" role="dialog" aria-labelledby="name-title">
+    <h3 id="name-title">What's your name?</h3>
+    <p>So your friends can see who's in. You only need to do this once on this device.</p>
+    <input id="name-input" maxlength="30" autocomplete="given-name" placeholder="First name">
+    <div class="btns"><button type="button" id="name-cancel">Cancel</button><button type="button" class="primary" id="name-ok">Save</button></div>
+  </div>
 </div>
 
 <script>
@@ -258,422 +287,422 @@ for (const t of Object.values(TYPES)) t.color = GROUPS[t.group].color;
 const HOME = { name: "Fun Finder HQ", lat: 40.7948, lng: -74.2391 };
 
 const EVENTS = [
-  { name: "South Mountain Reservation hikes", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: true,
+  { id: "south-mountain-reservation-hikes", name: "South Mountain Reservation hikes", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: true,
     lat: 40.7534061, lng: -74.2896523, when: "Open daily, 8:00 AM to 4:30 PM",
     where: "South Mountain Reservation, West Orange",
     cost: "Free to hike. Guided county hikes often need pre-registration (973-228-8776).",
     about: "Trails from easy strolls to real workouts, with Hemlock Falls, a reservoir loop of about 2 miles, and a Fairy Trail. Sturdy shoes recommended." },
-  { name: "Harvest Honey & Garlic Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
+  { id: "harvest-honey-garlic-festival", name: "Harvest Honey & Garlic Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
     lat: 41.135521, lng: -74.7166163, when: "Saturday, Oct 17, 10 AM to 4 PM",
     where: "Sussex County Fairgrounds, 37 Plains Rd, Augusta",
     cost: "Free admission.",
     about: "15th annual festival with products from local farmers and makers, food trucks, live music, hayrides, and pumpkin painting. About an hour's drive." },
-  { name: "Edison Street Fair & Food Truck Fest", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
+  { id: "edison-street-fair-food-truck-fest", name: "Edison Street Fair & Food Truck Fest", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
     lat: 40.5343198, lng: -74.3367722, when: "Saturday, Oct 17",
     where: "Amboy Avenue, Edison (eight blocks)",
     cost: "Free.",
     about: "Two stages of live music, two food courts, a beer and wine garden, carnival rides, a BMX demo, pro wrestling, and local vendors. A good group outing." },
-  { name: "JAPAN Fes: Japanese Food & Culture", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
+  { id: "japan-fes-japanese-food-culture", name: "JAPAN Fes: Japanese Food & Culture", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
     lat: 40.8643266, lng: -73.9969858, when: "Saturday, Oct 17",
     where: "Overpeck County Park, 40 Fort Lee Rd, Leonia",
     cost: "Not listed. Check the event page.",
     about: "Japanese street food, crafts, and culture in a big county park. Fun to graze with friends." },
-  { name: "Hoboken Biergarten Oktoberfest", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
+  { id: "hoboken-biergarten-oktoberfest", name: "Hoboken Biergarten Oktoberfest", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
     lat: 40.75521, lng: -74.0314376, when: "Saturday, Oct 17 (last day of the series)",
     where: "The Hoboken Biergarten, 1422 Grand St, Hoboken",
     cost: "Not listed. Food and drinks are paid.",
     about: "Traditional Oktoberfest with live music, stein-holding competitions, keg tapping, giveaways, and outdoor BBQ." },
-  { name: "Zion's Oktoberfest", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
+  { id: "zion-s-oktoberfest", name: "Zion's Oktoberfest", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
     lat: 41.0310691, lng: -74.0964371, when: "Saturday, Oct 17",
     where: "Zion Lutheran Church, 96 E Allendale Rd, Saddle River",
     cost: "$30 per ticket; children free.",
     about: "A nonprofit-run Oktoberfest with food, drinks, and live music." },
-  { name: "Dodge Poetry Festival (with Patti Smith)", weekends: ["2026-10-17"], type: "show", day: "sat", free: false,
+  { id: "dodge-poetry-festival-with-patti-smith", name: "Dodge Poetry Festival (with Patti Smith)", weekends: ["2026-10-17"], type: "show", day: "sat", free: false,
     lat: 40.7397652, lng: -74.1673071, when: "Oct 15–17; Saturday is the final day",
     where: "NJPAC, 1 Center St, Newark",
     cost: "Check NJPAC for tickets.",
     about: "North America's largest poetry festival, with Patti Smith's \"Songs and Stories,\" a Def Poetry Jam reunion, and U.S. Poet Laureate Arthur Sze. Saturday also has a Brooklyn Moon poetry-scene event with Vernon Reid and DJ Spinna." },
-  { name: "NJ Symphony Chamber Players", weekends: ["2026-10-17"], type: "show", day: "sat", free: false,
+  { id: "nj-symphony-chamber-players", name: "NJ Symphony Chamber Players", weekends: ["2026-10-17"], type: "show", day: "sat", free: false,
     lat: 40.8240266, lng: -74.2211677, when: "Saturday, Oct 17, 7 to 9 PM",
     where: "Van Vleck House & Gardens, 21 Van Vleck St, Montclair",
     cost: "From $50 (Eventbrite).",
     about: "A string quartet evening of Haydn, Amy Beach, and Beethoven, with an intermission reception. About 15 minutes from home." },
-  { name: "Fair Lawn Street Fair & Craft Show", weekends: ["2026-10-17"], type: "fair", day: "sun", free: false,
+  { id: "fair-lawn-street-fair-craft-show", name: "Fair Lawn Street Fair & Craft Show", weekends: ["2026-10-17"], type: "fair", day: "sun", free: false,
     lat: 40.9355202, lng: -74.1339162, when: "Sunday, Oct 18",
     where: "Downtown Fair Lawn (pin is approximate)",
     cost: "Admission not listed; street fairs are usually free to walk.",
     about: "A big juried outdoor craft show with about 150 vendors and food booths. Around 20,000 people are expected." },
-  { name: "Montclair Zombie Walk", weekends: ["2026-10-17"], type: "fall", day: "sat", free: true,
+  { id: "montclair-zombie-walk", name: "Montclair Zombie Walk", weekends: ["2026-10-17"], type: "fall", day: "sat", free: true,
     lat: 40.8145578, lng: -74.2179784, when: "Saturday, Oct 17, 2 to 6 PM (walk at 5:30)",
     where: "East Side Mags, 491 Bloomfield Ave, Montclair",
     cost: "Free to walk. Zombie makeup is $5.",
     about: "Annual zombie walk through Montclair Center with makeup, a costume contest, and food from Notorious BBQ. Great with friends, and close to home." },
-  { name: "Demarest Farms Halloween Light Show", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false,
+  { id: "demarest-farms-halloween-light-show", name: "Demarest Farms Halloween Light Show", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false,
     lat: 41.0078536, lng: -74.0707539, when: "Select evenings through Oct 31",
     where: "244 Werimus Rd, Hillsdale",
     cost: "$38.",
     about: "A drive-through Halloween light show, billed as New Jersey's largest. Check the dates before you go. About an hour away." },
-  { name: "NY Sheep & Wool Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: false, far: true,
+  { id: "ny-sheep-wool-festival", name: "NY Sheep & Wool Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: false, far: true,
     lat: 41.9399159, lng: -73.9070953, when: "Saturday & Sunday, Oct 17–18",
     where: "Dutchess County Fairgrounds, 6636 US-9, Rhinebeck, NY",
     cost: "Check the festival site.",
     about: "One of the country's biggest fiber festivals, with 300+ vendors, competitions, workshops, and fair food. Pair it with a fall drive through the Hudson Valley. About 1 hr 45 min." },
-  { name: "Rosendale International Pickle Festival", weekends: ["2026-10-17"], type: "food", day: "sun", free: false, far: true,
+  { id: "rosendale-international-pickle-festival", name: "Rosendale International Pickle Festival", weekends: ["2026-10-17"], type: "food", day: "sun", free: false, far: true,
     lat: 41.7218993, lng: -74.1202087, when: "Sunday, Oct 18 (rain or shine)",
     where: "Ulster County Fairgrounds, 249 Libertyville Rd, New Paltz, NY",
     cost: "Check the festival site.",
     about: "100+ vendors, pickling competitions, and a Pickle Triathlon. A quirky food festival that's fun with a group. About 1 hr 30 min." },
-  { name: "The Burning of Kingston", weekends: ["2026-10-17"], type: "show", day: "both", free: false, far: true,
+  { id: "the-burning-of-kingston", name: "The Burning of Kingston", weekends: ["2026-10-17"], type: "show", day: "both", free: false, far: true,
     lat: 41.9342135, lng: -74.0189955, when: "Oct 15–18",
     where: "Stockade District, Kingston, NY",
     cost: "Not listed.",
     about: "Revolutionary War reenactments, walking tours, talks, and music marking the 1777 British burning of Kingston. About 1 hr 45 min." },
-  { name: "Bear Mountain State Park", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: false, far: true,
+  { id: "bear-mountain-state-park", name: "Bear Mountain State Park", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: false, far: true,
     lat: 41.2930083, lng: -74.0001088, when: "Open daily, 8 AM to 8 PM",
     where: "3006 Seven Lakes Dr, Tomkins Cove, NY",
     cost: "Free to hike; parking fee.",
     about: "A steep climb of about 1,000 feet in under 2 miles to big Hudson River views in fall foliage season. A real calorie burner. About 1 hr." },
-  { name: "Great Pocono Pumpkin Festival", weekends: ["2026-10-17", "2026-10-24"], type: "fall", day: "both", free: false, far: true,
+  { id: "great-pocono-pumpkin-festival", name: "Great Pocono Pumpkin Festival", weekends: ["2026-10-17", "2026-10-24"], type: "fall", day: "both", free: false, far: true,
     lat: 40.8630079, lng: -75.5901631, when: "Sat & Sun, 11 AM to 6 PM, through Oct 25",
     where: "Country Junction, 6565 Interchange Rd, Lehighton, PA",
     cost: "$15; under 2 free.",
     about: "Pumpkin picking, hayrides (including a Wizard of Oz–themed one), and laser tag. About 1 hr 30 min." },
-  { name: "Jim Thorpe Fall Foliage Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: true, far: true,
+  { id: "jim-thorpe-fall-foliage-festival", name: "Jim Thorpe Fall Foliage Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: true, far: true,
     lat: 40.8630949, lng: -75.7375871, when: "Sat & Sun, Oct 17–18 (final weekend)",
     where: "Downtown Jim Thorpe, PA (visitor center at 2 Susquehanna St)",
     cost: "Free live music; parking fee.",
     about: "Craft and food vendors and free live music at four spots in a pretty mountain town during foliage season. Easy to add a hike nearby. About 1 hr 45 min." },
-  { name: "South Street Block Party Weekend", weekends: ["2026-10-17"], type: "fair", day: "sat", free: true, far: true,
+  { id: "south-street-block-party-weekend", name: "South Street Block Party Weekend", weekends: ["2026-10-17"], type: "fair", day: "sat", free: true, far: true,
     lat: 39.9419255, lng: -75.1515889, when: "Saturday, Oct 17, noon to 8 PM",
     where: "South Street, Philadelphia",
     cost: "Free.",
     about: "A nine-block party with a fantasy faire, the Philly Pops, a pop-up skate park, an outdoor Hocus Pocus screening, and a beer garden. About 1 hr 30 min." },
-  { name: "Manayunk Fall Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true, far: true,
+  { id: "manayunk-fall-festival", name: "Manayunk Fall Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true, far: true,
     lat: 40.0228209, lng: -75.2191021, when: "Saturday, Oct 17, 11 AM to 4 PM",
     where: "Main Street, Manayunk, Philadelphia",
     cost: "Free. The Mac n' Cheese Crawl that afternoon (noon to 4) is ticketed.",
     about: "50+ vendors, food trucks, live music, glassblowing, and a pumpkin patch. Add the mac and cheese tasting crawl for a fun group afternoon. About 1 hr 30 min." },
-  { name: "Philly Coffee Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
+  { id: "philly-coffee-festival", name: "Philly Coffee Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
     lat: 39.9532355, lng: -75.1781096, when: "Sat & Sun, timed sessions",
     where: "23rd Street Armory, 22 S 23rd St, Philadelphia",
     cost: "Ticketed; price not listed.",
     about: "Dozens of specialty roasters pouring samples, plus food and live entertainment. About 1 hr 30 min." },
-  { name: "WEIRDO Fest", weekends: ["2026-10-17"], type: "show", day: "sat", free: true, far: true,
+  { id: "weirdo-fest", name: "WEIRDO Fest", weekends: ["2026-10-17"], type: "show", day: "sat", free: true, far: true,
     lat: 39.9826892, lng: -75.1272219, when: "Saturday, Oct 17, 2 to 10 PM",
     where: "Philadelphia Brewing Co., 2440 Frankford Ave, Philadelphia",
     cost: "Free.",
     about: "Wrestling, clown arts, a roller circus, film screenings, live music, and interactive art at a brewery. A strange, fun night with friends. About 1 hr 30 min." },
-  { name: "Little Big Town", weekends: ["2026-10-17"], type: "show", day: "sat", free: false, far: true,
+  { id: "little-big-town", name: "Little Big Town", weekends: ["2026-10-17"], type: "show", day: "sat", free: false, far: true,
     lat: 39.9698503, lng: -75.1600372, when: "Saturday, Oct 17",
     where: "The Met Philadelphia, 858 N Broad St",
     cost: "Ticketed.",
     about: "The Grammy-winning country group on its For The Art Of It tour. About 1 hr 30 min." },
-  { name: "Chatsworth Cranberry Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
+  { id: "chatsworth-cranberry-festival", name: "Chatsworth Cranberry Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
     lat: 39.8527852, lng: -74.5471681, when: "Sat & Sun, Oct 17–18",
     where: "4243 Main St, Chatsworth, NJ (Pine Barrens)",
     cost: "Check the festival site; parking about $10.",
     about: "Up to 150 craft vendors, cranberry treats, food stands, and live music in the Pine Barrens during harvest. Car show on Sunday. About 1 hr 30 min." },
-  { name: "Clover Market", weekends: ["2026-10-17"], type: "fair", day: "sun", free: true, far: true,
+  { id: "clover-market", name: "Clover Market", weekends: ["2026-10-17"], type: "fair", day: "sun", free: true, far: true,
     lat: 39.8412675, lng: -75.7098901, when: "Sunday, Oct 18, 10 AM to 4 PM",
     where: "600 S Broad St, Kennett Square, PA",
     cost: "Free.",
     about: "Nearly 100 vintage and handmade vendors, food trucks, beer and wine, and live music. At the far edge of a 2-hour drive." },
-  { name: "Great Jack O'Lantern Blaze", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
+  { id: "great-jack-o-lantern-blaze", name: "Great Jack O'Lantern Blaze", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
     lat: 41.1915853, lng: -73.8764701, when: "Select evenings through Nov 8, timed entry",
     where: "Van Cortlandt Manor, 525 S Riverside Ave, Croton-on-Hudson, NY",
     cost: "Timed tickets from $24.",
     about: "Thousands of hand-carved jack-o'-lanterns lit up along a nighttime trail. A great evening out with friends. Check which nights are open. About 1 hr." },
-  { name: "Riamede Farm Fall Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false, far: false,
+  { id: "riamede-farm-fall-festival", name: "Riamede Farm Fall Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false, far: false,
     lat: 40.7947699, lng: -74.6924052, when: "Sat & Sun through Nov 1",
     where: "Riamede Farm, 122 Oakdale Rd, Chester, NJ",
     cost: "Not listed; pick-your-own is paid.",
     about: "Apple and pumpkin picking, hayrides, cider donuts, and a food shack. A relaxed group outing about 45 min away." },
-  { name: "Von Thun Farms Fall Festival Weekends", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: false,
+  { id: "von-thun-farms-fall-festival-weekends", name: "Von Thun Farms Fall Festival Weekends", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: false,
     lat: 40.7498595, lng: -75.0122016, when: "Sat & Sun through Nov 8",
     where: "Von Thun Farms, 438 NJ-57, Washington, NJ",
     cost: "Admission charged; check the farm's site.",
     about: "Fall festival weekends on a big farm with seasonal activities, food, and picking. About 55 min." },
-  { name: "Longwood Gardens Chrysanthemum Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
+  { id: "longwood-gardens-chrysanthemum-festival", name: "Longwood Gardens Chrysanthemum Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
     lat: 39.8735119, lng: -75.6734217, when: "Oct 16 to Nov 15, timed tickets",
     where: "Longwood Gardens, 1001 Longwood Rd, Kennett Square, PA",
     cost: "Included with regular admission; timed tickets required.",
     about: "Spectacular chrysanthemum displays across the conservatories, plus miles of garden paths to walk. At the far edge of a 2-hour drive." },
-  { name: "Pumpkinland at Linvilla Orchards", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: true, far: true,
+  { id: "pumpkinland-at-linvilla-orchards", name: "Pumpkinland at Linvilla Orchards", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: true, far: true,
     lat: 39.8837311, lng: -75.4136024, when: "Daily through Nov 8",
     where: "Linvilla Orchards, 137 W Knowlton Rd, Media, PA",
     cost: "Free entry; hayrides, mazes, and picking are pay-as-you-go.",
     about: "Hayrides, corn mazes, pick-your-own, and apple cider donuts. About 1 hr 45 min." },
-  { name: "Peddler's Village Scarecrows", weekends: ["2026-10-17", "2026-10-24"], type: "fair", day: "both", free: false, far: true,
+  { id: "peddler-s-village-scarecrows", name: "Peddler's Village Scarecrows", weekends: ["2026-10-17", "2026-10-24"], type: "fair", day: "both", free: false, far: true,
     lat: 40.347529, lng: -75.0327215, when: "Through Sun, Oct 25",
     where: "Peddler's Village, 100 Peddlers Village, Lahaska, PA",
     cost: "Not listed; free parking.",
     about: "100+ handmade scarecrows around a village of 65 shops and restaurants. Easy to pair with a walk around nearby New Hope. About 1 hr 15 min." },
-  { name: "Southeast Asian Market", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "food", day: "both", free: false, far: true,
+  { id: "southeast-asian-market", name: "Southeast Asian Market", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "food", day: "both", free: false, far: true,
     lat: 39.9055502, lng: -75.1755824, when: "Weekends through Sat, Oct 31",
     where: "FDR Park, 1500 Pattison Ave, Philadelphia",
     cost: "Admission not listed; food is paid, and some vendors are cash only (no ATM).",
     about: "70+ vendors with regional dishes, street food, produce, and crafts in a big park. About 1 hr 30 min." },
-  { name: "Paramus Halloween Truck or Treat Festival", weekends: ["2026-10-24"], type: "food", day: "sun", free: false, far: false,
+  { id: "paramus-halloween-truck-or-treat-festival", name: "Paramus Halloween Truck or Treat Festival", weekends: ["2026-10-24"], type: "food", day: "sun", free: false, far: false,
     lat: 40.9566715, lng: -74.0688646, when: "Sunday, Oct 25, 11 AM to 5 PM",
     where: "Paramus Park, 700 Paramus Park, Paramus",
     cost: "Admission not listed; food is paid.",
     about: "18 gourmet food trucks, a beer garden, and a costume contest with cash prizes. About 30 min." },
-  { name: "Zombie Opera 7", weekends: ["2026-10-24"], type: "show", day: "sat", free: true, far: false,
+  { id: "zombie-opera-7", name: "Zombie Opera 7", weekends: ["2026-10-24"], type: "show", day: "sat", free: true, far: false,
     lat: 40.7277047, lng: -74.0469034, when: "Saturday, Oct 24, 6:30 to 8:30 PM",
     where: "Hamilton Park, 25 W Hamilton Pl, Jersey City",
     cost: "Free. Bring chairs or a blanket.",
     about: "An outdoor zombie opera-theater performance in the park. Fun and spooky with friends. About 25 min." },
-  { name: "The Ghost of Uncle Joe's", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
+  { id: "the-ghost-of-uncle-joe-s", name: "The Ghost of Uncle Joe's", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
     lat: 40.7271289, lng: -74.0551971, when: "Fri, Oct 23 & Sat, Oct 24",
     where: "Harsimus Cemetery, 435 Newark Ave, Jersey City",
     cost: "Not listed; proceeds support the historic site.",
     about: "Live music, drinks, and food in a historic cemetery, plus after-parties. A good adult Halloween night out. About 25 min." },
-  { name: "Diwali @ The Commons", weekends: ["2026-10-24"], type: "art", day: "sat", free: true, far: false,
+  { id: "diwali-the-commons", name: "Diwali @ The Commons", weekends: ["2026-10-24"], type: "art", day: "sat", free: true, far: false,
     lat: 40.5858411, lng: -74.6191569, when: "Saturday, Oct 24",
     where: "Bridgewater Commons, 400 Commons Way, Bridgewater",
     cost: "Free.",
     about: "A Diwali celebration at the mall. About 40 min." },
-  { name: "Tice's Corner Fall Harvest Festival", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
+  { id: "tice-s-corner-fall-harvest-festival", name: "Tice's Corner Fall Harvest Festival", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
     lat: 41.0410579, lng: -74.075025, when: "Saturday, Oct 24",
     where: "Tice's Corner Marketplace, 441 Chestnut Ridge Rd, Woodcliff Lake",
     cost: "Not listed.",
     about: "A fall harvest festival at an outdoor shopping village. About 35 min." },
-  { name: "Laurita Winery Food Truck Festival", weekends: ["2026-10-24", "2026-11-07"], type: "food", day: "both", free: false, far: true,
+  { id: "laurita-winery-food-truck-festival", name: "Laurita Winery Food Truck Festival", weekends: ["2026-10-24", "2026-11-07"], type: "food", day: "both", free: false, far: true,
     lat: 40.069607, lng: -74.5041018, when: "Oct 24–25 and Nov 7–8",
     where: "Laurita Winery, 85 Archertown Rd, New Egypt, NJ",
     cost: "Not listed.",
     about: "Food trucks at a winery with wine tastings and vineyard views. A good group day trip. About 1 hr 15 min." },
-  { name: "Taste of the Philippines", weekends: ["2026-10-24"], type: "food", day: "sat", free: false, far: true,
+  { id: "taste-of-the-philippines", name: "Taste of the Philippines", weekends: ["2026-10-24"], type: "food", day: "sat", free: false, far: true,
     lat: 39.9524997, lng: -75.1392792, when: "Saturday, Oct 24, 11 AM to 5 PM",
     where: "Cherry Street Pier, 121 N Christopher Columbus Blvd, Philadelphia",
     cost: "Not listed.",
     about: "Adobo, lumpia, lechon, traditional music and dance, and a marketplace on the waterfront. About 1 hr 30 min." },
-  { name: "Pennsylvania Chocolate & Coffee Festival", weekends: ["2026-10-24"], type: "food", day: "both", free: false, far: true,
+  { id: "pennsylvania-chocolate-coffee-festival", name: "Pennsylvania Chocolate & Coffee Festival", weekends: ["2026-10-24"], type: "food", day: "both", free: false, far: true,
     lat: 40.1238562, lng: -75.4580644, when: "Sat & Sun, Oct 24–25",
     where: "Greater Philadelphia Expo Center, 100 Station Ave, Oaks, PA",
     cost: "Ticketed; free parking.",
     about: "150+ exhibitors with chocolate and coffee tastings. About 1 hr 45 min." },
-  { name: "Head of the Schuylkill Regatta", weekends: ["2026-10-24"], type: "show", day: "both", free: false, far: true,
+  { id: "head-of-the-schuylkill-regatta", name: "Head of the Schuylkill Regatta", weekends: ["2026-10-24"], type: "show", day: "both", free: false, far: true,
     lat: 39.9806089, lng: -75.1979938, when: "Sat & Sun, Oct 24–25",
     where: "Along Kelly Drive (at Fountain Green Dr), Philadelphia",
     cost: "Spectating along the river appears open; check the regatta site.",
     about: "Two days of rowing races with 260+ clubs and colleges. Walk or bike the river trail while you watch. About 1 hr 30 min." },
-  { name: "Meat Market Challenge", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: true,
+  { id: "meat-market-challenge", name: "Meat Market Challenge", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: true,
     lat: 39.9533, lng: -75.159, when: "Saturday, Oct 24",
     where: "Filbert St outside Reading Terminal Market, 1136 Arch St, Philadelphia (pin is approximate)",
     cost: "Not listed.",
     about: "Rocky-style frozen-meat punching plus a Rocky look-alike contest, right by one of the best food halls around. About 1 hr 30 min." },
-  { name: "Hoboken Ragamuffin Parade", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
+  { id: "hoboken-ragamuffin-parade", name: "Hoboken Ragamuffin Parade", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
     lat: 40.748566, lng: -74.0275192, when: "Saturday, Oct 31, 4:30 PM",
     where: "Washington St, Hoboken (10th St to 5th St)",
     cost: "Not listed.",
     about: "A longtime Halloween parade with live music, floats, and costumes. About 30 min." },
-  { name: "Hudson County Fall Fest", weekends: ["2026-10-31"], type: "fall", day: "sat", free: true, far: false,
+  { id: "hudson-county-fall-fest", name: "Hudson County Fall Fest", weekends: ["2026-10-31"], type: "fall", day: "sat", free: true, far: false,
     lat: 40.7068497, lng: -74.069388, when: "Saturday, Oct 31, 11 AM to 3 PM",
     where: "902 Brewing Co., 101 Pacific Ave, Jersey City",
     cost: "Free.",
     about: "Live music and costume contests at a brewery. About 25 min." },
-  { name: "Downtown Jersey City Halloween Bash", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
+  { id: "downtown-jersey-city-halloween-bash", name: "Downtown Jersey City Halloween Bash", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
     lat: 40.7202119, lng: -74.0433568, when: "Saturday, Oct 31, noon to 8 PM",
     where: "Newark Ave Pedestrian Plaza, Jersey City",
     cost: "Not listed.",
     about: "Games, a corn maze, and a \"Terror Tavern\" for adults on a lively pedestrian street. About 25 min." },
-  { name: "Halloween Party of the Year at Porta", weekends: ["2026-10-31"], type: "show", day: "sat", free: false, far: false,
+  { id: "halloween-party-of-the-year-at-porta", name: "Halloween Party of the Year at Porta", weekends: ["2026-10-31"], type: "show", day: "sat", free: false, far: false,
     lat: 40.8147281, lng: -74.2182306, when: "Saturday, Oct 31, 8 PM to 2 AM",
     where: "Porta Montclair, 499 Bloomfield Ave, Montclair",
     cost: "Not listed.",
     about: "Live salsa band, Halloween cocktails, and a $1,000 costume contest. About 15 min." },
-  { name: "Haunted House Halloween Party", weekends: ["2026-10-31"], type: "show", day: "sat", free: false, far: false,
+  { id: "haunted-house-halloween-party", name: "Haunted House Halloween Party", weekends: ["2026-10-31"], type: "show", day: "sat", free: false, far: false,
     lat: 40.2160241, lng: -74.0098416, when: "Saturday, Oct 31, 9 PM (21+)",
     where: "House of Independents, 572 Cookman Ave, Asbury Park",
     cost: "Ticketed; usually sells out.",
     about: "A 21+ party with live DJs and a $1,500 costume contest. About 55 min." },
-  { name: "Heritage India Festival", weekends: ["2026-10-31"], type: "food", day: "both", free: false, far: true,
+  { id: "heritage-india-festival", name: "Heritage India Festival", weekends: ["2026-10-31"], type: "food", day: "both", free: false, far: true,
     lat: 40.1238562, lng: -75.4580644, when: "Sat & Sun, Oct 31–Nov 1",
     where: "Greater Philadelphia Expo Center, 100 Station Ave, Oaks, PA",
     cost: "$5 per person per day, cash only.",
     about: "150+ booths of South Asian food, culture, and shopping. About 1 hr 45 min." },
-  { name: "Apple Festival at Peddler's Village", weekends: ["2026-11-07"], type: "food", day: "both", free: true, far: true,
+  { id: "apple-festival-at-peddler-s-village", name: "Apple Festival at Peddler's Village", weekends: ["2026-11-07"], type: "food", day: "both", free: true, far: true,
     lat: 40.347529, lng: -75.0327215, when: "Sat & Sun, Nov 7–8",
     where: "Peddler's Village, 100 Peddlers Village, Lahaska, PA",
     cost: "Free admission and parking; food is pay-as-you-go. Bring cash.",
     about: "Apple cider, fritters, donuts, live music, and 65 shops. About 1 hr 15 min." },
-  { name: "Contemporary Craft Show", weekends: ["2026-11-07"], type: "fair", day: "both", free: false, far: true,
+  { id: "contemporary-craft-show", name: "Contemporary Craft Show", weekends: ["2026-11-07"], type: "fair", day: "both", free: false, far: true,
     lat: 39.9551235, lng: -75.1626429, when: "Nov 6–8",
     where: "Pennsylvania Convention Center, 1101 Arch St, Philadelphia",
     cost: "Ticketed.",
     about: "The Philadelphia Museum of Art's 50th annual craft show, with 195 artists. About 1 hr 30 min." },
-  { name: "Main Street Pops Artisan Market", weekends: ["2026-11-07"], type: "fair", day: "sun", free: false, far: false,
+  { id: "main-street-pops-artisan-market", name: "Main Street Pops Artisan Market", weekends: ["2026-11-07"], type: "fair", day: "sun", free: false, far: false,
     lat: 40.744, lng: -74.0324, when: "Sunday, Nov 8",
     where: "Hoboken (pin is approximate)",
     cost: "Not listed.",
     about: "An artisan market in Hoboken. About 30 min." },
-  { name: "Olivia Rodrigo", weekends: ["2026-11-07"], type: "show", day: "both", free: false, far: true,
+  { id: "olivia-rodrigo", name: "Olivia Rodrigo", weekends: ["2026-11-07"], type: "show", day: "both", free: false, far: true,
     lat: 39.9012015, lng: -75.1719795, when: "Nov 7–8",
     where: "Xfinity Mobile Arena, 3601 S Broad St, Philadelphia",
     cost: "Ticketed.",
     about: "Olivia Rodrigo in concert. About 1 hr 30 min." },
-  { name: "Tri-State New York Spartan Race", weekends: ["2026-10-31"], type: "race", day: "both", free: false, far: false,
+  { id: "tri-state-new-york-spartan-race", name: "Tri-State New York Spartan Race", weekends: ["2026-10-31"], type: "race", day: "both", free: false, far: false,
     lat: 41.3327595, lng: -74.4797058, when: "Sat & Sun, Oct 31–Nov 1 (Super 10K is Saturday only)",
     where: "Sunflower Valley Farm, 366 County Rd 12, New Hampton, NY",
     cost: "Sprint (5K, 20 obstacles) from $139; Super (10K, 25 obstacles) from $169; kids race from $29. Spectator tickets available (price not listed).",
     about: "A full Spartan weekend: mud, walls, rope climbs, and carries. Sign up as a team with friends and grab food after. About 1 hr." },
-  { name: "Philly Bike Ride", weekends: ["2026-10-17"], type: "active", day: "sat", free: false, far: true,
+  { id: "philly-bike-ride", name: "Philly Bike Ride", weekends: ["2026-10-17"], type: "active", day: "sat", free: false, far: true,
     lat: 39.9655697, lng: -75.1809661, when: "Saturday, Oct 17, all riders start 7:30 AM",
     where: "Philadelphia Museum of Art, 2600 Benjamin Franklin Pkwy, Philadelphia",
     cost: "Registration required; price not listed.",
     about: "A 20-mile group ride on the Schuylkill River Trail and car-free roads. About 1 hr 30 min." },
-  { name: "#CaringForRare Cycling Event", weekends: ["2026-10-17"], type: "active", day: "sun", free: false, far: true,
+  { id: "caringforrare-cycling-event", name: "#CaringForRare Cycling Event", weekends: ["2026-10-17"], type: "active", day: "sun", free: false, far: true,
     lat: 40.4077157, lng: -75.0248344, when: "Sunday, Oct 18",
     where: "Federal Twist Vineyard, 8 Federal Twist Rd, Stockton, NJ",
     cost: "Registration required; price not listed.",
     about: "Ride up to 35 miles on the flat Delaware canal towpath (or 31/62 miles on road), then a picnic with wine tasting and music. Benefits Avery's Hope. About 1 hr 10 min." },
-  { name: "Halloween Victory Tour (bike ride)", weekends: ["2026-10-24"], type: "active", day: "sat", free: false, far: true,
+  { id: "halloween-victory-tour-bike-ride", name: "Halloween Victory Tour (bike ride)", weekends: ["2026-10-24"], type: "active", day: "sat", free: false, far: true,
     lat: 39.9537959, lng: -75.936003, when: "Saturday, Oct 24",
     where: "Victory Brewing Company, 3127 Lower Valley Rd, Parkesburg, PA",
     cost: "Registration required; $20 for riders 19 and under, military, and first responders. Standard price not listed.",
     about: "33- or 52-mile gravel and road rides ending at a brewery. Not for road bikes. About 2 hrs." },
-  { name: "Guy Fawkes Day Ride", weekends: ["2026-11-07"], type: "active", day: "sat", free: false, far: true,
+  { id: "guy-fawkes-day-ride", name: "Guy Fawkes Day Ride", weekends: ["2026-11-07"], type: "active", day: "sat", free: false, far: true,
     lat: 40.397567, lng: -75.1543499, when: "Saturday, Nov 7",
     where: "Bucks County Brewery, 31 Appletree Ln, Pipersville, PA",
     cost: "Registration required; price not listed. Includes a free beer after.",
     about: "Self-guided 28- or 49-mile rides through Bucks County, then Guy Fawkes Night festivities at the brewery. About 1 hr 20 min." },
-  { name: "Ride Along the River", weekends: ["2026-11-07"], type: "active", day: "sat", free: false, far: true,
+  { id: "ride-along-the-river", name: "Ride Along the River", weekends: ["2026-11-07"], type: "active", day: "sat", free: false, far: true,
     lat: 40.4097579, lng: -75.0364724, when: "Saturday, Nov 7",
     where: "Bull's Island Recreation Area, 2185 Daniel Bray Hwy, Stockton, NJ",
     cost: "Registration required; price not listed.",
     about: "18- or 22-mile round trips on the flat D&R Canal towpath along the Delaware. Benefits the Delaware Riverkeeper Network. About 1 hr 10 min." },
-  { name: "Chris Redd", weekends: ["2026-10-17"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "chris-redd", name: "Chris Redd", weekends: ["2026-10-17"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.4959369, lng: -74.4435773, when: "Saturday, Oct 17",
     where: "Stress Factory Comedy Club, 90 Church St, New Brunswick",
     cost: "Ticketed; check the venue for prices.",
     about: "SNL alum headlining one of NJ's best comedy clubs. About 40 min." },
-  { name: "Irene Tu", weekends: ["2026-10-17"], type: "comedy", day: "both", free: false, far: false,
+  { id: "irene-tu", name: "Irene Tu", weekends: ["2026-10-17"], type: "comedy", day: "both", free: false, far: false,
     lat: 40.8114968, lng: -74.1040834, when: "Sat & Sun, Oct 17–18",
     where: "Bananas Comedy Club, 801 Rutherford Ave, Rutherford",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up at a long-running club about 20 minutes away." },
-  { name: "Olivia Carter", weekends: ["2026-10-17"], type: "comedy", day: "sun", free: false, far: false,
+  { id: "olivia-carter", name: "Olivia Carter", weekends: ["2026-10-17"], type: "comedy", day: "sun", free: false, far: false,
     lat: 40.7451488, lng: -74.0346221, when: "Sunday, Oct 18",
     where: "Willie McBride's, 616 Grand St, Hoboken",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up at a lively Irish pub. About 30 min." },
-  { name: "Jared Freid", weekends: ["2026-10-24"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "jared-freid", name: "Jared Freid", weekends: ["2026-10-24"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.7397652, lng: -74.1673071, when: "Saturday, Oct 24",
     where: "Victoria Theater at NJPAC, 1 Center St, Newark",
     cost: "Ticketed; check the venue for prices.",
     about: "Comedian and podcast host. About 20 min." },
-  { name: "Sean Donnelly", weekends: ["2026-10-24"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "sean-donnelly", name: "Sean Donnelly", weekends: ["2026-10-24"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.8208813, lng: -74.4813481, when: "Saturday, Oct 24",
     where: "Dojo of Comedy, 231 Speedwell Ave, Morris Plains",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up at a small, well-reviewed club with food and craft beer. About 25 min." },
-  { name: "Michelle Traina", weekends: ["2026-10-24"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "michelle-traina", name: "Michelle Traina", weekends: ["2026-10-24"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.8271649, lng: -74.1032918, when: "Saturday, Oct 24",
     where: "Williams Center, 15 Sylvan St, Rutherford",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up in a converted movie theater. About 20 min." },
-  { name: "Felicia & Calliope", weekends: ["2026-10-24"], type: "comedy", day: "sun", free: false, far: false,
+  { id: "felicia-calliope", name: "Felicia & Calliope", weekends: ["2026-10-24"], type: "comedy", day: "sun", free: false, far: false,
     lat: 40.4959369, lng: -74.4435773, when: "Sunday, Oct 25",
     where: "Stress Factory Comedy Club, 90 Church St, New Brunswick",
     cost: "Ticketed; check the venue for prices.",
     about: "Comedy at the Stress Factory. About 40 min." },
-  { name: "Comedy at Old York Cellars", weekends: ["2026-10-24", "2026-11-07"], type: "comedy", day: "sat", free: false, far: true,
+  { id: "comedy-at-old-york-cellars", name: "Comedy at Old York Cellars", weekends: ["2026-10-24", "2026-11-07"], type: "comedy", day: "sat", free: false, far: true,
     lat: 40.4508945, lng: -74.8399534, when: "Sat, Oct 24 (Scott Baker & Vinnie Mark) and Sat, Nov 7 (Johnny Watson)",
     where: "Old York Cellars, 80 Old York Rd, Ringoes, NJ",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up at a winery, with wine flights and food before the show. About 1 hr." },
-  { name: "Aaron Weber", weekends: ["2026-10-31"], type: "comedy", day: "both", free: false, far: false,
+  { id: "aaron-weber", name: "Aaron Weber", weekends: ["2026-10-31"], type: "comedy", day: "both", free: false, far: false,
     lat: 40.8114968, lng: -74.1040834, when: "Fri–Sun, Oct 30–Nov 1",
     where: "Bananas Comedy Club, 801 Rutherford Ave, Rutherford",
     cost: "Ticketed; check the venue for prices.",
     about: "Halloween-weekend stand-up about 20 minutes away." },
-  { name: "Anthony DeVito", weekends: ["2026-10-31"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "anthony-devito", name: "Anthony DeVito", weekends: ["2026-10-31"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.8208813, lng: -74.4813481, when: "Saturday, Oct 31",
     where: "Dojo of Comedy, 231 Speedwell Ave, Morris Plains",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up on Halloween night. About 25 min." },
-  { name: "Justin Silva", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "justin-silva", name: "Justin Silva", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.7397652, lng: -74.1673071, when: "Saturday, Nov 7",
     where: "Victoria Theater at NJPAC, 1 Center St, Newark",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up at NJPAC. About 20 min." },
-  { name: "The Flip Side (improv)", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "the-flip-side-improv", name: "The Flip Side (improv)", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.7600934, lng: -74.418207, when: "Saturday, Nov 7",
     where: "Madison Community Arts Center, 10 Kings Rd, Madison",
     cost: "Ticketed; check the venue for prices.",
     about: "An improv comedy show presented by Vivid Stage. About 20 min." },
-  { name: "Lucy Darling", weekends: ["2026-11-07"], type: "comedy", day: "sun", free: false, far: false,
+  { id: "lucy-darling", name: "Lucy Darling", weekends: ["2026-11-07"], type: "comedy", day: "sun", free: false, far: false,
     lat: 40.7397652, lng: -74.1673071, when: "Sunday, Nov 8",
     where: "Prudential Hall at NJPAC, 1 Center St, Newark",
     cost: "Ticketed; check the venue for prices.",
     about: "A comedy-and-magic show at NJPAC. About 20 min." },
-  { name: "Alba Vineyard: live music & foliage helicopter rides", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "brew", day: "both", free: false, far: true,
+  { id: "alba-vineyard-live-music-foliage-helicopter-ride", name: "Alba Vineyard: live music & foliage helicopter rides", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "brew", day: "both", free: false, far: true,
     lat: 40.6140493, lng: -75.1633218, when: "Live music most Sat & Sun afternoons through Nov 1; helicopter rides Oct 17–18 (rain dates Oct 24–25); tasting class Sun, Nov 8, 3 PM",
     where: "Alba Vineyard, 269 County Rd 627, Milford, NJ",
     cost: "Music price not listed. Helicopter ride $65 (21+), includes a glass of wine.",
     about: "A hilltop winery with brick-oven pizza and afternoon bands. The 5–7 minute foliage helicopter flights are a fun group splurge. About 1 hr 10 min." },
-  { name: "Hamilton Oktoberfest", weekends: ["2026-10-17"], type: "brew", day: "sun", free: true, far: false,
+  { id: "hamilton-oktoberfest", name: "Hamilton Oktoberfest", weekends: ["2026-10-17"], type: "brew", day: "sun", free: true, far: false,
     lat: 40.2044737, lng: -74.6774508, when: "Sunday, Oct 18, 11 AM to 5 PM",
     where: "Veterans Park, 2206 Kuser Rd, Hamilton Township, NJ",
     cost: "Free to attend.",
     about: "A free town Oktoberfest with beer, food, and music in a big park. About 55 min." },
-  { name: "Montclair Film Festival", weekends: ["2026-10-17", "2026-10-24"], type: "movie", day: "both", free: false, far: false,
+  { id: "montclair-film-festival", name: "Montclair Film Festival", weekends: ["2026-10-17", "2026-10-24"], type: "movie", day: "both", free: false, far: false,
     lat: 40.814344, lng: -74.218509, when: "Screenings all day Sat & Sun through Oct 25",
     where: "The Clairidge (486 Bloomfield Ave), The Bellevue, and Wellmont Theater, Montclair",
     cost: "Ticketed; check the venue for prices.",
     about: "One of the region's biggest film festivals, with premieres, documentaries, and filmmaker Q&As about 10 minutes from home. Easy to catch a couple of films and dinner on Bloomfield Ave." },
-  { name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
+  { id: "warwick-drive-in", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
     lat: 41.2348937, lng: -74.3792495, when: "Nightly double features on 3 screens; open into the winter",
     where: "5 Warwick Turnpike, Warwick, NY",
     cost: "Not listed; check the drive-in's site.",
     about: "Classic drive-in double features. Pile a few friends into one car and grab snacks from the bar. Dog-friendly. About 55 min." },
-  { name: "Halloween horror double features", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+  { id: "halloween-horror-double-features", name: "Halloween horror double features", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "movie", day: "sat", free: false, far: false,
     lat: 40.8271649, lng: -74.1032918, when: "Sat, Oct 17 (incl. Rocky Horror), Sat, Oct 24, and Sat, Oct 31",
     where: "Williams Center, 15 Sylvan St, Rutherford",
     cost: "Ticketed; check the venue for prices.",
     about: "Cult and horror classics on the big screen all October, including Night of the Living Dead and Trick 'r Treat on Halloween. About 20 min." },
-  { name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+  { id: "the-rocky-horror-picture-show", name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
     lat: 40.814344, lng: -74.218509, when: "Fri & Sat, Oct 30–31",
     where: "The Clairidge, 486 Bloomfield Ave, Montclair",
     cost: "Ticketed; check the venue for prices.",
     about: "The ultimate costume-and-callback Halloween movie night. About 10 min." },
-  { name: "Ghostbusters in Concert", weekends: ["2026-10-17"], type: "movie", day: "sun", free: false, far: false,
+  { id: "ghostbusters-in-concert", name: "Ghostbusters in Concert", weekends: ["2026-10-17"], type: "movie", day: "sun", free: false, far: false,
     lat: 40.7943969, lng: -74.4778986, when: "Sunday, Oct 18",
     where: "Mayo Performing Arts Center, 100 South St, Morristown",
     cost: "Ticketed; check the venue for prices.",
     about: "The movie on the big screen with a live orchestra playing the score. About 20 min." },
-  { name: "Coco Live-to-Film Concert", weekends: ["2026-10-24"], type: "movie", day: "sat", free: false, far: false,
+  { id: "coco-live-to-film-concert", name: "Coco Live-to-Film Concert", weekends: ["2026-10-24"], type: "movie", day: "sat", free: false, far: false,
     lat: 40.7943969, lng: -74.4778986, when: "Saturday, Oct 24",
     where: "Mayo Performing Arts Center, 100 South St, Morristown",
     cost: "Ticketed; check the venue for prices.",
     about: "Pixar's Coco with live musicians. About 20 min." },
-  { name: "The Cabinet of Dr. Caligari with live music", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+  { id: "the-cabinet-of-dr-caligari-with-live-music", name: "The Cabinet of Dr. Caligari with live music", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
     lat: 40.8511244, lng: -73.9679192, when: "Saturday, Oct 31",
     where: "Barrymore Film Center, 1 Park Ave, Fort Lee",
     cost: "Ticketed; check the venue for prices.",
     about: "The 1920 silent horror classic with a live score, in the town where American film began. About 30 min." },
-  { name: "Rocky in Concert (50th anniversary)", weekends: ["2026-11-07"], type: "movie", day: "sun", free: false, far: false,
+  { id: "rocky-in-concert-50th-anniversary", name: "Rocky in Concert (50th anniversary)", weekends: ["2026-11-07"], type: "movie", day: "sun", free: false, far: false,
     lat: 40.8952924, lng: -73.9749328, when: "Sunday, Nov 8",
     where: "bergenPAC, 30 N Van Brunt St, Englewood",
     cost: "Ticketed; check the venue for prices.",
     about: "Rocky on the big screen with a live orchestra. About 35 min." },
-  { name: "Hoboken Art Month Artist Studio Tours", weekends: ["2026-11-07"], type: "art", day: "both", free: true, far: false,
+  { id: "hoboken-art-month-artist-studio-tours", name: "Hoboken Art Month Artist Studio Tours", weekends: ["2026-11-07"], type: "art", day: "both", free: true, far: false,
     lat: 40.7521954, lng: -74.0251241, when: "Sat & Sun, Nov 7–8, noon to 6 PM",
     where: "Studios and galleries around Hoboken (pin is the Hoboken Historical Museum, 1301 Hudson St)",
     cost: "Free; self-guided.",
     about: "A free walking tour of 16 artist studios, galleries, and cafés. Make an afternoon of it with friends and stop for food along the way. About 30 min." },
-  { name: "Barnes Foundation Free First Sunday", weekends: ["2026-10-31"], type: "art", day: "sun", free: true, far: true,
+  { id: "barnes-foundation-free-first-sunday", name: "Barnes Foundation Free First Sunday", weekends: ["2026-10-31"], type: "art", day: "sun", free: true, far: true,
     lat: 39.9606433, lng: -75.1728075, when: "Sunday, Nov 1",
     where: "Barnes Foundation, 2025 Benjamin Franklin Pkwy, Philadelphia",
     cost: "Free (PECO Free First Sunday).",
     about: "Free entry to one of the world's great Impressionist collections: Renoir, Cézanne, Matisse, and 7 Van Goghs. About 1 hr 30 min." },
-  { name: "Philadelphia Museum of Art: Pay What You Wish", weekends: ["2026-10-31"], type: "art", day: "sun", free: false, far: true,
+  { id: "philadelphia-museum-of-art-pay-what-you-wish", name: "Philadelphia Museum of Art: Pay What You Wish", weekends: ["2026-10-31"], type: "art", day: "sun", free: false, far: true,
     lat: 39.9655697, lng: -75.1809661, when: "Sunday, Nov 1 (first Sunday)",
     where: "2600 Benjamin Franklin Pkwy, Philadelphia",
     cost: "Pay what you wish.",
     about: "Run the Rocky Steps, then see the Duchamp exhibition for whatever you choose to pay. Pairs well with the Barnes the same day. About 1 hr 30 min." },
-  { name: "Woodmere Art Museum Free Sundays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "art", day: "sun", free: true, far: true,
+  { id: "woodmere-art-museum-free-sundays", name: "Woodmere Art Museum Free Sundays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "art", day: "sun", free: true, far: true,
     lat: 40.0831533, lng: -75.2194871, when: "Sundays",
     where: "9201 Germantown Ave, Philadelphia (Chestnut Hill)",
     cost: "Free on Sundays (donations welcome).",
@@ -700,7 +729,7 @@ const TOWNS = [
   ["Toms River", 39.9537, -74.1979], ["Atlantic City", 39.3643, -74.4229]
 ];
 
-let activeType = "all", dayFilter = "any", freeOnly = false, distFilter = "near";   // opens showing events within about 1 hour
+let activeType = "all", dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
 
 // Weekends are named by their Saturday (YYYY-MM-DD). Past weekends are hidden.
 function weekendLabel(sat) {
@@ -778,6 +807,7 @@ function visibleEvents() {
     (activeType === "all" || TYPES[e.type].group === activeType) &&
     (dayFilter === "any" || e.day === dayFilter || e.day === "both") &&
     (!freeOnly || e.free) &&
+    (!savedOnly || saved.has(e.id)) &&
     (distFilter === "any" || (distFilter === "near") === !e.far));
 }
 
@@ -818,6 +848,8 @@ function renderFilters() {
   chip(x, "Saturday", dayFilter === "sat", () => { dayFilter = "sat"; render(true); });
   chip(x, "Sunday", dayFilter === "sun", () => { dayFilter = "sun"; render(true); });
   chip(x, "💸 Free only", freeOnly, () => { freeOnly = !freeOnly; render(true); });
+  chip(x, "⭐ Saved (" + saved.size + ")", savedOnly, () => { savedOnly = !savedOnly; render(true); });
+  if (votesOnline) chip(x, "🏆 Most votes", sortByVotes, () => { sortByVotes = !sortByVotes; render(false); });
   const d = document.getElementById("dist-filters"); d.innerHTML = "";
   chip(d, "Any distance", distFilter === "any", () => { distFilter = "any"; render(true); });
   chip(d, "🚗 Within 1 hr", distFilter === "near", () => { distFilter = "near"; render(true); });
@@ -844,6 +876,7 @@ function renderList() {
     ul.innerHTML = '<li style="cursor:default;color:var(--muted)">No events match these filters.</li>';
     return;
   }
+  if (sortByVotes) shown.sort((a, b) => voteCount(b) - voteCount(a));
   shown.forEach(ev => {
     const t = TYPES[ev.type];
     const li = document.createElement("li");
@@ -866,6 +899,8 @@ function renderList() {
     const a = document.createElement("a"); a.className = "dir"; a.href = directionsUrl(ev); a.target = "_blank"; a.rel = "noopener"; a.textContent = "Directions ↗";
     a.onclick = e => e.stopPropagation();
     row.appendChild(a);
+    const act = document.createElement("div"); act.className = "actions"; fillActions(act, ev); li.appendChild(act);
+    const vs = document.createElement("div"); vs.className = "voters"; vs.textContent = votersText(ev); li.appendChild(vs);
     li.onclick = () => {
       const wasOpen = li.classList.contains("open");
       document.querySelectorAll(".list li").forEach(x => x.classList.remove("sel", "open"));
@@ -931,6 +966,8 @@ function showSheet(ev) {
   document.getElementById("sheet-cost").textContent = ev.cost;
   document.getElementById("sheet-about").textContent = ev.about;
   document.getElementById("sheet-dir").href = directionsUrl(ev);
+  fillActions(document.getElementById("sheet-actions"), ev);
+  document.getElementById("sheet-voters").textContent = votersText(ev);
   const sh = document.getElementById("sheet");
   sh.hidden = false; sh.scrollTop = 0;
   sheetEvent = ev;
@@ -938,6 +975,142 @@ function showSheet(ev) {
 function hideSheet() { document.getElementById("sheet").hidden = true; sheetEvent = null; }
 document.getElementById("sheet-close").onclick = hideSheet;
 if (hasMap) map.on("click", hideSheet);
+
+/* ============================================================
+   VOTES AND SAVES
+   Votes are shared with everyone through a Supabase database.
+   Saves are a personal list kept on this device only.
+   ============================================================ */
+const VOTE_DB = {
+  url: "https://bsdoccpgsoyixsmtsvsu.supabase.co",
+  key: "sb_publishable_cXIVru9WF-qQ6Ir2rglK5Q_vvP3ffhA"   // public key; safe in a web page
+};
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+function newId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); });
+}
+let DEVICE = store.get("aff-device", null);
+if (!DEVICE) { DEVICE = newId(); store.set("aff-device", DEVICE); }
+let myName = store.get("aff-name", "");
+let saved = new Set(store.get("aff-saved", []));
+let mine = new Set(store.get("aff-myvotes", []));
+let votes = {};            // event id -> list of voter names
+let votesOnline = false;   // becomes true once the database answers
+
+function db(path, body) {
+  return fetch(VOTE_DB.url + "/rest/v1/" + path, {
+    method: body ? "POST" : "GET",
+    headers: { apikey: VOTE_DB.key, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.status === 204 ? null : r.text().then(t => t ? JSON.parse(t) : null); });
+}
+
+function voteCount(ev) { return (votes[ev.id] || []).length; }
+function votersText(ev) {
+  const v = votes[ev.id] || [];
+  if (!v.length) return "";
+  const names = v.slice(0, 4).join(", ");
+  return "In: " + names + (v.length > 4 ? " +" + (v.length - 4) + " more" : "");
+}
+function fillActions(box, ev) {
+  box.innerHTML = "";
+  if (votesOnline) {
+    const v = document.createElement("button"); v.type = "button";
+    const n = voteCount(ev), on = mine.has(ev.id);
+    v.className = "vote" + (on ? " on" : "");
+    v.textContent = (on ? "👍 You're in" : "👍 I'm in") + (n ? " · " + n : "");
+    v.onclick = e => { e.stopPropagation(); toggleVote(ev); };
+    box.appendChild(v);
+  }
+  const s = document.createElement("button"); s.type = "button";
+  const sv = saved.has(ev.id);
+  s.className = "save" + (sv ? " on" : "");
+  s.textContent = sv ? "★ Saved" : "☆ Save";
+  s.onclick = e => { e.stopPropagation(); toggleSave(ev); };
+  box.appendChild(s);
+}
+function refreshEventUI() {
+  renderFilters();
+  renderList();
+  if (sheetEvent) {
+    fillActions(document.getElementById("sheet-actions"), sheetEvent);
+    document.getElementById("sheet-voters").textContent = votersText(sheetEvent);
+  }
+}
+
+function toggleSave(ev) {
+  if (saved.has(ev.id)) saved.delete(ev.id); else saved.add(ev.id);
+  store.set("aff-saved", [...saved]);
+  if (savedOnly) render(false); else refreshEventUI();
+}
+
+function askName() {
+  return new Promise(resolve => {
+    const dlg = document.getElementById("name-dialog"), inp = document.getElementById("name-input");
+    inp.value = myName || ""; dlg.hidden = false; setTimeout(() => inp.focus(), 50);
+    const done = val => { dlg.hidden = true; ok.onclick = cancel.onclick = inp.onkeydown = null; resolve(val); };
+    const ok = document.getElementById("name-ok"), cancel = document.getElementById("name-cancel");
+    ok.onclick = () => { const v = inp.value.trim().slice(0, 30); if (v) done(v); else inp.focus(); };
+    cancel.onclick = () => done("");
+    inp.onkeydown = e => { if (e.key === "Enter") ok.onclick(); if (e.key === "Escape") done(""); };
+  });
+}
+
+async function toggleVote(ev) {
+  if (!myName) {
+    const n = await askName();
+    if (!n) return;
+    myName = n; store.set("aff-name", myName);
+  }
+  const was = mine.has(ev.id);
+  // Show the change right away, then confirm with the database
+  if (was) { mine.delete(ev.id); votes[ev.id] = (votes[ev.id] || []).filter(x => x !== myName); }
+  else { mine.add(ev.id); votes[ev.id] = (votes[ev.id] || []).concat(myName); }
+  store.set("aff-myvotes", [...mine]);
+  refreshEventUI();
+  try {
+    if (was) await db("rpc/remove_vote", { p_event: ev.id, p_device: DEVICE });
+    else await db("rpc/cast_vote", { p_event: ev.id, p_device: DEVICE, p_name: myName });
+  } catch (e) {
+    if (was) mine.add(ev.id); else mine.delete(ev.id);
+    store.set("aff-myvotes", [...mine]);
+    showVoteNote("Couldn't save your vote. Check your connection and try again.");
+  }
+  loadVotes();
+}
+
+function showVoteNote(msg) {
+  const n = document.getElementById("vote-note");
+  n.textContent = msg || ""; n.hidden = !msg;
+}
+
+async function loadVotes() {
+  try {
+    const rows = await db("vote_list?select=event_id,voter_name&order=created_at.asc");
+    const next = {};
+    (rows || []).forEach(r => { (next[r.event_id] = next[r.event_id] || []).push(r.voter_name); });
+    votes = next;
+    try {
+      const m = await db("rpc/my_votes", { p_device: DEVICE });
+      if (Array.isArray(m)) { mine = new Set(m.map(x => typeof x === "string" ? x : x.event_id || x.my_votes)); store.set("aff-myvotes", [...mine]); }
+    } catch (e) { /* keep the local copy */ }
+    const first = !votesOnline;
+    votesOnline = true;
+    showVoteNote("");
+    if (first) renderFilters();
+    refreshEventUI();
+  } catch (e) {
+    if (!votesOnline) showVoteNote("Voting isn't available on this copy of the page. Use tehdean.github.io/AdultFunFinder to vote. Saving still works.");
+  }
+}
+
+loadVotes();
+setInterval(() => { if (!document.hidden) loadVotes(); }, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) loadVotes(); });
 
 function render(fit) { renderFilters(); renderMarkers(fit); renderList(); renderFallbackMap(); }
 render(true);

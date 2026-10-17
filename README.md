@@ -10,3 +10,4 @@ Events are refreshed every Thursday evening. Listings come from web searches, so
 
 - `index.html` – the public website.
 - `build_public.py` – rebuilds `index.html` from the Claude-hosted dashboard page, swapping in a live street map.
+- `supabase_setup.sql` – one-time database setup for shared votes (run in the Supabase SQL Editor).
