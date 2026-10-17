@@ -1,0 +1,22 @@
+{
+  "name": "Adult Fun Finder",
+  "short_name": "Fun Finder",
+  "description": "Things to do over the next few weekends within about 2 hours of West Orange, NJ.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0b16",
+  "theme_color": "#0d0b16",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

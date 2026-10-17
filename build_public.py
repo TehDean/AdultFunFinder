@@ -34,4 +34,19 @@ if i < 0 or j < 0 or j < i:
 out = src[:i] + LIVE_MAP + src[j:]
 out = out.replace('<!-- Index of the street-map pieces stored with this page -->\n<script src="tile-index.js"></script>\n', "")
 out = out.replace('<script src="tile-index.js"></script>', "")
+
+# Public website extras: switch on public-only features and make it installable as a home-screen app
+flag_old = "const IS_PUBLIC_SITE = false;"
+if flag_old not in out:
+    sys.exit("build_public.py: could not find the IS_PUBLIC_SITE switch")
+out = out.replace(flag_old, "const IS_PUBLIC_SITE = true;")
+APP_TAGS = """<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fun Finder">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">"""
+if '<link rel="apple-touch-icon" href="icon-180.png">' not in out:
+    sys.exit("build_public.py: could not find the app icon tag")
+out = out.replace('<link rel="apple-touch-icon" href="icon-180.png">', APP_TAGS, 1)
 sys.stdout.write(out)

@@ -7,6 +7,11 @@
 <meta name="theme-color" content="#0d0b16">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff4fd8'/%3E%3Cstop offset='1' stop-color='%239d7bff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle'%3E%F0%9F%8E%89%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fun Finder">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -311,6 +316,71 @@
   #name-warn { background:rgba(255,211,107,.12) !important; color:#ffd36b !important; }
   #vote-note { color:#ffd36b; }
   .note { color:#8c84b0; }
+
+  /* Search */
+  .search { position:relative; margin:2px 0 10px; max-width:520px; }
+  .search input { width:100%; font:inherit; font-size:16px; padding:10px 38px 10px 14px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:var(--fg); outline:none; -webkit-appearance:none; appearance:none; }
+  .search input::placeholder { color:#8c84b0; }
+  .search input:focus { border-color:rgba(255,79,216,.6); box-shadow:0 0 0 3px rgba(255,79,216,.18); }
+  .search input::-webkit-search-cancel-button { display:none; }
+  #search-clear { position:absolute; right:6px; top:50%; transform:translateY(-50%); width:28px; height:28px; border-radius:50%; border:none;
+    background:rgba(255,255,255,.1); color:var(--fg); font-size:16px; line-height:1; cursor:pointer; }
+  #search-clear[hidden] { display:none; }
+  .empty-msg { cursor:default !important; color:var(--muted); }
+  .empty-msg button { display:inline-flex; margin-top:8px; font:inherit; font-size:.85rem; padding:6px 12px; border-radius:999px;
+    border:1px solid rgba(75,227,255,.4); background:transparent; color:var(--cyan); cursor:pointer; }
+
+  /* Event page, share and calendar buttons */
+  .act { font:inherit; font-size:.82rem; min-height:32px; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.22);
+    background:transparent; color:#e8e2ff; cursor:pointer; display:inline-flex; align-items:center; gap:4px; text-decoration:none; }
+  .act:hover { border-color:rgba(75,227,255,.5); }
+  .act.link { color:var(--cyan); border-color:rgba(75,227,255,.35); }
+  .list li:not(.open) .actions .act { display:none; }   /* the list shows these once an event is tapped open */
+
+  /* Weather */
+  .tag.rain { background:rgba(75,227,255,.14); color:var(--cyan); font-weight:600; }
+  #sheet-wx[hidden], #hero-wx[hidden] { display:none; }
+  #hero-wx { font-size:.9rem; color:#c9c1e8; margin:0 0 8px; }
+
+  /* Hero buttons */
+  .hero-btns { display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 10px; }
+  .hero-btns button { font:inherit; font-weight:600; font-size:.88rem; padding:8px 14px; border-radius:999px; cursor:pointer;
+    border:1px solid rgba(182,255,74,.45); background:rgba(182,255,74,.08); color:var(--lime); }
+  .hero-btns button[hidden] { display:none; }
+
+  /* Pop-up dialogs (suggest, calendar choice) */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:3000; padding:16px; }
+  .modal[hidden] { display:none; }
+  .modal .box { background:#17132a; color:var(--fg); border:1px solid rgba(157,123,255,.35); border-radius:16px; padding:18px; width:100%;
+    max-width:420px; max-height:calc(100vh - 32px); overflow:auto; box-shadow:0 8px 30px rgba(0,0,0,.5); }
+  .modal h3 { margin:0 0 6px; font-size:1.1rem; font-family:"Bricolage Grotesque", Inter, system-ui, sans-serif; }
+  .modal p { margin:0 0 12px; color:var(--muted); font-size:.88rem; }
+  .modal label { display:block; font-size:.8rem; font-weight:600; color:#d6cff2; margin:10px 0 4px; }
+  .modal input, .modal textarea { width:100%; font:inherit; font-size:16px; padding:9px 12px; border-radius:10px; border:1px solid var(--line);
+    background:var(--bg); color:var(--fg); }
+  .modal textarea { min-height:64px; resize:vertical; }
+  .modal .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; flex-wrap:wrap; }
+  .modal .btns button, .modal .choice { font:inherit; padding:9px 14px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--fg); cursor:pointer; }
+  .modal .btns button.primary { background:var(--grad); border:none; color:#fff; font-weight:600; }
+  .modal .choice { display:flex; width:100%; justify-content:flex-start; gap:8px; margin:6px 0; text-decoration:none; padding:12px 14px; border-radius:12px; font-size:.95rem; }
+  .modal .choice:hover { border-color:rgba(255,79,216,.5); }
+  .modal .err { color:#ffd36b; font-size:.85rem; margin:10px 0 0; }
+  .modal .err[hidden] { display:none; }
+  #my-sugs { margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:.85rem; }
+  #my-sugs[hidden] { display:none; }
+  #my-sugs ul { list-style:none; margin:6px 0 0; padding:0; }
+  #my-sugs li { padding:4px 0; color:#d6cff2; }
+  #my-sugs .st { color:var(--muted); }
+
+  /* Little message along the bottom */
+  #toast { position:fixed; left:50%; bottom:calc(76px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:3500;
+    max-width:min(92vw, 440px); background:#231d3d; color:var(--fg); border:1px solid rgba(157,123,255,.45); border-radius:12px;
+    padding:10px 14px; font-size:.88rem; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+  #toast[hidden] { display:none; }
+  #toast input { width:100%; margin-top:6px; font:inherit; font-size:14px; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+  #install-tip { display:none; }
+  body.show-install #install-tip { display:block; }
 </style>
 </head>
 <body>
@@ -319,6 +389,8 @@
     <div class="kicker" id="hero-kicker">This weekend</div>
     <h1>Adult Fun<br>Finder</h1>
     <div class="stats" id="hero-stats"></div>
+    <div id="hero-wx" hidden></div>
+    <div class="hero-btns"><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
     <p class="sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
   </header>
 
@@ -326,6 +398,7 @@
   <div class="chips" id="type-filters"></div>
   <div class="chips" id="extra-filters"></div>
   <div class="chips" id="dist-filters"></div>
+  <div class="search"><input id="search" type="search" placeholder="🔎 Search events, places or keywords" autocomplete="off" enterkeyhint="search" aria-label="Search events"><button type="button" id="search-clear" aria-label="Clear search" hidden>×</button></div>
   <div class="count" id="count"></div>
   <div id="vote-note" hidden></div>
 
@@ -347,6 +420,7 @@
           <p><strong>When:</strong> <span id="sheet-when"></span></p>
           <p><strong>Where:</strong> <span id="sheet-where"></span></p>
           <p><strong>Cost:</strong> <span id="sheet-cost"></span></p>
+          <p id="sheet-wx" hidden></p>
           <p id="sheet-about"></p>
           <div class="actions" id="sheet-actions"></div>
           <div class="voters" id="sheet-voters"></div>
@@ -362,10 +436,44 @@
     </div>
   </div>
 
+  <p class="note" id="install-tip">📲 Keep Fun Finder on your phone like an app: on iPhone tap Share, then <b>Add to Home Screen</b>; on Android tap ⋮, then <b>Add to Home screen</b>.</p>
   <p class="note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
 </div>
 
 <button type="button" id="whos-btn">🙋 Who's in</button>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<div id="cal-dialog" class="modal" hidden>
+  <div class="box" role="dialog" aria-labelledby="cal-title">
+    <h3 id="cal-title">Add to calendar</h3>
+    <p id="cal-sub"></p>
+    <a class="choice" id="cal-google" target="_blank" rel="noopener">📆 Google Calendar</a>
+    <button type="button" class="choice" id="cal-ics">🍎 Apple, Outlook or other calendar</button>
+    <div class="btns"><button type="button" id="cal-cancel">Cancel</button></div>
+  </div>
+</div>
+
+<div id="suggest-dialog" class="modal" hidden>
+  <div class="box" role="dialog" aria-labelledby="suggest-title">
+    <h3 id="suggest-title">💡 Suggest something fun</h3>
+    <p>Found an event your friends would like? Send it in. Suggestions are checked and added in the Thursday update.</p>
+    <label for="sg-title">What is it? *</label>
+    <input id="sg-title" maxlength="120" placeholder="e.g. Hoboken Pumpkin Smash">
+    <label for="sg-link">Link (optional)</label>
+    <input id="sg-link" type="url" maxlength="500" placeholder="https://…" inputmode="url">
+    <label for="sg-when">When</label>
+    <input id="sg-when" maxlength="120" placeholder="e.g. Sat, Nov 14, noon to 5 PM">
+    <label for="sg-where">Where</label>
+    <input id="sg-where" maxlength="160" placeholder="Place or town">
+    <label for="sg-note">Why it's fun (optional)</label>
+    <textarea id="sg-note" maxlength="500"></textarea>
+    <label for="sg-by">Your name</label>
+    <input id="sg-by" maxlength="30" autocomplete="given-name" placeholder="First name">
+    <p class="err" id="sg-err" hidden></p>
+    <div class="btns"><button type="button" id="sg-cancel">Cancel</button><button type="button" class="primary" id="sg-send">Send suggestion</button></div>
+    <div id="my-sugs" hidden><strong>Your suggestions</strong><ul></ul></div>
+  </div>
+</div>
 <div id="whos-backdrop"></div>
 <div id="name-dialog" hidden>
   <div class="box" role="dialog" aria-labelledby="name-title">
@@ -412,24 +520,27 @@ const TYPES = {
 for (const t of Object.values(TYPES)) t.color = GROUPS[t.group].color;
 
 const HOME = { name: "Fun Finder HQ", lat: 40.7948, lng: -74.2391 };
+// The public website. Shared event links always point here so anyone can open them.
+const PUBLIC_URL = "https://tehdean.github.io/AdultFunFinder/";
+const IS_PUBLIC_SITE = true;   // build_public.py switches this on for the public website
 
 const EVENTS = [
-  { id: "south-mountain-reservation-hikes", name: "South Mountain Reservation hikes", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: true,
+  { id: "south-mountain-reservation-hikes", url: "https://essexcountyparks.org/parks/south-mountain-reservation", name: "South Mountain Reservation hikes", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: true,
     lat: 40.7534061, lng: -74.2896523, when: "Open daily, 8:00 AM to 4:30 PM",
     where: "South Mountain Reservation, West Orange",
     cost: "Free to hike. Guided county hikes often need pre-registration (973-228-8776).",
     about: "Trails from easy strolls to real workouts, with Hemlock Falls, a reservoir loop of about 2 miles, and a Fairy Trail. Sturdy shoes recommended." },
-  { id: "harvest-honey-garlic-festival", name: "Harvest Honey & Garlic Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
+  { id: "harvest-honey-garlic-festival", url: "https://www.sussexskylands.com/event/harvest-honey-%26-garlic-festival/1688/", name: "Harvest Honey & Garlic Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
     lat: 41.135521, lng: -74.7166163, when: "Saturday, Oct 17, 10 AM to 4 PM",
     where: "Sussex County Fairgrounds, 37 Plains Rd, Augusta",
     cost: "Free admission.",
     about: "15th annual festival with products from local farmers and makers, food trucks, live music, hayrides, and pumpkin painting. About an hour's drive." },
-  { id: "edison-street-fair-food-truck-fest", name: "Edison Street Fair & Food Truck Fest", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
+  { id: "edison-street-fair-food-truck-fest", url: "https://thelocalgirl.com/calendar/event/edisons-fall-family-spectacular-street-fair-food-truck-fest-2/", name: "Edison Street Fair & Food Truck Fest", weekends: ["2026-10-17"], type: "food", day: "sat", free: true,
     lat: 40.5343198, lng: -74.3367722, when: "Saturday, Oct 17",
     where: "Amboy Avenue, Edison (eight blocks)",
     cost: "Free.",
     about: "Two stages of live music, two food courts, a beer and wine garden, carnival rides, a BMX demo, pro wrestling, and local vendors. A good group outing." },
-  { id: "japan-fes-japanese-food-culture", name: "JAPAN Fes: Japanese Food & Culture", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
+  { id: "japan-fes-japanese-food-culture", url: "https://thelocalgirl.com/bergen/japanese-food-festival-overpeck-park-bergen-county-nj/", name: "JAPAN Fes: Japanese Food & Culture", weekends: ["2026-10-17"], type: "food", day: "sat", free: false,
     lat: 40.8643266, lng: -73.9969858, when: "Saturday, Oct 17",
     where: "Overpeck County Park, 40 Fort Lee Rd, Leonia",
     cost: "Not listed. Check the event page.",
@@ -444,7 +555,7 @@ const EVENTS = [
     where: "Zion Lutheran Church, 96 E Allendale Rd, Saddle River",
     cost: "$30 per ticket; children free.",
     about: "A nonprofit-run Oktoberfest with food, drinks, and live music." },
-  { id: "dodge-poetry-festival-with-patti-smith", name: "Dodge Poetry Festival (with Patti Smith)", weekends: ["2026-10-17"], type: "show", day: "sat", free: false,
+  { id: "dodge-poetry-festival-with-patti-smith", url: "https://www.njpac.org/series/dodge-poetry-festival/", name: "Dodge Poetry Festival (with Patti Smith)", weekends: ["2026-10-17"], type: "show", day: "sat", free: false,
     lat: 40.7397652, lng: -74.1673071, when: "Oct 15–17; Saturday is the final day",
     where: "NJPAC, 1 Center St, Newark",
     cost: "Check NJPAC for tickets.",
@@ -454,7 +565,7 @@ const EVENTS = [
     where: "Van Vleck House & Gardens, 21 Van Vleck St, Montclair",
     cost: "From $50 (Eventbrite).",
     about: "A string quartet evening of Haydn, Amy Beach, and Beethoven, with an intermission reception. About 15 minutes from home." },
-  { id: "fair-lawn-street-fair-craft-show", name: "Fair Lawn Street Fair & Craft Show", weekends: ["2026-10-17"], type: "fair", day: "sun", free: false,
+  { id: "fair-lawn-street-fair-craft-show", url: "https://www.thecraftmap.com/fair/fair-lawn-street-fair-craft-show-october-nj", name: "Fair Lawn Street Fair & Craft Show", weekends: ["2026-10-17"], type: "fair", day: "sun", free: false,
     lat: 40.9355202, lng: -74.1339162, when: "Sunday, Oct 18",
     where: "Downtown Fair Lawn (pin is approximate)",
     cost: "Admission not listed; street fairs are usually free to walk.",
@@ -464,77 +575,77 @@ const EVENTS = [
     where: "East Side Mags, 491 Bloomfield Ave, Montclair",
     cost: "Free to walk. Zombie makeup is $5.",
     about: "Annual zombie walk through Montclair Center with makeup, a costume contest, and food from Notorious BBQ. Great with friends, and close to home." },
-  { id: "demarest-farms-halloween-light-show", name: "Demarest Farms Halloween Light Show", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false,
+  { id: "demarest-farms-halloween-light-show", url: "https://thepressgroup.net/halloween-light-show-at-demarest-farms/", name: "Demarest Farms Halloween Light Show", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false,
     lat: 41.0078536, lng: -74.0707539, when: "Select evenings through Oct 31",
     where: "244 Werimus Rd, Hillsdale",
     cost: "$38.",
     about: "A drive-through Halloween light show, billed as New Jersey's largest. Check the dates before you go. About an hour away." },
-  { id: "ny-sheep-wool-festival", name: "NY Sheep & Wool Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: false, far: true,
+  { id: "ny-sheep-wool-festival", url: "https://sheepandwool.com/", name: "NY Sheep & Wool Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: false, far: true,
     lat: 41.9399159, lng: -73.9070953, when: "Saturday & Sunday, Oct 17–18",
     where: "Dutchess County Fairgrounds, 6636 US-9, Rhinebeck, NY",
     cost: "Check the festival site.",
     about: "One of the country's biggest fiber festivals, with 300+ vendors, competitions, workshops, and fair food. Pair it with a fall drive through the Hudson Valley. About 1 hr 45 min." },
-  { id: "rosendale-international-pickle-festival", name: "Rosendale International Pickle Festival", weekends: ["2026-10-17"], type: "food", day: "sun", free: false, far: true,
+  { id: "rosendale-international-pickle-festival", url: "https://www.thecraftmap.com/fair/rosendale-international-pickle-festival-new-paltz-ny", name: "Rosendale International Pickle Festival", weekends: ["2026-10-17"], type: "food", day: "sun", free: false, far: true,
     lat: 41.7218993, lng: -74.1202087, when: "Sunday, Oct 18 (rain or shine)",
     where: "Ulster County Fairgrounds, 249 Libertyville Rd, New Paltz, NY",
     cost: "Check the festival site.",
     about: "100+ vendors, pickling competitions, and a Pickle Triathlon. A quirky food festival that's fun with a group. About 1 hr 30 min." },
-  { id: "the-burning-of-kingston", name: "The Burning of Kingston", weekends: ["2026-10-17"], type: "show", day: "both", free: false, far: true,
+  { id: "the-burning-of-kingston", url: "https://burningofkingston.com/", name: "The Burning of Kingston", weekends: ["2026-10-17"], type: "show", day: "both", free: false, far: true,
     lat: 41.9342135, lng: -74.0189955, when: "Oct 15–18",
     where: "Stockade District, Kingston, NY",
     cost: "Not listed.",
     about: "Revolutionary War reenactments, walking tours, talks, and music marking the 1777 British burning of Kingston. About 1 hr 45 min." },
-  { id: "bear-mountain-state-park", name: "Bear Mountain State Park", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: false, far: true,
+  { id: "bear-mountain-state-park", url: "https://parks.ny.gov/visit/state-parks/bear-mountain-state-park", name: "Bear Mountain State Park", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: false, far: true,
     lat: 41.2930083, lng: -74.0001088, when: "Open daily, 8 AM to 8 PM",
     where: "3006 Seven Lakes Dr, Tomkins Cove, NY",
     cost: "Free to hike; parking fee.",
     about: "A steep climb of about 1,000 feet in under 2 miles to big Hudson River views in fall foliage season. A real calorie burner. About 1 hr." },
-  { id: "great-pocono-pumpkin-festival", name: "Great Pocono Pumpkin Festival", weekends: ["2026-10-17", "2026-10-24"], type: "fall", day: "both", free: false, far: true,
+  { id: "great-pocono-pumpkin-festival", url: "https://discovernepa.com/event/the-great-pocono-pumpkin-festival/2026-10-17/", name: "Great Pocono Pumpkin Festival", weekends: ["2026-10-17", "2026-10-24"], type: "fall", day: "both", free: false, far: true,
     lat: 40.8630079, lng: -75.5901631, when: "Sat & Sun, 11 AM to 6 PM, through Oct 25",
     where: "Country Junction, 6565 Interchange Rd, Lehighton, PA",
     cost: "$15; under 2 free.",
     about: "Pumpkin picking, hayrides (including a Wizard of Oz–themed one), and laser tag. About 1 hr 30 min." },
-  { id: "jim-thorpe-fall-foliage-festival", name: "Jim Thorpe Fall Foliage Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: true, far: true,
+  { id: "jim-thorpe-fall-foliage-festival", url: "https://discovernepa.com/event/jim-thorpe-fall-foliage-festival/2026-10-17/", name: "Jim Thorpe Fall Foliage Festival", weekends: ["2026-10-17"], type: "fair", day: "both", free: true, far: true,
     lat: 40.8630949, lng: -75.7375871, when: "Sat & Sun, Oct 17–18 (final weekend)",
     where: "Downtown Jim Thorpe, PA (visitor center at 2 Susquehanna St)",
     cost: "Free live music; parking fee.",
     about: "Craft and food vendors and free live music at four spots in a pretty mountain town during foliage season. Easy to add a hike nearby. About 1 hr 45 min." },
-  { id: "south-street-block-party-weekend", name: "South Street Block Party Weekend", weekends: ["2026-10-17"], type: "fair", day: "sat", free: true, far: true,
+  { id: "south-street-block-party-weekend", url: "https://www.phillyvoice.com/south-street-block-party-weekend-fall-fest-philadelphia-2026/", name: "South Street Block Party Weekend", weekends: ["2026-10-17"], type: "fair", day: "sat", free: true, far: true,
     lat: 39.9419255, lng: -75.1515889, when: "Saturday, Oct 17, noon to 8 PM",
     where: "South Street, Philadelphia",
     cost: "Free.",
     about: "A nine-block party with a fantasy faire, the Philly Pops, a pop-up skate park, an outdoor Hocus Pocus screening, and a beer garden. About 1 hr 30 min." },
-  { id: "manayunk-fall-festival", name: "Manayunk Fall Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true, far: true,
+  { id: "manayunk-fall-festival", url: "https://manayunk.com/mnyk-events/manayunk-fall-fest/", name: "Manayunk Fall Festival", weekends: ["2026-10-17"], type: "food", day: "sat", free: true, far: true,
     lat: 40.0228209, lng: -75.2191021, when: "Saturday, Oct 17, 11 AM to 4 PM",
     where: "Main Street, Manayunk, Philadelphia",
     cost: "Free. The Mac n' Cheese Crawl that afternoon (noon to 4) is ticketed.",
     about: "50+ vendors, food trucks, live music, glassblowing, and a pumpkin patch. Add the mac and cheese tasting crawl for a fun group afternoon. About 1 hr 30 min." },
-  { id: "philly-coffee-festival", name: "Philly Coffee Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
+  { id: "philly-coffee-festival", url: "https://www.phillyvoice.com/philly-coffee-festival-23rd-street-armory-2026/", name: "Philly Coffee Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
     lat: 39.9532355, lng: -75.1781096, when: "Sat & Sun, timed sessions",
     where: "23rd Street Armory, 22 S 23rd St, Philadelphia",
     cost: "Ticketed; price not listed.",
     about: "Dozens of specialty roasters pouring samples, plus food and live entertainment. About 1 hr 30 min." },
-  { id: "weirdo-fest", name: "WEIRDO Fest", weekends: ["2026-10-17"], type: "show", day: "sat", free: true, far: true,
+  { id: "weirdo-fest", url: "https://phillyvoice.com/weirdo-fest-2026-east-kensington-philadelphia-october-17/", name: "WEIRDO Fest", weekends: ["2026-10-17"], type: "show", day: "sat", free: true, far: true,
     lat: 39.9826892, lng: -75.1272219, when: "Saturday, Oct 17, 2 to 10 PM",
     where: "Philadelphia Brewing Co., 2440 Frankford Ave, Philadelphia",
     cost: "Free.",
     about: "Wrestling, clown arts, a roller circus, film screenings, live music, and interactive art at a brewery. A strange, fun night with friends. About 1 hr 30 min." },
-  { id: "little-big-town", name: "Little Big Town", weekends: ["2026-10-17"], type: "show", day: "sat", free: false, far: true,
+  { id: "little-big-town", url: "https://www.jambase.com/show/little-big-town-the-met-philadelphia-20261017", name: "Little Big Town", weekends: ["2026-10-17"], type: "show", day: "sat", free: false, far: true,
     lat: 39.9698503, lng: -75.1600372, when: "Saturday, Oct 17",
     where: "The Met Philadelphia, 858 N Broad St",
     cost: "Ticketed.",
     about: "The Grammy-winning country group on its For The Art Of It tour. About 1 hr 30 min." },
-  { id: "chatsworth-cranberry-festival", name: "Chatsworth Cranberry Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
+  { id: "chatsworth-cranberry-festival", url: "https://www.cranfest.info/", name: "Chatsworth Cranberry Festival", weekends: ["2026-10-17"], type: "food", day: "both", free: false, far: true,
     lat: 39.8527852, lng: -74.5471681, when: "Sat & Sun, Oct 17–18",
     where: "4243 Main St, Chatsworth, NJ (Pine Barrens)",
     cost: "Check the festival site; parking about $10.",
     about: "Up to 150 craft vendors, cranberry treats, food stands, and live music in the Pine Barrens during harvest. Car show on Sunday. About 1 hr 30 min." },
-  { id: "clover-market", name: "Clover Market", weekends: ["2026-10-17"], type: "fair", day: "sun", free: true, far: true,
+  { id: "clover-market", url: "https://www.phillyvoice.com/clover-market-kennett-square-chester-county-vintage-handmade-vendors-2026/", name: "Clover Market", weekends: ["2026-10-17"], type: "fair", day: "sun", free: true, far: true,
     lat: 39.8412675, lng: -75.7098901, when: "Sunday, Oct 18, 10 AM to 4 PM",
     where: "600 S Broad St, Kennett Square, PA",
     cost: "Free.",
     about: "Nearly 100 vintage and handmade vendors, food trucks, beer and wine, and live music. At the far edge of a 2-hour drive." },
-  { id: "great-jack-o-lantern-blaze", name: "Great Jack O'Lantern Blaze", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
+  { id: "great-jack-o-lantern-blaze", url: "https://travelhudsonvalley.com/event/the-great-jack-olantern-blaze/", name: "Great Jack O'Lantern Blaze", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
     lat: 41.1915853, lng: -73.8764701, when: "Select evenings through Nov 8, timed entry",
     where: "Van Cortlandt Manor, 525 S Riverside Ave, Croton-on-Hudson, NY",
     cost: "Timed tickets from $24.",
@@ -549,22 +660,22 @@ const EVENTS = [
     where: "Von Thun Farms, 438 NJ-57, Washington, NJ",
     cost: "Admission charged; check the farm's site.",
     about: "Fall festival weekends on a big farm with seasonal activities, food, and picking. About 55 min." },
-  { id: "longwood-gardens-chrysanthemum-festival", name: "Longwood Gardens Chrysanthemum Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
+  { id: "longwood-gardens-chrysanthemum-festival", url: "https://longwoodgardens.org/gardens/our-seasons/chrysanthemum-festival", name: "Longwood Gardens Chrysanthemum Festival", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: false, far: true,
     lat: 39.8735119, lng: -75.6734217, when: "Oct 16 to Nov 15, timed tickets",
     where: "Longwood Gardens, 1001 Longwood Rd, Kennett Square, PA",
     cost: "Included with regular admission; timed tickets required.",
     about: "Spectacular chrysanthemum displays across the conservatories, plus miles of garden paths to walk. At the far edge of a 2-hour drive." },
-  { id: "pumpkinland-at-linvilla-orchards", name: "Pumpkinland at Linvilla Orchards", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: true, far: true,
+  { id: "pumpkinland-at-linvilla-orchards", url: "https://www.linvilla.com/family-fun/pumpkinland", name: "Pumpkinland at Linvilla Orchards", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "fall", day: "both", free: true, far: true,
     lat: 39.8837311, lng: -75.4136024, when: "Daily through Nov 8",
     where: "Linvilla Orchards, 137 W Knowlton Rd, Media, PA",
     cost: "Free entry; hayrides, mazes, and picking are pay-as-you-go.",
     about: "Hayrides, corn mazes, pick-your-own, and apple cider donuts. About 1 hr 45 min." },
-  { id: "peddler-s-village-scarecrows", name: "Peddler's Village Scarecrows", weekends: ["2026-10-17", "2026-10-24"], type: "fair", day: "both", free: false, far: true,
+  { id: "peddler-s-village-scarecrows", url: "https://www.phillyvoice.com/peddlers-village-octoberfeast-bucks-county-oktoberfest-scarecrows-2026/", name: "Peddler's Village Scarecrows", weekends: ["2026-10-17", "2026-10-24"], type: "fair", day: "both", free: false, far: true,
     lat: 40.347529, lng: -75.0327215, when: "Through Sun, Oct 25",
     where: "Peddler's Village, 100 Peddlers Village, Lahaska, PA",
     cost: "Not listed; free parking.",
     about: "100+ handmade scarecrows around a village of 65 shops and restaurants. Easy to pair with a walk around nearby New Hope. About 1 hr 15 min." },
-  { id: "southeast-asian-market", name: "Southeast Asian Market", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "food", day: "both", free: false, far: true,
+  { id: "southeast-asian-market", url: "https://www.phillyvoice.com/southeast-asian-market-fdr-park-philadelphia-hours-2026", name: "Southeast Asian Market", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "food", day: "both", free: false, far: true,
     lat: 39.9055502, lng: -75.1755824, when: "Weekends through Sat, Oct 31",
     where: "FDR Park, 1500 Pattison Ave, Philadelphia",
     cost: "Admission not listed; food is paid, and some vendors are cash only (no ATM).",
@@ -579,12 +690,12 @@ const EVENTS = [
     where: "Hamilton Park, 25 W Hamilton Pl, Jersey City",
     cost: "Free. Bring chairs or a blanket.",
     about: "An outdoor zombie opera-theater performance in the park. Fun and spooky with friends. About 25 min." },
-  { id: "the-ghost-of-uncle-joe-s", name: "The Ghost of Uncle Joe's", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
+  { id: "the-ghost-of-uncle-joe-s", url: "https://www.hobokengirl.com/ghost-uncle-joes-jersey-city-2026/", name: "The Ghost of Uncle Joe's", weekends: ["2026-10-24"], type: "fall", day: "sat", free: false, far: false,
     lat: 40.7271289, lng: -74.0551971, when: "Fri, Oct 23 & Sat, Oct 24",
     where: "Harsimus Cemetery, 435 Newark Ave, Jersey City",
     cost: "Not listed; proceeds support the historic site.",
     about: "Live music, drinks, and food in a historic cemetery, plus after-parties. A good adult Halloween night out. About 25 min." },
-  { id: "diwali-the-commons", name: "Diwali @ The Commons", weekends: ["2026-10-24"], type: "art", day: "sat", free: true, far: false,
+  { id: "diwali-the-commons", url: "https://southasianherald.com/bridgewater-commons-to-host-grand-diwali-celebration-with-music-dance-and-cultural-festivities/", name: "Diwali @ The Commons", weekends: ["2026-10-24"], type: "art", day: "sat", free: true, far: false,
     lat: 40.5858411, lng: -74.6191569, when: "Saturday, Oct 24",
     where: "Bridgewater Commons, 400 Commons Way, Bridgewater",
     cost: "Free.",
@@ -599,17 +710,17 @@ const EVENTS = [
     where: "Laurita Winery, 85 Archertown Rd, New Egypt, NJ",
     cost: "Not listed.",
     about: "Food trucks at a winery with wine tastings and vineyard views. A good group day trip. About 1 hr 15 min." },
-  { id: "taste-of-the-philippines", name: "Taste of the Philippines", weekends: ["2026-10-24"], type: "food", day: "sat", free: false, far: true,
+  { id: "taste-of-the-philippines", url: "https://www.cherrystreetpier.com/event/2025/06/taste-of-the-philippines-part-of-the-peco-multicultural-series-2026/", name: "Taste of the Philippines", weekends: ["2026-10-24"], type: "food", day: "sat", free: false, far: true,
     lat: 39.9524997, lng: -75.1392792, when: "Saturday, Oct 24, 11 AM to 5 PM",
     where: "Cherry Street Pier, 121 N Christopher Columbus Blvd, Philadelphia",
     cost: "Not listed.",
     about: "Adobo, lumpia, lechon, traditional music and dance, and a marketplace on the waterfront. About 1 hr 30 min." },
-  { id: "pennsylvania-chocolate-coffee-festival", name: "Pennsylvania Chocolate & Coffee Festival", weekends: ["2026-10-24"], type: "food", day: "both", free: false, far: true,
+  { id: "pennsylvania-chocolate-coffee-festival", url: "https://www.phillyvoice.com/pennsylvania-chocolate-coffee-festival-oaks-october-2026/", name: "Pennsylvania Chocolate & Coffee Festival", weekends: ["2026-10-24"], type: "food", day: "both", free: false, far: true,
     lat: 40.1238562, lng: -75.4580644, when: "Sat & Sun, Oct 24–25",
     where: "Greater Philadelphia Expo Center, 100 Station Ave, Oaks, PA",
     cost: "Ticketed; free parking.",
     about: "150+ exhibitors with chocolate and coffee tastings. About 1 hr 45 min." },
-  { id: "head-of-the-schuylkill-regatta", name: "Head of the Schuylkill Regatta", weekends: ["2026-10-24"], type: "show", day: "both", free: false, far: true,
+  { id: "head-of-the-schuylkill-regatta", url: "https://www.hosr.org/", name: "Head of the Schuylkill Regatta", weekends: ["2026-10-24"], type: "show", day: "both", free: false, far: true,
     lat: 39.9806089, lng: -75.1979938, when: "Sat & Sun, Oct 24–25",
     where: "Along Kelly Drive (at Fountain Green Dr), Philadelphia",
     cost: "Spectating along the river appears open; check the regatta site.",
@@ -619,7 +730,7 @@ const EVENTS = [
     where: "Filbert St outside Reading Terminal Market, 1136 Arch St, Philadelphia (pin is approximate)",
     cost: "Not listed.",
     about: "Rocky-style frozen-meat punching plus a Rocky look-alike contest, right by one of the best food halls around. About 1 hr 30 min." },
-  { id: "hoboken-ragamuffin-parade", name: "Hoboken Ragamuffin Parade", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
+  { id: "hoboken-ragamuffin-parade", url: "https://www.visithudson.org/things-to-do/attractions/hoboken-ragamuffin-halloween-parade/", name: "Hoboken Ragamuffin Parade", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
     lat: 40.748566, lng: -74.0275192, when: "Saturday, Oct 31, 4:30 PM",
     where: "Washington St, Hoboken (10th St to 5th St)",
     cost: "Not listed.",
@@ -629,7 +740,7 @@ const EVENTS = [
     where: "902 Brewing Co., 101 Pacific Ave, Jersey City",
     cost: "Free.",
     about: "Live music and costume contests at a brewery. About 25 min." },
-  { id: "downtown-jersey-city-halloween-bash", name: "Downtown Jersey City Halloween Bash", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
+  { id: "downtown-jersey-city-halloween-bash", url: "https://www.hobokengirl.com/halloween-hoboken-jersey-city-nj-2026/", name: "Downtown Jersey City Halloween Bash", weekends: ["2026-10-31"], type: "fall", day: "sat", free: false, far: false,
     lat: 40.7202119, lng: -74.0433568, when: "Saturday, Oct 31, noon to 8 PM",
     where: "Newark Ave Pedestrian Plaza, Jersey City",
     cost: "Not listed.",
@@ -654,37 +765,37 @@ const EVENTS = [
     where: "Peddler's Village, 100 Peddlers Village, Lahaska, PA",
     cost: "Free admission and parking; food is pay-as-you-go. Bring cash.",
     about: "Apple cider, fritters, donuts, live music, and 65 shops. About 1 hr 15 min." },
-  { id: "contemporary-craft-show", name: "Contemporary Craft Show", weekends: ["2026-11-07"], type: "fair", day: "both", free: false, far: true,
+  { id: "contemporary-craft-show", url: "https://pmacraftshow.org/", name: "Contemporary Craft Show", weekends: ["2026-11-07"], type: "fair", day: "both", free: false, far: true,
     lat: 39.9551235, lng: -75.1626429, when: "Nov 6–8",
     where: "Pennsylvania Convention Center, 1101 Arch St, Philadelphia",
     cost: "Ticketed.",
     about: "The Philadelphia Museum of Art's 50th annual craft show, with 195 artists. About 1 hr 30 min." },
-  { id: "main-street-pops-artisan-market", name: "Main Street Pops Artisan Market", weekends: ["2026-11-07"], type: "fair", day: "sun", free: false, far: false,
+  { id: "main-street-pops-artisan-market", url: "https://mainstreetpops.com/?event=hoboken-artisan-market-2026", name: "Main Street Pops Artisan Market", weekends: ["2026-11-07"], type: "fair", day: "sun", free: false, far: false,
     lat: 40.744, lng: -74.0324, when: "Sunday, Nov 8",
     where: "Hoboken (pin is approximate)",
     cost: "Not listed.",
     about: "An artisan market in Hoboken. About 30 min." },
-  { id: "olivia-rodrigo", name: "Olivia Rodrigo", weekends: ["2026-11-07"], type: "show", day: "both", free: false, far: true,
+  { id: "olivia-rodrigo", url: "https://www.phillyvoice.com/olivia-rodrigo-philadelphia-unraveled-tour-2026/", name: "Olivia Rodrigo", weekends: ["2026-11-07"], type: "show", day: "both", free: false, far: true,
     lat: 39.9012015, lng: -75.1719795, when: "Nov 7–8",
     where: "Xfinity Mobile Arena, 3601 S Broad St, Philadelphia",
     cost: "Ticketed.",
     about: "Olivia Rodrigo in concert. About 1 hr 30 min." },
-  { id: "tri-state-new-york-spartan-race", name: "Tri-State New York Spartan Race", weekends: ["2026-10-31"], type: "race", day: "both", free: false, far: false,
+  { id: "tri-state-new-york-spartan-race", url: "https://www.spartan.com/en/races/new-york-fall", name: "Tri-State New York Spartan Race", weekends: ["2026-10-31"], type: "race", day: "both", free: false, far: false,
     lat: 41.3327595, lng: -74.4797058, when: "Sat & Sun, Oct 31–Nov 1 (Super 10K is Saturday only)",
     where: "Sunflower Valley Farm, 366 County Rd 12, New Hampton, NY",
     cost: "Sprint (5K, 20 obstacles) from $139; Super (10K, 25 obstacles) from $169; kids race from $29. Spectator tickets available (price not listed).",
     about: "A full Spartan weekend: mud, walls, rope climbs, and carries. Sign up as a team with friends and grab food after. About 1 hr." },
-  { id: "philly-bike-ride", name: "Philly Bike Ride", weekends: ["2026-10-17"], type: "active", day: "sat", free: false, far: true,
+  { id: "philly-bike-ride", url: "https://www.phila.gov/2026-10-15-city-announces-road-closures-and-other-details-for-the-2026-philly-bike-ride/", name: "Philly Bike Ride", weekends: ["2026-10-17"], type: "active", day: "sat", free: false, far: true,
     lat: 39.9655697, lng: -75.1809661, when: "Saturday, Oct 17, all riders start 7:30 AM",
     where: "Philadelphia Museum of Art, 2600 Benjamin Franklin Pkwy, Philadelphia",
     cost: "Registration required; price not listed.",
     about: "A 20-mile group ride on the Schuylkill River Trail and car-free roads. About 1 hr 30 min." },
-  { id: "caringforrare-cycling-event", name: "#CaringForRare Cycling Event", weekends: ["2026-10-17"], type: "active", day: "sun", free: false, far: true,
+  { id: "caringforrare-cycling-event", url: "https://www.bikeride.com/?p=472027", name: "#CaringForRare Cycling Event", weekends: ["2026-10-17"], type: "active", day: "sun", free: false, far: true,
     lat: 40.4077157, lng: -75.0248344, when: "Sunday, Oct 18",
     where: "Federal Twist Vineyard, 8 Federal Twist Rd, Stockton, NJ",
     cost: "Registration required; price not listed.",
     about: "Ride up to 35 miles on the flat Delaware canal towpath (or 31/62 miles on road), then a picnic with wine tasting and music. Benefits Avery's Hope. About 1 hr 10 min." },
-  { id: "halloween-victory-tour-bike-ride", name: "Halloween Victory Tour (bike ride)", weekends: ["2026-10-24"], type: "active", day: "sat", free: false, far: true,
+  { id: "halloween-victory-tour-bike-ride", url: "https://parkesburg.victorybeer.com/taproomevents/halloween-victory-bike-tour", name: "Halloween Victory Tour (bike ride)", weekends: ["2026-10-24"], type: "active", day: "sat", free: false, far: true,
     lat: 39.9537959, lng: -75.936003, when: "Saturday, Oct 24",
     where: "Victory Brewing Company, 3127 Lower Valley Rd, Parkesburg, PA",
     cost: "Registration required; $20 for riders 19 and under, military, and first responders. Standard price not listed.",
@@ -694,7 +805,7 @@ const EVENTS = [
     where: "Bucks County Brewery, 31 Appletree Ln, Pipersville, PA",
     cost: "Registration required; price not listed. Includes a free beer after.",
     about: "Self-guided 28- or 49-mile rides through Bucks County, then Guy Fawkes Night festivities at the brewery. About 1 hr 20 min." },
-  { id: "ride-along-the-river", name: "Ride Along the River", weekends: ["2026-11-07"], type: "active", day: "sat", free: false, far: true,
+  { id: "ride-along-the-river", url: "https://delawareriverkeeper.org/events/ride-along-the-river", name: "Ride Along the River", weekends: ["2026-11-07"], type: "active", day: "sat", free: false, far: true,
     lat: 40.4097579, lng: -75.0364724, when: "Saturday, Nov 7",
     where: "Bull's Island Recreation Area, 2185 Daniel Bray Hwy, Stockton, NJ",
     cost: "Registration required; price not listed.",
@@ -734,7 +845,7 @@ const EVENTS = [
     where: "Stress Factory Comedy Club, 90 Church St, New Brunswick",
     cost: "Ticketed; check the venue for prices.",
     about: "Comedy at the Stress Factory. About 40 min." },
-  { id: "comedy-at-old-york-cellars", name: "Comedy at Old York Cellars", weekends: ["2026-10-24", "2026-11-07"], type: "comedy", day: "sat", free: false, far: true,
+  { id: "comedy-at-old-york-cellars", url: "https://www.newjerseystage.com/articles2/2026/01/28/old-york-cellars-launches-11th-season-of-wine-and-comedy-nights", name: "Comedy at Old York Cellars", weekends: ["2026-10-24", "2026-11-07"], type: "comedy", day: "sat", free: false, far: true,
     lat: 40.4508945, lng: -74.8399534, when: "Sat, Oct 24 (Scott Baker & Vinnie Mark) and Sat, Nov 7 (Johnny Watson)",
     where: "Old York Cellars, 80 Old York Rd, Ringoes, NJ",
     cost: "Ticketed; check the venue for prices.",
@@ -749,7 +860,7 @@ const EVENTS = [
     where: "Dojo of Comedy, 231 Speedwell Ave, Morris Plains",
     cost: "Ticketed; check the venue for prices.",
     about: "Stand-up on Halloween night. About 25 min." },
-  { id: "justin-silva", name: "Justin Silva", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
+  { id: "justin-silva", url: "https://www.newjerseystage.com/articles3/2026/08/27/njpac-presents-comedian-justin-silva-on-november-7th", name: "Justin Silva", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
     lat: 40.7397652, lng: -74.1673071, when: "Saturday, Nov 7",
     where: "Victoria Theater at NJPAC, 1 Center St, Newark",
     cost: "Ticketed; check the venue for prices.",
@@ -764,22 +875,22 @@ const EVENTS = [
     where: "Prudential Hall at NJPAC, 1 Center St, Newark",
     cost: "Ticketed; check the venue for prices.",
     about: "A comedy-and-magic show at NJPAC. About 20 min." },
-  { id: "alba-vineyard-live-music-foliage-helicopter-ride", name: "Alba Vineyard: live music & foliage helicopter rides", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "brew", day: "both", free: false, far: true,
+  { id: "alba-vineyard-live-music-foliage-helicopter-ride", url: "https://explorewarren.org/node/12213", name: "Alba Vineyard: live music & foliage helicopter rides", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "brew", day: "both", free: false, far: true,
     lat: 40.6140493, lng: -75.1633218, when: "Live music most Sat & Sun afternoons through Nov 1; helicopter rides Oct 17–18 (rain dates Oct 24–25); tasting class Sun, Nov 8, 3 PM",
     where: "Alba Vineyard, 269 County Rd 627, Milford, NJ",
     cost: "Music price not listed. Helicopter ride $65 (21+), includes a glass of wine.",
     about: "A hilltop winery with brick-oven pizza and afternoon bands. The 5–7 minute foliage helicopter flights are a fun group splurge. About 1 hr 10 min." },
-  { id: "hamilton-oktoberfest", name: "Hamilton Oktoberfest", weekends: ["2026-10-17"], type: "brew", day: "sun", free: true, far: false,
+  { id: "hamilton-oktoberfest", url: "https://www.hamiltonnj.com/Oktoberfest", name: "Hamilton Oktoberfest", weekends: ["2026-10-17"], type: "brew", day: "sun", free: true, far: false,
     lat: 40.2044737, lng: -74.6774508, when: "Sunday, Oct 18, 11 AM to 5 PM",
     where: "Veterans Park, 2206 Kuser Rd, Hamilton Township, NJ",
     cost: "Free to attend.",
     about: "A free town Oktoberfest with beer, food, and music in a big park. About 55 min." },
-  { id: "montclair-film-festival", name: "Montclair Film Festival", weekends: ["2026-10-17", "2026-10-24"], type: "movie", day: "both", free: false, far: false,
+  { id: "montclair-film-festival", url: "https://montclairfilm.org/festivals/2026-festival/", name: "Montclair Film Festival", weekends: ["2026-10-17", "2026-10-24"], type: "movie", day: "both", free: false, far: false,
     lat: 40.814344, lng: -74.218509, when: "Screenings all day Sat & Sun through Oct 25",
     where: "The Clairidge (486 Bloomfield Ave), The Bellevue, and Wellmont Theater, Montclair",
     cost: "Ticketed; check the venue for prices.",
     about: "One of the region's biggest film festivals, with premieres, documentaries, and filmmaker Q&As about 10 minutes from home. Easy to catch a couple of films and dinner on Bloomfield Ave." },
-  { id: "warwick-drive-in", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
+  { id: "warwick-drive-in", url: "https://drive-ins.com/theater/nytwarw/warwick-drive-in-theater", name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
     lat: 41.2348937, lng: -74.3792495, when: "Nightly double features on 3 screens; open into the winter",
     where: "5 Warwick Turnpike, Warwick, NY",
     cost: "Not listed; check the drive-in's site.",
@@ -789,12 +900,12 @@ const EVENTS = [
     where: "Williams Center, 15 Sylvan St, Rutherford",
     cost: "Ticketed; check the venue for prices.",
     about: "Cult and horror classics on the big screen all October, including Night of the Living Dead and Trick 'r Treat on Halloween. About 20 min." },
-  { id: "the-rocky-horror-picture-show", name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+  { id: "the-rocky-horror-picture-show", url: "https://www.montclairfilm.org/events/the-rocky-horror-picture-show/", name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
     lat: 40.814344, lng: -74.218509, when: "Fri & Sat, Oct 30–31",
     where: "The Clairidge, 486 Bloomfield Ave, Montclair",
     cost: "Ticketed; check the venue for prices.",
     about: "The ultimate costume-and-callback Halloween movie night. About 10 min." },
-  { id: "ghostbusters-in-concert", name: "Ghostbusters in Concert", weekends: ["2026-10-17"], type: "movie", day: "sun", free: false, far: false,
+  { id: "ghostbusters-in-concert", url: "https://www.mayoarts.org/shows/ghostbusters-in-concert/", name: "Ghostbusters in Concert", weekends: ["2026-10-17"], type: "movie", day: "sun", free: false, far: false,
     lat: 40.7943969, lng: -74.4778986, when: "Sunday, Oct 18",
     where: "Mayo Performing Arts Center, 100 South St, Morristown",
     cost: "Ticketed; check the venue for prices.",
@@ -809,17 +920,17 @@ const EVENTS = [
     where: "Barrymore Film Center, 1 Park Ave, Fort Lee",
     cost: "Ticketed; check the venue for prices.",
     about: "The 1920 silent horror classic with a live score, in the town where American film began. About 30 min." },
-  { id: "rocky-in-concert-50th-anniversary", name: "Rocky in Concert (50th anniversary)", weekends: ["2026-11-07"], type: "movie", day: "sun", free: false, far: false,
+  { id: "rocky-in-concert-50th-anniversary", url: "https://www.bergenpac.org/events/detail/rocky-in-concert", name: "Rocky in Concert (50th anniversary)", weekends: ["2026-11-07"], type: "movie", day: "sun", free: false, far: false,
     lat: 40.8952924, lng: -73.9749328, when: "Sunday, Nov 8",
     where: "bergenPAC, 30 N Van Brunt St, Englewood",
     cost: "Ticketed; check the venue for prices.",
     about: "Rocky on the big screen with a live orchestra. About 35 min." },
-  { id: "hoboken-art-month-artist-studio-tours", name: "Hoboken Art Month Artist Studio Tours", weekends: ["2026-11-07"], type: "art", day: "both", free: true, far: false,
+  { id: "hoboken-art-month-artist-studio-tours", url: "https://www.hobokengirl.com/hoboken-nj-art-month-2026/", name: "Hoboken Art Month Artist Studio Tours", weekends: ["2026-11-07"], type: "art", day: "both", free: true, far: false,
     lat: 40.7521954, lng: -74.0251241, when: "Sat & Sun, Nov 7–8, noon to 6 PM",
     where: "Studios and galleries around Hoboken (pin is the Hoboken Historical Museum, 1301 Hudson St)",
     cost: "Free; self-guided.",
     about: "A free walking tour of 16 artist studios, galleries, and cafés. Make an afternoon of it with friends and stop for food along the way. About 30 min." },
-  { id: "barnes-foundation-free-first-sunday", name: "Barnes Foundation Free First Sunday", weekends: ["2026-10-31"], type: "art", day: "sun", free: true, far: true,
+  { id: "barnes-foundation-free-first-sunday", url: "https://barnesfoundation.org/whats-on/free", name: "Barnes Foundation Free First Sunday", weekends: ["2026-10-31"], type: "art", day: "sun", free: true, far: true,
     lat: 39.9606433, lng: -75.1728075, when: "Sunday, Nov 1",
     where: "Barnes Foundation, 2025 Benjamin Franklin Pkwy, Philadelphia",
     cost: "Free (PECO Free First Sunday).",
@@ -829,7 +940,7 @@ const EVENTS = [
     where: "2600 Benjamin Franklin Pkwy, Philadelphia",
     cost: "Pay what you wish.",
     about: "Run the Rocky Steps, then see the Duchamp exhibition for whatever you choose to pay. Pairs well with the Barnes the same day. About 1 hr 30 min." },
-  { id: "woodmere-art-museum-free-sundays", name: "Woodmere Art Museum Free Sundays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "art", day: "sun", free: true, far: true,
+  { id: "woodmere-art-museum-free-sundays", url: "https://woodmereartmuseum.org/visit", name: "Woodmere Art Museum Free Sundays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "art", day: "sun", free: true, far: true,
     lat: 40.0831533, lng: -75.2194871, when: "Sundays",
     where: "9201 Germantown Ave, Philadelphia (Chestnut Hill)",
     cost: "Free on Sundays (donations welcome).",
@@ -857,6 +968,8 @@ const TOWNS = [
 ];
 
 let activeTypes = new Set();   // selected categories; empty means All
+let searchText = "";
+let openEventId = null;   // the list item that's tapped open, kept open when the list refreshes
 let dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
 
 // Weekends are named by their Saturday (YYYY-MM-DD). Past weekends are hidden.
@@ -936,7 +1049,21 @@ function visibleEvents() {
     (dayFilter === "any" || e.day === dayFilter || e.day === "both") &&
     (!freeOnly || e.free) &&
     (!savedOnly || saved.has(e.id)) &&
-    (distFilter === "any" || (distFilter === "near") === !e.far));
+    (distFilter === "any" || (distFilter === "near") === !e.far) &&
+    matchesSearch(e));
+}
+
+// Search: every word typed must appear somewhere in the event's details
+const fold = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+function matchesSearch(e) {
+  if (!searchText) return true;
+  const t = TYPES[e.type], hay = fold([e.name, e.where, e.about, e.when, e.cost, t.label, GROUPS[t.group].label, e.free ? "free" : ""].join(" "));
+  return fold(searchText).split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+function clearFilters() {
+  selectedWeekends = new Set(WEEKENDS); activeTypes.clear();
+  dayFilter = "any"; freeOnly = false; savedOnly = false; distFilter = "any";
+  render(true);
 }
 
 function chip(box, label, on, onclick) {
@@ -951,7 +1078,7 @@ function renderWeekendFilters() {
   if (WEEKENDS.length > 1)
     chip(box, "All weekends", all, () => { selectedWeekends = new Set(WEEKENDS); render(true); });
   WEEKENDS.forEach((w, i) => {
-    const label = "📅 " + weekendLabel(w) + (i === 0 && !ALL_PAST ? (isThisWeekend(w) ? " (this weekend)" : " (next)") : "");
+    const label = "📅 " + weekendLabel(w) + (i === 0 && !ALL_PAST ? (isThisWeekend(w) ? " (this weekend)" : " (next)") : "") + weekendWxHint(w);
     chip(box, label, selectedWeekends.has(w) && !(all && WEEKENDS.length > 1), () => {
       // Tap to add or remove a weekend; from "All", tapping one shows just that one
       if (all && WEEKENDS.length > 1) selectedWeekends = new Set([w]);
@@ -1006,7 +1133,13 @@ function renderList() {
     (ALL_PAST ? " · these dates have passed; new weekends are added every Thursday" : "");
   const ul = document.getElementById("list"); ul.innerHTML = "";
   if (!shown.length) {
-    ul.innerHTML = '<li style="cursor:default;color:var(--muted)">No events match these filters.</li>';
+    const li = document.createElement("li"); li.className = "empty-msg";
+    li.textContent = searchText ? "Nothing matches \u201c" + searchText + "\u201d with these filters." : "No events match these filters.";
+    const b = document.createElement("button"); b.type = "button";
+    b.textContent = searchText ? "Search every weekend and category" : "Clear filters";
+    b.onclick = clearFilters;
+    li.appendChild(document.createElement("br")); li.appendChild(b);
+    ul.appendChild(li);
     return;
   }
   if (sortByVotes) shown.sort((a, b) => voteCount(b) - voteCount(a));
@@ -1019,6 +1152,7 @@ function renderList() {
     li.querySelector(".d-cost").textContent = ev.cost;
     li.querySelector(".d-about").textContent = ev.about;
     li.dataset.idx = EVENTS.indexOf(ev);
+    if (ev.id === openEventId) li.classList.add("sel", "open");
     li.querySelector(".name").textContent = t.emoji + " " + ev.name;
     li.querySelector(".when").textContent = ev.when;
     const row = li.querySelector(".row");
@@ -1030,6 +1164,7 @@ function renderList() {
       });
     }
     if (ev.free) { const f = document.createElement("span"); f.className = "tag free"; f.textContent = "Free"; row.appendChild(f); }
+    addRainTag(row, ev);
     const a = document.createElement("a"); a.className = "dir"; a.href = directionsUrl(ev); a.target = "_blank"; a.rel = "noopener"; a.textContent = "Directions ↗";
     a.onclick = e => e.stopPropagation();
     row.appendChild(a);
@@ -1040,6 +1175,7 @@ function renderList() {
       document.querySelectorAll(".list li").forEach(x => x.classList.remove("sel", "open"));
       li.classList.add("sel");
       if (!wasOpen) li.classList.add("open");
+      openEventId = wasOpen ? null : ev.id;
       if (hasMap && !wasOpen) {
         document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "start" });
         map.flyTo([ev.lat, ev.lng], 13, { duration: 0.8 });
@@ -1084,6 +1220,7 @@ document.addEventListener("click", e => {
   if (!li) return;
   document.querySelectorAll(".list li").forEach(x => x.classList.remove("sel", "open"));
   li.classList.add("sel", "open");
+  openEventId = EVENTS[+btn.dataset.idx].id;
   li.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
@@ -1095,11 +1232,13 @@ function showSheet(ev) {
   if (voteCount(ev) >= POPULAR_AT) { const h = document.createElement("span"); h.className = "tag hot"; h.textContent = "🔥 Popular"; tags.appendChild(h); }
   const a = document.createElement("span"); a.className = "tag"; a.textContent = t.emoji + " " + t.label; tags.appendChild(a);
   if (ev.free) { const f = document.createElement("span"); f.className = "tag free"; f.textContent = "Free"; tags.appendChild(f); }
+  addRainTag(tags, ev);
   document.getElementById("sheet-title").textContent = ev.name;
   document.getElementById("sheet-when").textContent = ev.when;
   document.getElementById("sheet-where").textContent = ev.where;
   document.getElementById("sheet-cost").textContent = ev.cost;
   document.getElementById("sheet-about").textContent = ev.about;
+  fillSheetWeather(ev);
   document.getElementById("sheet-dir").href = directionsUrl(ev);
   fillActions(document.getElementById("sheet-actions"), ev);
   document.getElementById("sheet-voters").textContent = votersText(ev);
@@ -1141,7 +1280,10 @@ function db(path, body) {
     method: body ? "POST" : "GET",
     headers: { apikey: VOTE_DB.key, "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined
-  }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.status === 204 ? null : r.text().then(t => t ? JSON.parse(t) : null); });
+  }).then(r => {
+    if (!r.ok) return r.text().then(t => { throw new Error("HTTP " + r.status + " " + t); });
+    return r.status === 204 ? null : r.text().then(t => t ? JSON.parse(t) : null);
+  });
 }
 
 function voteCount(ev) { return (votes[ev.id] || []).length; }
@@ -1167,6 +1309,24 @@ function fillActions(box, ev) {
   s.textContent = sv ? "★ Saved" : "☆ Save";
   s.onclick = e => { e.stopPropagation(); toggleSave(ev); };
   box.appendChild(s);
+
+  // Event page (or a web search when there's no page yet)
+  const lk = document.createElement("a");
+  lk.className = "act link"; lk.target = "_blank"; lk.rel = "noopener";
+  lk.href = ev.url || "https://www.google.com/search?q=" + encodeURIComponent(ev.name + " " + ev.where);
+  lk.textContent = ev.url ? "🔗 Event page" : "🔎 Look it up";
+  lk.onclick = e => e.stopPropagation();
+  box.appendChild(lk);
+
+  const sh = document.createElement("button"); sh.type = "button"; sh.className = "act";
+  sh.textContent = "📤 Share";
+  sh.onclick = e => { e.stopPropagation(); shareEvent(ev); };
+  box.appendChild(sh);
+
+  const cb = document.createElement("button"); cb.type = "button"; cb.className = "act";
+  cb.textContent = "📅 Calendar";
+  cb.onclick = e => { e.stopPropagation(); addToCalendar(ev); };
+  box.appendChild(cb);
 }
 function upcomingWeekendsOf(ev) { return (ev.weekends || []).filter(w => WEEKENDS.includes(w)); }
 
@@ -1209,7 +1369,10 @@ function renderWhosIn() {
 function jumpToEvent(ev) {
   const wk = upcomingWeekendsOf(ev);
   if (!wk.some(w => selectedWeekends.has(w))) selectedWeekends.add(wk[0]);
-  if (!visibleEvents().includes(ev)) { activeTypes.clear(); dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false; }
+  if (!visibleEvents().includes(ev)) {
+    activeTypes.clear(); dayFilter = "any"; freeOnly = false; distFilter = "any"; savedOnly = false;
+    if (!matchesSearch(ev)) { searchText = ""; document.getElementById("search").value = ""; document.getElementById("search-clear").hidden = true; }
+  }
   document.body.classList.remove("whos-open");
   render(false);
   const li = document.querySelector(`.list li[data-idx="${EVENTS.indexOf(ev)}"]`);
@@ -1390,10 +1553,293 @@ function renderHero() {
   add(evs.length, "things to do");
   add(free, "free");
   if (votesOnline) add(friends.size, friends.size === 1 ? "friend in" : "friends in");
+  renderHeroWeather();
 }
 
 function render(fit) { renderHero(); renderFilters(); renderMarkers(fit); renderList(); renderFallbackMap(); }
+
+/* ============================================================
+   SEARCH BOX
+   ============================================================ */
+(function () {
+  const box = document.getElementById("search"), clr = document.getElementById("search-clear");
+  let timer = null;
+  box.addEventListener("input", () => {
+    clr.hidden = !box.value;
+    clearTimeout(timer);
+    timer = setTimeout(() => { searchText = box.value.trim(); render(true); }, 250);
+  });
+  box.addEventListener("keydown", e => { if (e.key === "Enter") { clearTimeout(timer); searchText = box.value.trim(); render(true); box.blur(); } });
+  clr.onclick = () => { box.value = ""; clr.hidden = true; searchText = ""; render(true); };
+})();
+
+/* ============================================================
+   SMALL MESSAGES ALONG THE BOTTOM
+   ============================================================ */
+let toastTimer = null;
+function toast(msg, link) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  if (link) {
+    const i = document.createElement("input"); i.readOnly = true; i.value = link; t.appendChild(i);
+    setTimeout(() => { i.focus(); i.select(); }, 30);
+  }
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, link ? 9000 : 3500);
+}
+
+/* ============================================================
+   SHARE AN EVENT
+   Links open the public website with that event showing.
+   ============================================================ */
+function eventLink(ev) { return PUBLIC_URL + "?e=" + encodeURIComponent(ev.id); }
+async function shareEvent(ev) {
+  const url = eventLink(ev), text = ev.name + " (" + ev.when + ")";
+  if (navigator.share) {
+    try { await navigator.share({ title: ev.name, text, url }); return; }
+    catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  try { await navigator.clipboard.writeText(text + "\n" + url); toast("Link copied. Paste it in your group chat."); return; }
+  catch (e) {}
+  toast("Copy this link and send it to your friends:", url);
+}
+
+// Opening a shared link (…?e=event-id) shows that event
+function openSharedEvent() {
+  let id = null;
+  try { id = new URLSearchParams(location.search).get("e") || (location.hash.match(/(?:^#|&)e=([^&]+)/) || [])[1]; } catch (e) {}
+  if (!id) return;
+  id = decodeURIComponent(id);
+  const ev = EVENTS.find(x => x.id === id);
+  if (ev && upcomingWeekendsOf(ev).length) setTimeout(() => jumpToEvent(ev), 300);
+  else toast(ev ? "That event has already happened. Here's what's on now." : "That event isn't on the list anymore. Here's what's on now.");
+}
+
+/* ============================================================
+   ADD TO CALENDAR
+   ============================================================ */
+const isoAddDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+function shownWeekendOf(ev) { return (ev.weekends || []).find(w => selectedWeekends.has(w) && WEEKENDS.includes(w)) || upcomingWeekendsOf(ev)[0] || ev.weekends[0]; }
+function eventDays(ev, sat) {
+  const sun = isoAddDays(sat, 1);
+  return ev.day === "sat" ? [sat] : ev.day === "sun" ? [sun] : [sat, sun];
+}
+// Reads times like "10 AM to 4 PM", "2 to 6 PM", "noon to 8 PM" or "7:30 AM" from the listing
+function parseTimes(when) {
+  const T = "(\\d{1,2}(?::\\d{2})?\\s*(?:AM|PM)|noon|midnight)", T0 = "(\\d{1,2}(?::\\d{2})?\\s*(?:AM|PM)?|noon)";
+  const mins = (tok, mer) => {
+    tok = tok.toLowerCase().trim();
+    if (tok === "noon") return 720;
+    if (tok === "midnight") return 1440;
+    const m = tok.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+    if (!m) return null;
+    let h = +m[1]; const mm = +(m[2] || 0), ap = m[3] || mer;
+    if (!ap || h > 12) return null;
+    if (h === 12) h = 0;
+    return h * 60 + mm + (ap === "pm" ? 720 : 0);
+  };
+  let r = when.match(new RegExp("(?:^|[\\s,])" + T0 + "\\s*(?:to|–|-)\\s*" + T, "i"));
+  if (r) {
+    const endMer = (r[2].match(/am|pm/i) || [""])[0].toLowerCase() || (r[2].toLowerCase() === "noon" ? "pm" : "");
+    const startHasMer = /am|pm|noon/i.test(r[1]);
+    let a = mins(r[1], endMer), b = mins(r[2], endMer);
+    if (a == null || b == null) return null;
+    if (!startHasMer && a > b) a -= 720;
+    if (b <= a) b += 1440;   // runs past midnight
+    return { start: a, end: b };
+  }
+  r = when.match(new RegExp("(?:^|[\\s,])" + T, "i"));
+  if (r) { const a = mins(r[1], ""); if (a != null) return { start: a, end: a + 120 }; }
+  return null;
+}
+function calInfo(ev) {
+  const sat = shownWeekendOf(ev), days = eventDays(ev, sat);
+  const t = days.length === 1 ? parseTimes(ev.when) : null;
+  const details = [ev.when, "Cost: " + ev.cost, "", ev.about, "", ev.url ? "Event page: " + ev.url : "", "On Adult Fun Finder: " + eventLink(ev),
+    "Times and prices come from listings, so check before you go."].filter((x, i) => x !== "" || i === 2 || i === 4).join("\n");
+  return { sat, days, t, details };
+}
+const stamp = (iso, m) => iso.replace(/-/g, "") + "T" + String(Math.floor(m / 60) % 24).padStart(2, "0") + String(m % 60).padStart(2, "0") + "00";
+function calRange(c) {
+  if (!c.t) return { allDay: true, a: c.days[0].replace(/-/g, ""), b: isoAddDays(c.days[c.days.length - 1], 1).replace(/-/g, "") };
+  const endDay = c.t.end >= 1440 ? isoAddDays(c.days[0], 1) : c.days[0];
+  return { allDay: false, a: stamp(c.days[0], c.t.start), b: stamp(endDay, c.t.end % 1440) };
+}
+function googleCalUrl(ev) {
+  const c = calInfo(ev), r = calRange(c);
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(ev.name) +
+    "&dates=" + r.a + "/" + r.b + (r.allDay ? "" : "&ctz=America%2FNew_York") +
+    "&details=" + encodeURIComponent(c.details) + "&location=" + encodeURIComponent(ev.where);
+}
+function icsText(ev) {
+  const c = calInfo(ev), r = calRange(c);
+  const esc2 = t => String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  const now = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Adult Fun Finder//EN", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+    "UID:" + ev.id + "-" + r.a + "@adultfunfinder", "DTSTAMP:" + now,
+    r.allDay ? "DTSTART;VALUE=DATE:" + r.a : "DTSTART;TZID=America/New_York:" + r.a,
+    r.allDay ? "DTEND;VALUE=DATE:" + r.b : "DTEND;TZID=America/New_York:" + r.b,
+    "SUMMARY:" + esc2(ev.name), "LOCATION:" + esc2(ev.where), "DESCRIPTION:" + esc2(c.details),
+    "URL:" + (ev.url || eventLink(ev)), "END:VEVENT", "END:VCALENDAR"];
+  // Calendar files wrap long lines at 74 characters
+  const fold = l => { let out = l.slice(0, 74); for (let i = 74; i < l.length; i += 73) out += "\r\n " + l.slice(i, i + 73); return out; };
+  return lines.map(fold).join("\r\n") + "\r\n";
+}
+function downloadIcs(ev) {
+  const blob = new Blob([icsText(ev)], { type: "text/calendar;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = ev.id + ".ics";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function addToCalendar(ev) {
+  // The Claude-hosted copy can't hand over calendar files, so it uses Google Calendar only
+  if (!IS_PUBLIC_SITE) { window.open(googleCalUrl(ev), "_blank", "noopener"); return; }
+  const dlg = document.getElementById("cal-dialog"), c = calInfo(ev);
+  document.getElementById("cal-sub").textContent = ev.name + " · " + c.days.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })).join(" & ") +
+    (c.t ? "" : " (all day; see the listing for times)");
+  const g = document.getElementById("cal-google"); g.href = googleCalUrl(ev);
+  g.onclick = () => { dlg.hidden = true; };
+  document.getElementById("cal-ics").onclick = () => { downloadIcs(ev); dlg.hidden = true; };
+  document.getElementById("cal-cancel").onclick = () => { dlg.hidden = true; };
+  dlg.onclick = e => { if (e.target === dlg) dlg.hidden = true; };
+  dlg.hidden = false;
+}
+
+/* ============================================================
+   WEEKEND WEATHER (free forecast from Open-Meteo, no account)
+   Forecasts reach about two weeks ahead.
+   ============================================================ */
+const OUTDOOR_TYPES = new Set(["race", "hike", "active", "fair", "fall", "food"]);
+const isOutdoor = ev => ev.outdoor != null ? !!ev.outdoor : OUTDOOR_TYPES.has(ev.type);
+const RAIN_WARN_AT = 50;   // % chance of rain that earns a ☔ tag on outdoor events
+let WX = null;             // forecast area -> date -> { hi, lo, rain, code }
+const wxKey = (lat, lng) => (Math.round(lat * 2) / 2).toFixed(1) + "," + (Math.round(lng * 2) / 2).toFixed(1);
+function wxEmoji(c) {
+  return c === 0 ? "☀️" : c <= 2 ? "🌤️" : c === 3 ? "☁️" : c <= 48 ? "🌫️" : c <= 57 ? "🌦️" : c <= 67 ? "🌧️" : c <= 77 ? "🌨️" : c <= 82 ? "🌧️" : c <= 86 ? "🌨️" : "⛈️";
+}
+const wxAt = (lat, lng, iso) => WX && WX[wxKey(lat, lng)] ? WX[wxKey(lat, lng)][iso] : null;
+const dayName = iso => new Date(iso + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
+function weekendWxHint(sat) {
+  const a = wxAt(HOME.lat, HOME.lng, sat), b = wxAt(HOME.lat, HOME.lng, isoAddDays(sat, 1));
+  if (!a && !b) return "";
+  return " " + (a ? wxEmoji(a.code) : "") + (b ? wxEmoji(b.code) : "");
+}
+function addRainTag(box, ev) {
+  if (!WX || !isOutdoor(ev)) return;
+  const wet = eventDays(ev, shownWeekendOf(ev)).filter(d => { const f = wxAt(ev.lat, ev.lng, d); return f && f.rain >= RAIN_WARN_AT; });
+  if (!wet.length) return;
+  const t = document.createElement("span"); t.className = "tag rain";
+  t.textContent = "☔ Rain likely " + wet.map(dayName).join(" & ");
+  box.appendChild(t);
+}
+function wxLine(lat, lng, days) {
+  return days.map(d => { const f = wxAt(lat, lng, d); return f ? dayName(d) + " " + wxEmoji(f.code) + " " + f.hi + "°/" + f.lo + "°" + (f.rain >= 30 ? ", " + f.rain + "% rain" : "") : null; })
+    .filter(Boolean).join(" · ");
+}
+function fillSheetWeather(ev) {
+  const el = document.getElementById("sheet-wx");
+  const line = WX ? wxLine(ev.lat, ev.lng, eventDays(ev, shownWeekendOf(ev))) : "";
+  el.hidden = !line;
+  if (line) { el.innerHTML = "<strong>Forecast:</strong> "; el.appendChild(document.createTextNode(line)); }
+}
+function renderHeroWeather() {
+  const el = document.getElementById("hero-wx"), w = WEEKENDS[0];
+  const line = WX && w && !ALL_PAST ? wxLine(HOME.lat, HOME.lng, [w, isoAddDays(w, 1)].filter(d => d >= todayIso())) : "";
+  el.hidden = !line;
+  el.textContent = line ? "Forecast near HQ: " + line : "";
+}
+const todayIso = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+async function loadWeather() {
+  const keys = [...new Set([wxKey(HOME.lat, HOME.lng)].concat(EVENTS.map(e => wxKey(e.lat, e.lng))))];
+  const url = "https://api.open-meteo.com/v1/forecast?latitude=" + keys.map(k => k.split(",")[0]).join(",") +
+    "&longitude=" + keys.map(k => k.split(",")[1]).join(",") +
+    "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+    "&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=16";
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json(), arr = Array.isArray(j) ? j : [j];
+    const next = {};
+    arr.forEach((p, i) => {
+      const d = {}, D = p.daily;
+      D.time.forEach((t, k) => { d[t] = { hi: Math.round(D.temperature_2m_max[k]), lo: Math.round(D.temperature_2m_min[k]), rain: D.precipitation_probability_max[k] || 0, code: D.weather_code[k] }; });
+      next[keys[i]] = d;
+    });
+    WX = next;
+    renderHeroWeather(); renderFilters(); renderList();
+    if (sheetEvent) showSheet(sheetEvent);
+  } catch (e) { /* no forecast on this copy; everything else still works */ }
+}
+
+/* ============================================================
+   SUGGEST AN EVENT
+   Suggestions go to the votes database; the Thursday update reviews them.
+   ============================================================ */
+let suggestionsOn = false;
+async function loadMySuggestions() {
+  try {
+    const rows = await db("rpc/my_suggestions", { p_device: DEVICE });
+    suggestionsOn = true;
+    document.getElementById("suggest-btn").hidden = false;
+    const box = document.getElementById("my-sugs"), ul = box.querySelector("ul");
+    ul.innerHTML = "";
+    (rows || []).slice(0, 8).forEach(r => {
+      const li = document.createElement("li");
+      li.textContent = r.title + " ";
+      const st = document.createElement("span"); st.className = "st";
+      st.textContent = r.status === "added" ? "· ✅ Added" : r.status === "skipped" ? "· Not added" + (r.review_note ? " (" + r.review_note + ")" : "") : "· Waiting for Thursday";
+      li.appendChild(st); ul.appendChild(li);
+    });
+    box.hidden = !(rows || []).length;
+  } catch (e) { /* suggestions aren't switched on in the database yet */ }
+}
+(function () {
+  const dlg = document.getElementById("suggest-dialog"), err = document.getElementById("sg-err");
+  const f = id => document.getElementById(id);
+  const close = () => { dlg.hidden = true; };
+  f("suggest-btn").onclick = () => {
+    err.hidden = true;
+    if (!f("sg-by").value) f("sg-by").value = myName || "";
+    dlg.hidden = false; loadMySuggestions();
+    setTimeout(() => f("sg-title").focus(), 50);
+  };
+  f("sg-cancel").onclick = close;
+  dlg.addEventListener("click", e => { if (e.target === dlg) close(); });
+  f("sg-send").onclick = async () => {
+    const v = id => f(id).value.trim();
+    const say = m => { err.textContent = m; err.hidden = false; };
+    if (v("sg-title").length < 3) { say("Tell us what the event is."); f("sg-title").focus(); return; }
+    if (v("sg-link") && !/^https?:\/\/\S+\.\S+/i.test(v("sg-link"))) { say("The link should start with http:// or https://"); f("sg-link").focus(); return; }
+    if (!v("sg-by")) { say("Add your name so friends know who suggested it."); f("sg-by").focus(); return; }
+    const btn = f("sg-send"); btn.disabled = true; btn.textContent = "Sending…";
+    try {
+      await db("rpc/suggest_event", { p_device: DEVICE, p_by: v("sg-by").slice(0, 30), p_title: v("sg-title").slice(0, 120),
+        p_link: v("sg-link").slice(0, 500), p_when: v("sg-when").slice(0, 120), p_where: v("sg-where").slice(0, 160), p_note: v("sg-note").slice(0, 500) });
+      ["sg-title", "sg-link", "sg-when", "sg-where", "sg-note"].forEach(id => { f(id).value = ""; });
+      close();
+      toast("Thanks! Your suggestion will be checked in the Thursday update.");
+      loadMySuggestions();
+    } catch (e) {
+      say(/429|too many/i.test(String(e && e.message)) ? "That's a lot of suggestions for one day. Try again tomorrow." : "Couldn't send that. Check your connection and try again.");
+    } finally { btn.disabled = false; btn.textContent = "Send suggestion"; }
+  };
+})();
+
+/* ============================================================
+   HOME-SCREEN APP TIP (public website only)
+   ============================================================ */
+(function () {
+  const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+  if (IS_PUBLIC_SITE && !standalone && /iphone|ipad|ipod|android/i.test(navigator.userAgent)) document.body.classList.add("show-install");
+})();
+
 render(true);
+openSharedEvent();
+loadWeather();
+loadMySuggestions();
+setInterval(() => { if (!document.hidden) loadWeather(); }, 3 * 3600 * 1000);
 </script>
 </body>
 </html>
