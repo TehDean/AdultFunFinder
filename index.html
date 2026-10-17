@@ -405,8 +405,14 @@
   .tag.cmt { background:rgba(157,123,255,.16); color:#c9b8ff; }
 
   /* Latest comments feed in the Who's in panel */
-  #feed { margin-top:18px; padding-top:14px; border-top:1px solid rgba(255,255,255,.1); }
-  #feed[hidden] { display:none; }
+  #feed[hidden], #tab-votes[hidden], .ptabs[hidden] { display:none; }
+  .ptabs { display:flex; gap:4px; padding:4px; margin:0 40px 12px 0; border-radius:999px; background:rgba(255,255,255,.06); }
+  .ptabs button { flex:1; font:inherit; font-size:.86rem; font-weight:700; padding:8px 10px; border:none; border-radius:999px; background:transparent; color:#c9c1e8; cursor:pointer; white-space:nowrap; }
+  .ptabs button.on { background:var(--grad); color:#fff; box-shadow:0 0 14px rgba(255,79,216,.35); }
+  #feed-count { margin-left:4px; font-size:.75rem; background:rgba(182,255,74,.2); color:var(--lime); border-radius:999px; padding:1px 7px; }
+  #feed-count:empty { display:none; }
+  .ptabs button.on #feed-count { background:rgba(255,255,255,.25); color:#fff; }
+  @media (min-width: 1100px) { .ptabs { margin-right:0; } .ptabs button { padding:7px 4px; font-size:.78rem; min-width:0; } #feed-count { margin-left:3px; padding:1px 5px; } }
   #feed-list { list-style:none; margin:0; padding:0; }
   #feed-list li { padding:9px 8px; border-bottom:1px solid rgba(255,255,255,.08); border-radius:10px; cursor:pointer; font-size:.84rem; line-height:1.35; }
   #feed-list li:last-child { border-bottom:none; }
@@ -440,13 +446,18 @@
   <div class="layout">
     <aside class="card" id="whos-in" aria-label="Who's in">
       <button type="button" id="whos-close" aria-label="Close">×</button>
-      <h2>🙋 Who's in</h2>
-      <p class="sub">What friends have voted for, most popular first. Tap one to see it on the map.</p>
-      <div class="me" id="whos-me"></div>
-      <ul id="whos-list"></ul>
+      <div class="ptabs" id="ptabs" hidden>
+        <button type="button" data-tab="votes" class="on">🙋 Who's in</button>
+        <button type="button" data-tab="feed">💬 Comments<span id="feed-count"></span></button>
+      </div>
+      <div id="tab-votes">
+        <h2 id="whos-h2">🙋 Who's in</h2>
+        <p class="sub">What friends have voted for, most popular first. Tap one to see it on the map.</p>
+        <div class="me" id="whos-me"></div>
+        <ul id="whos-list"></ul>
+      </div>
       <div id="feed" hidden>
-        <h2>💬 Latest comments</h2>
-        <p class="sub">What people are saying across all events. Tap one to open that event.</p>
+        <p class="sub">The latest comments from every event, newest first. Tap one to open that event.</p>
         <ul id="feed-list"></ul>
       </div>
     </aside>
@@ -1383,15 +1394,29 @@ function fillActions(box, ev) {
 function upcomingWeekendsOf(ev) { return (ev.weekends || []).filter(w => WEEKENDS.includes(w)); }
 
 // Newest comments from every event that's still on the list
+let panelTab = "votes", feedFresh = 0;
+function showPanelTab(t) {
+  panelTab = t;
+  document.querySelectorAll("#ptabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  document.getElementById("tab-votes").hidden = t !== "votes";
+  document.getElementById("feed").hidden = t !== "feed";
+}
+document.querySelectorAll("#ptabs button").forEach(b => { b.onclick = () => showPanelTab(b.dataset.tab); });
 function renderFeed() {
-  const box = document.getElementById("feed"), ul = document.getElementById("feed-list");
-  box.hidden = !commentsOn;
-  if (!commentsOn) return;
+  const ul = document.getElementById("feed-list");
+  document.getElementById("ptabs").hidden = !commentsOn;
+  document.getElementById("whos-h2").hidden = commentsOn;   // the tabs say it instead
+  if (!commentsOn) { showPanelTab("votes"); return; }
+  showPanelTab(panelTab);
   ul.innerHTML = "";
   const byId = new Map(EVENTS.map(e => [e.id, e]));
   const recent = Object.values(comments).flat()
     .filter(c => byId.has(c.event_id) && upcomingWeekendsOf(byId.get(c.event_id)).length)
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 15);
+  // Count comments from the last 2 days on the tab and the phone button
+  const fresh = recent.filter(c => Date.now() - new Date(c.created_at) < 2 * 864e5).length;
+  document.getElementById("feed-count").textContent = fresh ? String(fresh) : "";
+  feedFresh = fresh;
   if (!recent.length) {
     ul.innerHTML = '<li class="empty">No comments yet. Open any event to start the conversation.</li>';
     return;
@@ -1426,7 +1451,7 @@ function renderWhosIn() {
   const voted = EVENTS.filter(ev => voteCount(ev) > 0 && upcomingWeekendsOf(ev).length)
     .sort((a, b) => voteCount(b) - voteCount(a) || a.name.localeCompare(b.name));
   const total = voted.reduce((n, ev) => n + voteCount(ev), 0);
-  document.getElementById("whos-btn").textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "");
+  document.getElementById("whos-btn").textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "") + (feedFresh ? " · 💬 " + feedFresh : "");
   if (!voted.length) {
     list.innerHTML = '<li class="empty">No one\'s in yet. Tap 👍 I\'m in on anything that looks fun and it will show up here for everyone.</li>';
     return;
