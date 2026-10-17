@@ -392,6 +392,13 @@
   #toast input { width:100%; margin-top:6px; font:inherit; font-size:14px; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
   #install-tip { display:none; }
 
+  /* Never let anything make the page wider than the phone screen (that makes phones zoom out) */
+  html, body { max-width:100%; overflow-x:hidden; }
+  @supports (overflow-x: clip) { html, body { overflow-x:clip; } }
+  .layout > *, .card, .list, .list li, .cmts, .cmts form { min-width:0; }
+  .list li, #sheet, .cmts li, #feed-list li { overflow-wrap:anywhere; }
+  @media (max-width: 860px) { .layout { grid-template-columns:minmax(0, 1fr); } }
+
   /* Comments */
   .cmts { margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,.08); cursor:default; }
   .cmts h4 { margin:0 0 6px; font-size:.85rem; font-weight:700; color:#d6cff2; }
@@ -402,7 +409,7 @@
   .cmts .del { font:inherit; font-size:.75rem; background:none; border:none; color:#ff8be6; cursor:pointer; padding:0 0 0 6px; }
   .cmts .none { color:#8c84b0; font-size:.82rem; margin:0 0 8px; }
   .cmts form { display:flex; gap:6px; }
-  .cmts input { flex:1; min-width:0; font:inherit; font-size:16px; padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.05); color:var(--fg); }
+  .cmts input { flex:1 1 0; width:0; min-width:0; font:inherit; font-size:16px; padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.05); color:var(--fg); }
   .cmts input:focus { outline:none; border-color:rgba(255,79,216,.6); }
   .cmts button[type=submit] { font:inherit; font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:999px; border:none; background:var(--grad); color:#fff; cursor:pointer; }
   .cmts button[type=submit]:disabled { opacity:.5; }
