@@ -183,7 +183,9 @@
   #name-dialog h3 { margin:0 0 6px; font-size:1.05rem; }
   #name-dialog p { margin:0 0 12px; color:var(--muted); font-size:.88rem; }
   #name-dialog input { width:100%; font:inherit; font-size:16px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
-  #name-dialog .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+  #name-dialog .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap; }
+  #name-warn { margin:10px 0 0 !important; padding:8px 10px; border-radius:10px; background:#fff4d6; color:#7a5200 !important; font-size:.85rem !important; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #name-warn { background:#3a2f12; color:#f5d58a !important; } }
   #name-dialog button { font:inherit; padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--fg); cursor:pointer; }
   #name-dialog button.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
 
@@ -290,6 +292,7 @@
     <h3 id="name-title">What's your name?</h3>
     <p>So your friends can see who's in. You only need to do this once on this device.</p>
     <input id="name-input" maxlength="30" autocomplete="given-name" placeholder="First name">
+    <p id="name-warn" hidden></p>
     <div class="btns"><button type="button" id="name-cancel">Cancel</button><button type="button" class="primary" id="name-ok">Save</button></div>
   </div>
 </div>
@@ -1138,7 +1141,12 @@ async function changeName() {
   const old = myName;
   myName = n; store.set("aff-name", myName);
   // Update the name on every vote this device has cast
-  Object.keys(votes).forEach(id => { if (mine.has(id)) votes[id] = votes[id].map(x => x === old ? myName : x); });
+  Object.keys(votes).forEach(id => {
+    if (!mine.has(id)) return;
+    const list = votes[id].slice(), i = list.lastIndexOf(old);   // just this phone's entry
+    if (i >= 0) list[i] = myName;
+    votes[id] = list;
+  });
   refreshEventUI();
   try {
     await Promise.all([...mine].map(id => db("rpc/cast_vote", { p_event: id, p_device: DEVICE, p_name: myName })));
@@ -1168,6 +1176,15 @@ function toggleSave(ev) {
   if (savedOnly) render(false); else refreshEventUI();
 }
 
+function nameUsedByOthers(name) {
+  const key = name.trim().toLowerCase();
+  let total = 0, mineCount = 0;
+  Object.entries(votes).forEach(([id, names]) => names.forEach(n => {
+    if (n.trim().toLowerCase() === key) { total++; if (mine.has(id) && myName.trim().toLowerCase() === key) mineCount++; }
+  }));
+  return total - Math.min(mineCount, total) > 0;
+}
+
 function askName(renaming) {
   document.getElementById("name-title").textContent = renaming ? "Change your name" : "What's your name?";
   document.querySelector("#name-dialog p").textContent = renaming
@@ -1176,9 +1193,28 @@ function askName(renaming) {
   return new Promise(resolve => {
     const dlg = document.getElementById("name-dialog"), inp = document.getElementById("name-input");
     inp.value = myName || ""; dlg.hidden = false; setTimeout(() => inp.focus(), 50);
+    loadVotes();
     const done = val => { dlg.hidden = true; ok.onclick = cancel.onclick = inp.onkeydown = null; resolve(val); };
     const ok = document.getElementById("name-ok"), cancel = document.getElementById("name-cancel");
-    ok.onclick = () => { const v = inp.value.trim().slice(0, 30); if (v) done(v); else inp.focus(); };
+    const warn = document.getElementById("name-warn");
+    let warnedFor = null;
+    const resetWarn = () => { warnedFor = null; warn.hidden = true; ok.textContent = "Save"; };
+    resetWarn();
+    inp.oninput = resetWarn;
+    ok.onclick = () => {
+      const v = inp.value.trim().slice(0, 30);
+      if (!v) { inp.focus(); return; }
+      if (warnedFor !== v.toLowerCase() && nameUsedByOthers(v)) {
+        warnedFor = v.toLowerCase();
+        warn.textContent = "Someone is already voting as \u201c" + v + "\u201d. If that's you on another device, keep it. Otherwise, add a last initial, like \u201c" + v + " B.\u201d, so friends can tell you apart.";
+        warn.hidden = false;
+        ok.textContent = "Keep \u201c" + v + "\u201d";
+        inp.focus();
+        return;
+      }
+      inp.oninput = null;
+      done(v);
+    };
     cancel.onclick = () => done("");
     inp.onkeydown = e => { if (e.key === "Enter") ok.onclick(); if (e.key === "Escape") done(""); };
   });
@@ -1192,7 +1228,12 @@ async function toggleVote(ev) {
   }
   const was = mine.has(ev.id);
   // Show the change right away, then confirm with the database
-  if (was) { mine.delete(ev.id); votes[ev.id] = (votes[ev.id] || []).filter(x => x !== myName); }
+  if (was) {
+    mine.delete(ev.id);
+    const list = (votes[ev.id] || []).slice(), i = list.lastIndexOf(myName);
+    if (i >= 0) list.splice(i, 1);
+    votes[ev.id] = list;
+  }
   else { mine.add(ev.id); votes[ev.id] = (votes[ev.id] || []).concat(myName); }
   store.set("aff-myvotes", [...mine]);
   refreshEventUI();
