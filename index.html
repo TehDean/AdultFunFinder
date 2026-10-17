@@ -229,18 +229,31 @@
    free:  true only when the listing says it's free
    lat / lng place the pin (right-click a spot in Google Maps to copy them)
    ============================================================ */
-const TYPES = {
-  race: { emoji: "🧗", label: "Obstacle races", color: "#e0533d" },
-  hike: { emoji: "🥾", label: "Outdoors",     color: "#2e9b57" },
-  food: { emoji: "🍽️", label: "Food & drink", color: "#c2410c" },
-  show: { emoji: "🎭", label: "Shows",        color: "#7c3aed" },
-  fair: { emoji: "🎪", label: "Street fairs", color: "#0e7490" },
-  fall: { emoji: "🎃", label: "Halloween",    color: "#e8912d" },
-  active:  { emoji: "🚴", label: "Active outings",       color: "#0284c7" },
-  comedy:  { emoji: "😂", label: "Comedy & trivia",      color: "#db2777" },
-  brew:    { emoji: "🍺", label: "Breweries & wineries", color: "#a16207" },
-  holiday: { emoji: "🎄", label: "Holiday",              color: "#be123c" }
+// The six filter categories. Pin rings use the category's color.
+const GROUPS = {
+  outdoors:  { emoji: "🏃", label: "Active & outdoors",     color: "#2e9b57" },
+  fooddrink: { emoji: "🍻", label: "Food & drink",          color: "#c2410c" },
+  shows:     { emoji: "🎭", label: "Shows & entertainment", color: "#7c3aed" },
+  arts:      { emoji: "🎨", label: "Arts & culture",        color: "#db2777" },
+  fairs:     { emoji: "🎪", label: "Fairs & markets",       color: "#0e7490" },
+  seasonal:  { emoji: "✨", label: "Seasonal",              color: "#e8912d" }
 };
+// Each event's specific type (its icon on the map) and which category it belongs to.
+const TYPES = {
+  race:    { emoji: "🧗", label: "Obstacle race",     group: "outdoors" },
+  hike:    { emoji: "🥾", label: "Hiking & parks",    group: "outdoors" },
+  active:  { emoji: "🚴", label: "Active outing",     group: "outdoors" },
+  food:    { emoji: "🍽️", label: "Food festival",     group: "fooddrink" },
+  brew:    { emoji: "🍺", label: "Brewery & winery",  group: "fooddrink" },
+  show:    { emoji: "🎭", label: "Show",              group: "shows" },
+  comedy:  { emoji: "😂", label: "Comedy",            group: "shows" },
+  movie:   { emoji: "🎬", label: "Movie",             group: "shows" },
+  art:     { emoji: "🖼️", label: "Art & museums",     group: "arts" },
+  fair:    { emoji: "🎪", label: "Fair & market",     group: "fairs" },
+  fall:    { emoji: "🎃", label: "Halloween & fall",  group: "seasonal" },
+  holiday: { emoji: "🎄", label: "Holiday",           group: "seasonal" }
+};
+for (const t of Object.values(TYPES)) t.color = GROUPS[t.group].color;
 
 const HOME = { name: "Fun Finder HQ", lat: 40.7948, lng: -74.2391 };
 
@@ -425,7 +438,7 @@ const EVENTS = [
     where: "Harsimus Cemetery, 435 Newark Ave, Jersey City",
     cost: "Not listed; proceeds support the historic site.",
     about: "Live music, drinks, and food in a historic cemetery, plus after-parties. A good adult Halloween night out. About 25 min." },
-  { name: "Diwali @ The Commons", weekends: ["2026-10-24"], type: "fair", day: "sat", free: true, far: false,
+  { name: "Diwali @ The Commons", weekends: ["2026-10-24"], type: "art", day: "sat", free: true, far: false,
     lat: 40.5858411, lng: -74.6191569, when: "Saturday, Oct 24",
     where: "Bridgewater Commons, 400 Commons Way, Bridgewater",
     cost: "Free.",
@@ -629,7 +642,87 @@ const EVENTS = [
     lat: 40.7535367, lng: -73.9829529, when: "Opens Wed, Oct 28; shops through Jan 3",
     where: "Bryant Park, between 40th & 42nd Sts and 5th & 6th Aves, New York",
     cost: "Free to enter. The rink is free with your own skates; rentals cost extra.",
-    about: "NYC's first holiday market of the season, with gift shops, food, and a free-admission skating rink. About 40 min." }
+    about: "NYC's first holiday market of the season, with gift shops, food, and a free-admission skating rink. About 40 min." },
+  { name: "Montclair Film Festival", weekends: ["2026-10-17", "2026-10-24"], type: "movie", day: "both", free: false, far: false,
+    lat: 40.814344, lng: -74.218509, when: "Screenings all day Sat & Sun through Oct 25",
+    where: "The Clairidge (486 Bloomfield Ave), The Bellevue, and Wellmont Theater, Montclair",
+    cost: "Ticketed; check the venue for prices.",
+    about: "One of the region's biggest film festivals, with premieres, documentaries, and filmmaker Q&As about 10 minutes from home. Easy to catch a couple of films and dinner on Bloomfield Ave." },
+  { name: "Warwick Drive-In", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "movie", day: "both", free: false, far: false,
+    lat: 41.2348937, lng: -74.3792495, when: "Nightly double features on 3 screens; open into the winter",
+    where: "5 Warwick Turnpike, Warwick, NY",
+    cost: "Not listed; check the drive-in's site.",
+    about: "Classic drive-in double features. Pile a few friends into one car and grab snacks from the bar. Dog-friendly. About 55 min." },
+  { name: "Halloween horror double features", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+    lat: 40.8271649, lng: -74.1032918, when: "Sat, Oct 17 (incl. Rocky Horror), Sat, Oct 24, and Sat, Oct 31",
+    where: "Williams Center, 15 Sylvan St, Rutherford",
+    cost: "Ticketed; check the venue for prices.",
+    about: "Cult and horror classics on the big screen all October, including Night of the Living Dead and Trick 'r Treat on Halloween. About 20 min." },
+  { name: "The Rocky Horror Picture Show", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+    lat: 40.814344, lng: -74.218509, when: "Fri & Sat, Oct 30–31",
+    where: "The Clairidge, 486 Bloomfield Ave, Montclair",
+    cost: "Ticketed; check the venue for prices.",
+    about: "The ultimate costume-and-callback Halloween movie night. About 10 min." },
+  { name: "Ghostbusters in Concert", weekends: ["2026-10-17"], type: "movie", day: "sun", free: false, far: false,
+    lat: 40.7943969, lng: -74.4778986, when: "Sunday, Oct 18",
+    where: "Mayo Performing Arts Center, 100 South St, Morristown",
+    cost: "Ticketed; check the venue for prices.",
+    about: "The movie on the big screen with a live orchestra playing the score. About 20 min." },
+  { name: "Coco Live-to-Film Concert", weekends: ["2026-10-24"], type: "movie", day: "sat", free: false, far: false,
+    lat: 40.7943969, lng: -74.4778986, when: "Saturday, Oct 24",
+    where: "Mayo Performing Arts Center, 100 South St, Morristown",
+    cost: "Ticketed; check the venue for prices.",
+    about: "Pixar's Coco with live musicians. About 20 min." },
+  { name: "The Cabinet of Dr. Caligari with live music", weekends: ["2026-10-31"], type: "movie", day: "sat", free: false, far: false,
+    lat: 40.8511244, lng: -73.9679192, when: "Saturday, Oct 31",
+    where: "Barrymore Film Center, 1 Park Ave, Fort Lee",
+    cost: "Ticketed; check the venue for prices.",
+    about: "The 1920 silent horror classic with a live score, in the town where American film began. About 30 min." },
+  { name: "Rocky in Concert (50th anniversary)", weekends: ["2026-11-07"], type: "movie", day: "sun", free: false, far: false,
+    lat: 40.8952924, lng: -73.9749328, when: "Sunday, Nov 8",
+    where: "bergenPAC, 30 N Van Brunt St, Englewood",
+    cost: "Ticketed; check the venue for prices.",
+    about: "Rocky on the big screen with a live orchestra. About 35 min." },
+  { name: "Hoboken Art Month Artist Studio Tours", weekends: ["2026-11-07"], type: "art", day: "both", free: true, far: false,
+    lat: 40.7521954, lng: -74.0251241, when: "Sat & Sun, Nov 7–8, noon to 6 PM",
+    where: "Studios and galleries around Hoboken (pin is the Hoboken Historical Museum, 1301 Hudson St)",
+    cost: "Free; self-guided.",
+    about: "A free walking tour of 16 artist studios, galleries, and cafés. Make an afternoon of it with friends and stop for food along the way. About 30 min." },
+  { name: "Barnes Foundation Free First Sunday", weekends: ["2026-10-31"], type: "art", day: "sun", free: true, far: true,
+    lat: 39.9606433, lng: -75.1728075, when: "Sunday, Nov 1",
+    where: "Barnes Foundation, 2025 Benjamin Franklin Pkwy, Philadelphia",
+    cost: "Free (PECO Free First Sunday).",
+    about: "Free entry to one of the world's great Impressionist collections: Renoir, Cézanne, Matisse, and 7 Van Goghs. About 1 hr 30 min." },
+  { name: "Philadelphia Museum of Art: Pay What You Wish", weekends: ["2026-10-31"], type: "art", day: "sun", free: false, far: true,
+    lat: 39.9655697, lng: -75.1809661, when: "Sunday, Nov 1 (first Sunday)",
+    where: "2600 Benjamin Franklin Pkwy, Philadelphia",
+    cost: "Pay what you wish.",
+    about: "Run the Rocky Steps, then see the Duchamp exhibition for whatever you choose to pay. Pairs well with the Barnes the same day. About 1 hr 30 min." },
+  { name: "Woodmere Art Museum Free Sundays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31"], type: "art", day: "sun", free: true, far: true,
+    lat: 40.0831533, lng: -75.2194871, when: "Sundays",
+    where: "9201 Germantown Ave, Philadelphia (Chestnut Hill)",
+    cost: "Free on Sundays (donations welcome).",
+    about: "Philadelphia-area art and outdoor sculptures in a leafy neighborhood. About 1 hr 30 min." },
+  { name: "The Jewish Museum Free Saturdays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "art", day: "sat", free: true, far: false,
+    lat: 40.785334, lng: -73.957351, when: "Saturdays, 11 AM to 6 PM",
+    where: "1109 5th Ave at E 92nd St, New York",
+    cost: "Free on Saturdays.",
+    about: "A Fifth Avenue mansion on Museum Mile with strong rotating exhibitions. Combine it with a Central Park walk. About 45 min." },
+  { name: "Studio Museum in Harlem Free Sundays", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "art", day: "sun", free: true, far: false,
+    lat: 40.8082859, lng: -73.9476926, when: "Sundays, 11 AM to 6 PM",
+    where: "144 W 125th St, New York",
+    cost: "Free on Sundays.",
+    about: "A striking new building for contemporary art, with a rooftop terrace and city views. Pair it with brunch in Harlem. About 45 min." },
+  { name: "Whitney Museum Free Second Sunday", weekends: ["2026-11-07"], type: "art", day: "sun", free: true, far: false,
+    lat: 40.7395877, lng: -74.0088629, when: "Sunday, Nov 8",
+    where: "99 Gansevoort St, New York",
+    cost: "Free on the second Sunday of the month.",
+    about: "American art with outdoor terraces over the Hudson, right by the High Line. Walk the High Line after. About 35 min." },
+  { name: "MoMA PS1", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "art", day: "both", free: true, far: false,
+    lat: 40.7456014, lng: -73.947097, when: "Sat 10 AM–6 PM, Sun noon–6 PM",
+    where: "22-25 Jackson Ave, Long Island City, Queens",
+    cost: "Free for everyone (reserve online).",
+    about: "Experimental contemporary art in a former schoolhouse; currently free for all visitors. About 40 min." }
 ];
 /* ============================================================ */
 
@@ -727,7 +820,7 @@ if (hasMap) {
 function visibleEvents() {
   return EVENTS.filter(e =>
     (e.weekends || []).some(w => selectedWeekends.has(w)) &&
-    (activeType === "all" || e.type === activeType) &&
+    (activeType === "all" || TYPES[e.type].group === activeType) &&
     (dayFilter === "any" || e.day === dayFilter || e.day === "both") &&
     (!freeOnly || e.free) &&
     (distFilter === "any" || (distFilter === "near") === !e.far));
@@ -764,7 +857,7 @@ function renderFilters() {
   renderWeekendFilters();
   const t = document.getElementById("type-filters"); t.innerHTML = "";
   chip(t, "All", activeType === "all", () => { activeType = "all"; render(true); });
-  Object.entries(TYPES).forEach(([k, ty]) => chip(t, ty.emoji + " " + ty.label, activeType === k, () => { activeType = k; render(true); }));
+  Object.entries(GROUPS).forEach(([k, g]) => chip(t, g.emoji + " " + g.label, activeType === k, () => { activeType = k; render(true); }));
   const x = document.getElementById("extra-filters"); x.innerHTML = "";
   chip(x, "Both days", dayFilter === "any", () => { dayFilter = "any"; render(true); });
   chip(x, "Saturday", dayFilter === "sat", () => { dayFilter = "sat"; render(true); });
