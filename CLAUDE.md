@@ -71,15 +71,19 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
   don't touch it.
 - The page uses only the publishable key. Never put a secret / service_role key in the page.
 - Tables are locked (RLS on, no direct access). Everything goes through functions:
-  - votes: `vote_list`, `cast_vote`, `remove_vote`, `my_votes`
+  - votes (⭐ Interested / ✅ Going): `set_interest(p_event, p_device, p_name, p_status, p_type, p_title)`,
+    `remove_vote`, `my_interest`, and the `vote_list` view (with `status`, `event_type`, `event_name`).
+    `cast_vote` (3 args) is only used to rename and keeps the level. `my_votes` is the old version.
+  - `interest_by_type` view: interest per event type (score = interested + 2 × going). The Thursday
+    update reads it to search harder for the kinds of events friends like.
   - suggestions: `suggest_event`, `my_suggestions`, plus `review_suggestions(p_key)` and
     `mark_suggestion(p_key, …)` for the Thursday task
   - comments: the `comment_list` view, `add_comment`, `delete_comment`, `my_comment_ids`,
     `rename_my_comments`, plus `remove_comment(p_key, id)` for moderation
 - Moderation functions need the private review key. It lives only in the Thursday task's prompt.
   Never copy it into this repo, the page, a commit, or a chat summary.
-- Setup SQL: `supabase_setup.sql`, `supabase_suggestions.sql`, `supabase_comments.sql`.
-  - Dean has run all three already. Write new SQL files so they're safe to run more than once.
+- Setup SQL: `supabase_setup.sql`, `supabase_suggestions.sql`, `supabase_comments.sql`, `supabase_interest.sql`.
+  - All four are applied already. Write new SQL files so they're safe to run more than once.
   - The Supabase connector may be connected. If it is, apply schema changes with it, but only
     when Dean asks for a change. If not, send Dean the SQL to paste into the SQL Editor.
 - Don't delete or edit real votes or comments from friends.

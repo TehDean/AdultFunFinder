@@ -196,6 +196,7 @@
   /* Votes and saves */
   .vote, .save { font:inherit; font-size:.82rem; min-height:32px; padding:5px 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
   .vote.on { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+  .vote.going.on { background:#15803d; border-color:#15803d; color:#fff; }
   .save.on { border-color:#e0a800; color:#a16207; }
   .voters { color:var(--muted); font-size:.8rem; margin-top:6px; }
   .actions { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; }
@@ -306,6 +307,7 @@
   .dir { color:var(--cyan); border-color:rgba(75,227,255,.35); background:transparent; }
   .vote, .save { background:transparent; border-color:rgba(255,255,255,.22); color:#e8e2ff; }
   .vote.on { background:var(--grad); border-color:transparent; color:#fff; box-shadow:0 0 16px rgba(255,79,216,.45); }
+  .vote.going.on { background:var(--lime); color:#0d0b16; box-shadow:0 0 16px rgba(182,255,74,.45); }
   .save.on { border-color:#ffd36b; color:#ffd36b; }
   .voters { color:#a99fd0; }
   @keyframes vote-pop { 0% { transform:scale(1); } 35% { transform:scale(1.18); } 70% { transform:scale(.96); } 100% { transform:scale(1); } }
@@ -461,7 +463,7 @@
     <h1>Adult Fun<br>Finder</h1>
     <div class="stats" id="hero-stats"></div>
     <div id="hero-wx" hidden></div>
-    <div class="hero-btns"><button type="button" id="hero-whos" class="panel-btn" hidden>🙋 Who's in</button><button type="button" id="hero-cmts" class="panel-btn" hidden>💬 Comments</button><button type="button" id="install-btn" hidden>📲 Install app</button><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
+    <div class="hero-btns"><button type="button" id="hero-whos" class="panel-btn" hidden>🙋 Who's interested</button><button type="button" id="hero-cmts" class="panel-btn" hidden>💬 Comments</button><button type="button" id="install-btn" hidden>📲 Install app</button><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
     <p class="sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
   </header>
 
@@ -474,15 +476,15 @@
   <div id="vote-note" hidden></div>
 
   <div class="layout">
-    <aside class="card" id="whos-in" aria-label="Who's in">
+    <aside class="card" id="whos-in" aria-label="Who's interested">
       <button type="button" id="whos-close" aria-label="Close">×</button>
       <div class="ptabs" id="ptabs" hidden>
-        <button type="button" data-tab="votes" class="on">🙋 Who's in</button>
+        <button type="button" data-tab="votes" class="on">🙋 Interested</button>
         <button type="button" data-tab="feed">💬 Comments<span id="feed-count"></span></button>
       </div>
       <div id="tab-votes">
-        <h2 id="whos-h2">🙋 Who's in</h2>
-        <p class="sub">What friends have voted for, most popular first. Tap one to see it on the map.</p>
+        <h2 id="whos-h2">🙋 Who's interested</h2>
+        <p class="sub">What friends are going to or interested in, with the most plans first. Tap one to see it on the map.</p>
         <div class="me" id="whos-me"></div>
         <ul id="whos-list"></ul>
       </div>
@@ -530,7 +532,7 @@
   <p class="note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
 </div>
 
-<button type="button" id="whos-btn">🙋 Who's in</button>
+<button type="button" id="whos-btn">🙋 Who's interested</button>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 
 <div id="cal-dialog" class="modal" hidden>
@@ -1397,8 +1399,8 @@ function renderFilters() {
   chip(x, "Sunday", dayFilter === "sun", () => { dayFilter = "sun"; render(true); });
   chip(x, "💸 Free only", freeOnly, () => { freeOnly = !freeOnly; render(true); });
   chip(x, "🏠 Indoor", indoorOnly, () => { indoorOnly = !indoorOnly; render(true); });
-  chip(x, "⭐ Saved (" + saved.size + ")", savedOnly, () => { savedOnly = !savedOnly; render(true); });
-  if (votesOnline) chip(x, "🏆 Most votes", sortByVotes, () => { sortByVotes = !sortByVotes; render(false); });
+  chip(x, "🔖 Saved (" + saved.size + ")", savedOnly, () => { savedOnly = !savedOnly; render(true); });
+  if (votesOnline) chip(x, "🏆 Most interest", sortByVotes, () => { sortByVotes = !sortByVotes; render(false); });
   const d = document.getElementById("dist-filters"); d.innerHTML = "";
   chip(d, "Any distance", distFilter === "any", () => { distFilter = "any"; render(true); });
   chip(d, "🚗 Within 1 hr", distFilter === "near", () => { distFilter = "near"; render(true); });
@@ -1516,7 +1518,7 @@ const startMin = ev => { if (dayList(ev).length > 1) return 9999; const t = pars
 const DAY_ORDER = { fri: 0, sat: 1, sun: 2 };
 const firstShownWeekend = ev => { const w = (ev.weekends || []).filter(x => selectedWeekends.has(x)).sort()[0]; return w || "9"; };
 function sortByTime(evs) {
-  return evs.slice().sort((a, b) => (sortByVotes ? voteCount(b) - voteCount(a) : 0) ||
+  return evs.slice().sort((a, b) => (sortByVotes ? voteScore(b) - voteScore(a) : 0) ||
     firstShownWeekend(a).localeCompare(firstShownWeekend(b)) ||
     (DAY_ORDER[dayList(a)[0]] - DAY_ORDER[dayList(b)[0]]) * (dayList(a).length === 1 && dayList(b).length === 1) ||
     startMin(a) - startMin(b) || a.name.localeCompare(b.name));
@@ -1662,8 +1664,11 @@ let DEVICE = store.get("aff-device", null);
 if (!DEVICE) { DEVICE = newId(); store.set("aff-device", DEVICE); }
 let myName = store.get("aff-name", "");
 let saved = new Set(store.get("aff-saved", []));
-let mine = new Set(store.get("aff-myvotes", []));
-let votes = {};            // event id -> list of voter names
+// This device's own votes: event id -> "interested" or "going".
+// (Older versions kept a plain list from the "I'm in" button; those count as "going".)
+let mine = new Map(Object.entries(store.get("aff-mine2", null) || Object.fromEntries(store.get("aff-myvotes", []).map(id => [id, "going"]))));
+const saveMine = () => store.set("aff-mine2", Object.fromEntries(mine));
+let votes = {};            // event id -> list of { name, status }
 let votesOnline = false;   // becomes true once the database answers
 
 function db(path, body) {
@@ -1678,26 +1683,35 @@ function db(path, body) {
 }
 
 function voteCount(ev) { return (votes[ev.id] || []).length; }
+function levelCount(ev, lvl) { return (votes[ev.id] || []).filter(v => v.status === lvl).length; }
+function voteScore(ev) { return voteCount(ev) + levelCount(ev, "going"); }   // going counts double
+function namesAt(ev, lvl, max) {
+  const n = (votes[ev.id] || []).filter(v => v.status === lvl).map(v => v.name);
+  if (!max || n.length <= max) return n.join(", ");
+  return n.slice(0, max).join(", ") + " +" + (n.length - max) + " more";
+}
 function votersText(ev) {
-  const v = votes[ev.id] || [];
-  if (!v.length) return "";
-  const names = v.slice(0, 4).join(", ");
-  return "In: " + names + (v.length > 4 ? " +" + (v.length - 4) + " more" : "");
+  const g = namesAt(ev, "going", 4), i = namesAt(ev, "interested", 4);
+  return [g && "✅ Going: " + g, i && "⭐ Interested: " + i].filter(Boolean).join(" · ");
 }
 function fillActions(box, ev) {
   box.innerHTML = "";
   if (votesOnline) {
-    const v = document.createElement("button"); v.type = "button";
-    const n = voteCount(ev), on = mine.has(ev.id);
-    v.className = "vote" + (on ? " on" : "") + (ev.id === justVoted ? " pop" : "");
-    v.textContent = (on ? "👍 You're in" : "👍 I'm in") + (n ? " · " + n : "");
-    v.onclick = e => { e.stopPropagation(); toggleVote(ev); };
-    box.appendChild(v);
+    [["interested", "⭐ Interested"], ["going", "✅ Going"]].forEach(([lvl, label]) => {
+      const v = document.createElement("button"); v.type = "button";
+      const n = levelCount(ev, lvl), on = mine.get(ev.id) === lvl;
+      v.className = "vote " + lvl + (on ? " on" : "") + (on && ev.id === justVoted ? " pop" : "");
+      v.textContent = label + (n ? " · " + n : "");
+      v.title = lvl === "going" ? "You're planning to go" : "Looks fun; maybe";
+      v.setAttribute("aria-pressed", on ? "true" : "false");
+      v.onclick = e => { e.stopPropagation(); setLevel(ev, lvl); };
+      box.appendChild(v);
+    });
   }
   const s = document.createElement("button"); s.type = "button";
   const sv = saved.has(ev.id);
   s.className = "save" + (sv ? " on" : "");
-  s.textContent = sv ? "★ Saved" : "☆ Save";
+  s.textContent = sv ? "🔖 Saved" : "🔖 Save";
   s.onclick = e => { e.stopPropagation(); toggleSave(ev); };
   box.appendChild(s);
 
@@ -1777,24 +1791,25 @@ function renderWhosIn() {
   const list = document.getElementById("whos-list");
   list.innerHTML = "";
   const voted = EVENTS.filter(ev => voteCount(ev) > 0 && upcomingWeekendsOf(ev).length)
-    .sort((a, b) => voteCount(b) - voteCount(a) || a.name.localeCompare(b.name));
+    .sort((a, b) => levelCount(b, "going") - levelCount(a, "going") || voteCount(b) - voteCount(a) || a.name.localeCompare(b.name));
   const total = voted.reduce((n, ev) => n + voteCount(ev), 0);
-  document.getElementById("whos-btn").textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "") + (feedFresh ? " · 💬 " + feedFresh : "");
+  document.getElementById("whos-btn").textContent = "🙋 Who's interested" + (voted.length ? " · " + voted.length : "") + (feedFresh ? " · 💬 " + feedFresh : "");
   const hw = document.getElementById("hero-whos"), hc = document.getElementById("hero-cmts");
-  hw.hidden = !votesOnline; hw.textContent = "🙋 Who's in" + (voted.length ? " · " + voted.length : "");
+  hw.hidden = !votesOnline; hw.textContent = "🙋 Who's interested" + (voted.length ? " · " + voted.length : "");
   hc.hidden = !commentsOn;  hc.textContent = "💬 Comments" + (feedFresh ? " · " + feedFresh : "");
   if (!voted.length) {
-    list.innerHTML = '<li class="empty">No one\'s in yet. Tap 👍 I\'m in on anything that looks fun and it will show up here for everyone.</li>';
+    list.innerHTML = '<li class="empty">Nothing yet. Tap ⭐ Interested on anything that looks fun, or ✅ Going once you\'re set, and it shows up here for everyone.</li>';
     return;
   }
   voted.forEach(ev => {
     const t = TYPES[ev.type];
     const li = document.createElement("li");
     li.innerHTML = '<span class="wcount"></span><div class="wname"></div><div class="wmeta"></div><div class="wpeople"></div>';
-    li.querySelector(".wcount").textContent = voteCount(ev);
+    const g = levelCount(ev, "going"), it = levelCount(ev, "interested");
+    li.querySelector(".wcount").textContent = [g && "✅ " + g, it && "⭐ " + it].filter(Boolean).join("  ");
     li.querySelector(".wname").textContent = t.emoji + " " + ev.name;
     li.querySelector(".wmeta").textContent = upcomingWeekendsOf(ev).map(weekendLabel).join(", ") + (ev.free ? " · Free" : "");
-    li.querySelector(".wpeople").textContent = (votes[ev.id] || []).join(", ");
+    li.querySelector(".wpeople").textContent = votersText(ev);
     li.onclick = () => jumpToEvent(ev);
     list.appendChild(li);
   });
@@ -1829,13 +1844,13 @@ async function changeName() {
   // Update the name on every vote this device has cast
   Object.keys(votes).forEach(id => {
     if (!mine.has(id)) return;
-    const list = votes[id].slice(), i = list.lastIndexOf(old);   // just this phone's entry
-    if (i >= 0) list[i] = myName;
+    const list = votes[id].slice(), i = list.map(v => v.name).lastIndexOf(old);   // just this phone's entry
+    if (i >= 0) list[i] = { name: myName, status: list[i].status };
     votes[id] = list;
   });
   refreshEventUI();
   try {
-    await Promise.all([...mine].map(id => db("rpc/cast_vote", { p_event: id, p_device: DEVICE, p_name: myName })));
+    await Promise.all([...mine.keys()].map(id => db("rpc/cast_vote", { p_event: id, p_device: DEVICE, p_name: myName })));
     if (commentsOn) { await db("rpc/rename_my_comments", { p_device: DEVICE, p_name: myName }); loadComments(); }
   } catch (e) {
     showVoteNote("Couldn't update your name on every vote. Check your connection and try again.");
@@ -1874,7 +1889,7 @@ function toggleSave(ev) {
 function nameUsedByOthers(name) {
   const key = name.trim().toLowerCase();
   let total = 0, mineCount = 0;
-  Object.entries(votes).forEach(([id, names]) => names.forEach(n => {
+  Object.entries(votes).forEach(([id, list]) => list.map(v => v.name).forEach(n => {
     if (n.trim().toLowerCase() === key) { total++; if (mine.has(id) && myName.trim().toLowerCase() === key) mineCount++; }
   }));
   return total - Math.min(mineCount, total) > 0;
@@ -1883,8 +1898,8 @@ function nameUsedByOthers(name) {
 function askName(renaming) {
   document.getElementById("name-title").textContent = renaming ? "Change your name" : "What's your name?";
   document.querySelector("#name-dialog p").textContent = renaming
-    ? "Your new name will show on all the events you've said you're in for."
-    : "So your friends can see who's in. You only need to do this once on this device.";
+    ? "Your new name will show on every event you've marked."
+    : "So your friends can see who's interested and who's going. You only need to do this once on this device.";
   return new Promise(resolve => {
     const dlg = document.getElementById("name-dialog"), inp = document.getElementById("name-input");
     inp.value = myName || ""; dlg.hidden = false; setTimeout(() => inp.focus(), 50);
@@ -1915,31 +1930,32 @@ function askName(renaming) {
   });
 }
 
-async function toggleVote(ev) {
+// Tap Interested or Going; tap the one that's already on to clear it
+async function setLevel(ev, lvl) {
   if (!myName) {
     const n = await askName();
     if (!n) return;
     myName = n; store.set("aff-name", myName);
   }
-  const was = mine.has(ev.id);
-  if (!was) { justVoted = ev.id; setTimeout(() => { if (justVoted === ev.id) justVoted = null; }, 600); }
+  const was = mine.get(ev.id) || null, next = was === lvl ? null : lvl;
+  if (next) { justVoted = ev.id; setTimeout(() => { if (justVoted === ev.id) justVoted = null; }, 600); }
   // Show the change right away, then confirm with the database
-  if (was) {
-    mine.delete(ev.id);
-    const list = (votes[ev.id] || []).slice(), i = list.lastIndexOf(myName);
-    if (i >= 0) list.splice(i, 1);
-    votes[ev.id] = list;
-  }
-  else { mine.add(ev.id); votes[ev.id] = (votes[ev.id] || []).concat(myName); }
-  store.set("aff-myvotes", [...mine]);
+  const prevList = (votes[ev.id] || []).slice();
+  const list = prevList.slice(), i = was ? list.map(v => v.name).lastIndexOf(myName) : -1;
+  if (i >= 0) list.splice(i, 1);
+  if (next) list.push({ name: myName, status: next });
+  votes[ev.id] = list;
+  if (next) mine.set(ev.id, next); else mine.delete(ev.id);
+  saveMine();
   refreshEventUI();
   try {
-    if (was) await db("rpc/remove_vote", { p_event: ev.id, p_device: DEVICE });
-    else await db("rpc/cast_vote", { p_event: ev.id, p_device: DEVICE, p_name: myName });
+    if (!next) await db("rpc/remove_vote", { p_event: ev.id, p_device: DEVICE });
+    else await db("rpc/set_interest", { p_event: ev.id, p_device: DEVICE, p_name: myName, p_status: next, p_type: ev.type, p_title: ev.name.slice(0, 120) });
   } catch (e) {
-    if (was) mine.add(ev.id); else mine.delete(ev.id);
-    store.set("aff-myvotes", [...mine]);
-    showVoteNote("Couldn't save your vote. Check your connection and try again.");
+    votes[ev.id] = prevList;
+    if (was) mine.set(ev.id, was); else mine.delete(ev.id);
+    saveMine(); refreshEventUI();
+    showVoteNote("Couldn't save that. Check your connection and try again.");
   }
   loadVotes();
 }
@@ -1951,13 +1967,13 @@ function showVoteNote(msg) {
 
 async function loadVotes() {
   try {
-    const rows = await db("vote_list?select=event_id,voter_name&order=created_at.asc");
+    const rows = await db("vote_list?select=event_id,voter_name,status&order=created_at.asc");
     const next = {};
-    (rows || []).forEach(r => { (next[r.event_id] = next[r.event_id] || []).push(r.voter_name); });
+    (rows || []).forEach(r => { (next[r.event_id] = next[r.event_id] || []).push({ name: r.voter_name, status: r.status === "interested" ? "interested" : "going" }); });
     votes = next;
     try {
-      const m = await db("rpc/my_votes", { p_device: DEVICE });
-      if (Array.isArray(m)) { mine = new Set(m.map(x => typeof x === "string" ? x : x.event_id || x.my_votes)); store.set("aff-myvotes", [...mine]); }
+      const m = await db("rpc/my_interest", { p_device: DEVICE });
+      if (Array.isArray(m)) { mine = new Map(m.map(x => [x.event_id, x.status === "interested" ? "interested" : "going"])); saveMine(); }
     } catch (e) { /* keep the local copy */ }
     const first = !votesOnline;
     votesOnline = true;
@@ -1976,7 +1992,7 @@ loadVotes();
 setInterval(() => { if (!document.hidden) loadVotes(); }, 30000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) loadVotes(); });
 
-const POPULAR_AT = 3;      // votes needed for the 🔥 Popular badge
+const POPULAR_AT = 3;      // people interested or going needed for the 🔥 Popular badge
 let justVoted = null;
 
 function renderHero() {
@@ -1987,7 +2003,7 @@ function renderHero() {
   const friends = new Set();
   Object.entries(votes).forEach(([id, names]) => {
     const ev = EVENTS.find(e => e.id === id);
-    if (ev && upcomingWeekendsOf(ev).length) names.forEach(n => friends.add(n.trim().toLowerCase()));
+    if (ev && upcomingWeekendsOf(ev).length) names.forEach(v => friends.add(v.name.trim().toLowerCase()));
   });
   document.getElementById("hero-kicker").textContent =
     (ALL_PAST ? "Last weekend" : isThisWeekend(w) ? "This weekend" : "Next weekend") + " · " + weekendLabel(w);
