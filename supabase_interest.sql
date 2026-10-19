@@ -18,10 +18,8 @@ do $$ begin
   end if;
 end $$;
 
--- 2. Votes cast before this change came from the old "I'm in" button, so count them as "going",
---    and fill in what kind of event each one was.
-update public.votes set status = 'going'
-  where created_at < '2026-10-19 18:00:00+00' and event_type is null;
+-- 2. Votes cast before this change came from the old "I'm in" button. Dean asked for them to count
+--    as "interested" (the column's default), so they need no change. Fill in what kind of event each was.
 update public.votes v set event_type = x.t, event_name = x.n
   from (values
     ('montclair-zombie-walk', 'fall', 'Montclair Zombie Walk'),
