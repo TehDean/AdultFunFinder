@@ -87,8 +87,9 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
   - votes (⭐ Interested / ✅ Going): `set_interest(p_event, p_device, p_name, p_status, p_type, p_title)`,
     `remove_vote`, `my_interest`, and the `vote_list` view (with `status`, `event_type`, `event_name`).
     `cast_vote` (3 args) is only used to rename and keeps the level. `my_votes` is the old version.
-  - `interest_by_type` view: interest per event type (score = interested + 2 × going). The Thursday
-    update reads it to search harder for the kinds of events friends like.
+  - `interest_by_type` view: interest per event type (score = interested + 2 × going).
+  - `interest_by_area` view: the same, split by `area` ("nj" / "roc", from the `roc-` id prefix).
+    The Thursday update reads it so each crew's likes steer only its own tab.
   - suggestions: `suggest_event`, `my_suggestions`, plus `review_suggestions(p_key)` and
     `mark_suggestion(p_key, …)` for the Thursday task
   - comments: the `comment_list` view, `add_comment`, `delete_comment`, `my_comment_ids`,

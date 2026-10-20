@@ -76,3 +76,19 @@ revoke all on function public.set_interest(text, uuid, text, text, text, text) f
 revoke all on function public.my_interest(uuid) from public;
 grant execute on function public.set_interest(text, uuid, text, text, text, text) to anon, authenticated;
 grant execute on function public.my_interest(uuid) to anon, authenticated;
+
+-- 6. The same summary split by area, so New Jersey and Rochester friends are learned from separately.
+--    Rochester events have ids starting with "roc-"; everything else is New Jersey.
+create or replace view public.interest_by_area as
+  select case when event_id like 'roc-%' then 'roc' else 'nj' end as area,
+         coalesce(event_type, 'unknown') as event_type,
+         count(*) filter (where status = 'interested') as interested,
+         count(*) filter (where status = 'going') as going,
+         count(*) filter (where status = 'interested') + 2 * count(*) filter (where status = 'going') as score,
+         count(distinct event_id) as events,
+         count(distinct voter_name) as people,
+         max(created_at) as last_vote
+  from public.votes
+  group by 1, 2;
+revoke all on public.interest_by_area from anon, authenticated;
+grant select on public.interest_by_area to anon, authenticated;
