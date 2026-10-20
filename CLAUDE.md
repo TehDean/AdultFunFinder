@@ -7,7 +7,7 @@ This repo is PUBLIC: never write keys, passwords or the review key into any file
 
 A weekend-events site for Dean and his friends: a Leaflet map and a list of things to do
 Friday evening through Sunday, for the next ~4 weekends. It has two area tabs:
-- **New Jersey**: within ~2 hours of West Orange, NJ (HQ 40.7948, -74.2391).
+- **New Jersey**: within ~2 hours of West Orange, NJ (HQ 45 Wilfred St, 40.7986057, -74.2338897).
 - **Rochester, NY**: within ~1 hour of 651 Hinchey Rd, Rochester NY 14624 (HQ 43.1385787, -77.6890792).
 
 There are two copies of the same page:
