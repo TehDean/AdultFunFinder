@@ -1483,8 +1483,10 @@ function initialRegion() {
     const saved = JSON.parse(localStorage.getItem("aff-region"));
     if (REGIONS[saved]) return saved;
   } catch (e) {}
+  regionGuessNeeded = true;   // first visit with nothing chosen: pick the area nearest the visitor
   return "nj";
 }
+let regionGuessNeeded = false, regionPickedByHand = false;
 let region = initialRegion();
 let HOME = REGIONS[region].home;
 let EVENTS = ALL_EVENTS.filter(e => regionOf(e) === region);   // the events of the area being shown
@@ -2290,7 +2292,7 @@ function renderRegionTabs() {
     const b = document.createElement("button"); b.type = "button";
     b.textContent = "📍 " + R.label; b.className = k === region ? "on" : "";
     b.setAttribute("role", "tab"); b.setAttribute("aria-selected", k === region ? "true" : "false");
-    b.onclick = () => { if (k !== region) setRegion(k); };
+    b.onclick = () => { regionPickedByHand = true; if (k !== region) setRegion(k); };
     box.appendChild(b);
   });
   const R = REGIONS[region];
@@ -2704,9 +2706,30 @@ async function deleteComment(ev, id) {
   window.addEventListener("appinstalled", () => { btn.hidden = true; document.body.classList.remove("show-install"); toast("Fun Finder is on your home screen."); });
 })();
 
+// First visit: open the area nearest the visitor, judged roughly from their internet connection
+// (city-level, no permission prompt). Runs once; after that the last tab used is remembered.
+async function guessRegion() {
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 4000);
+    const r = await fetch("https://get.geojs.io/v1/ip/geo.json", { signal: ctl.signal });
+    if (!r.ok) return;
+    const j = await r.json(), lat = parseFloat(j.latitude), lng = parseFloat(j.longitude);
+    if (!isFinite(lat) || !isFinite(lng)) return;
+    let best = region, bd = Infinity;
+    Object.entries(REGIONS).forEach(([k, R]) => {
+      const d = (R.home.lat - lat) ** 2 + ((R.home.lng - lng) * Math.cos(lat * Math.PI / 180)) ** 2;
+      if (d < bd) { bd = d; best = k; }
+    });
+    if (regionPickedByHand) return;
+    try { localStorage.setItem("aff-region", JSON.stringify(best)); } catch (e) {}
+    if (best !== region) setRegion(best);
+  } catch (e) { /* stay on the default */ }
+}
+
 applyRegionMap();
 render(true);
 openSharedEvent();
+if (regionGuessNeeded) guessRegion();
 loadWeather();
 loadMySuggestions();
 setInterval(() => { if (!document.hidden) loadWeather(); }, 3 * 3600 * 1000);

@@ -68,6 +68,9 @@ Rochester events have `region: "roc"`; events without `region` are New Jersey. A
   Rochester: lat 42.45–43.45, lng -78.55 to -76.75.
 - Rochester ids start with `roc-`. Share links with `?e=<id>` open the right tab automatically;
   `?r=roc` opens the Rochester tab.
+- Which tab opens: `?r=` or a shared event's area first, then the last tab used on that device;
+  on a first visit the page asks get.geojs.io for the visitor's rough (city-level) location and
+  opens the nearest area (falls back to New Jersey).
 
 ## The Thursday update (scheduled task)
 
