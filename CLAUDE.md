@@ -7,8 +7,12 @@ This repo is PUBLIC: never write keys, passwords or the review key into any file
 
 A weekend-events site for Dean and his friends: a Leaflet map and a list of things to do
 Friday evening through Sunday, for the next ~4 weekends. It has two area tabs:
-- **New Jersey**: within ~2 hours of West Orange, NJ (HQ 45 Wilfred St, 40.7986057, -74.2338897).
-- **Rochester, NY**: within ~1 hour of 651 Hinchey Rd, Rochester NY 14624 (HQ 43.1385787, -77.6890792).
+- **New Jersey**: within ~2 hours of West Orange, NJ.
+- **Rochester, NY**: within ~1 hour of Rochester.
+
+Privacy: the friends' home addresses are NOT in this repo or the page. The map has no HQ pin and
+each area's center in `REGIONS` is rounded to about a kilometer. The exact HQ addresses live only in
+the private Thursday task prompt. Never add addresses or exact home coordinates here or to the page.
 
 There are two copies of the same page:
 
@@ -53,8 +57,8 @@ Rochester events have `region: "roc"`; events without `region` are New Jersey. A
 - `type`: race, hike, active, food, brew, show, comedy, movie, art, fair, fall, holiday.
   `race` is ONLY obstacle/mud races; ordinary 5Ks, half marathons, etc. are excluded.
 - `outdoor`: optional override. By default race/hike/active/fair/fall/food count as outdoor.
-- `far`: NJ: true if more than ~1 hour's drive from West Orange. Rochester: true if more than
-  ~30 min from 651 Hinchey Rd (its distance chips are "Within 30 min" / "30–60 min").
+- `far`: NJ: true if more than ~1 hour's drive from the NJ HQ. Rochester: true if more than
+  ~30 min from the Rochester HQ (its distance chips are "Within 30 min" / "30–60 min").
   `free`: true only when a source says free.
 - `when`: write times like "Saturday, Oct 24, 10 AM to 4 PM". The calendar button and the
   list's time sorting read this format.

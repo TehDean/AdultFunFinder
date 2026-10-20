@@ -1234,7 +1234,7 @@ const ALL_EVENTS = [
     where: "Village Green, Summit",
     cost: "Free",
     about: "Summit's Halloween night on the green: monster mash dance party, a bonfire and an outdoor spooky movie. Bring a blanket. About 20 min away." },
-  // ---------------- Rochester, NY (region "roc"); drive times from 651 Hinchey Rd ----------------
+  // ---------------- Rochester, NY (region "roc"); drive times from the Rochester HQ ----------------
   { id: "roc-jeff-tweedy-rit", region: "roc", url: "https://www.rit.edu/events/jeff-tweedy-live-concert-rit-performing-arts-center", name: "Jeff Tweedy", weekends: ["2026-10-24"], type: "show", day: "fri", free: false, far: false,
     lat: 43.0854179, lng: -77.6795609, when: "Friday, Oct 23, 7:30 PM",
     where: "RIT Performing Arts Center, 250 Lomb Memorial Dr, Rochester",
@@ -1465,10 +1465,10 @@ const TOWNS_ROC = [
 
 // The areas shown as tabs at the top. Each has its own HQ, map area and towns.
 const REGIONS = {
-  nj:  { label: "New Jersey", home: { name: "Fun Finder HQ (45 Wilfred St)", lat: 40.7986057, lng: -74.2338897 }, from: "West Orange", range: "within about 2 hours of West Orange, NJ",
+  nj:  { label: "New Jersey", home: { name: "West Orange", lat: 40.79, lng: -74.24 }, from: "West Orange", range: "within about 2 hours of West Orange, NJ",
          view: 10, bounds: [[38.9, -76.6], [42.5, -72.2]], box: { minLat: 39.30, maxLat: 42.10, minLng: -76.00, maxLng: -72.80 },
          towns: TOWNS, near: "🚗 Within 1 hr", far: "🛣️ 1–2 hrs", dist: "near", stored: true },
-  roc: { label: "Rochester", home: { name: "Rochester HQ (651 Hinchey Rd)", lat: 43.1385787, lng: -77.6890792 }, from: "651 Hinchey Rd", range: "within about an hour of 651 Hinchey Rd, Rochester",
+  roc: { label: "Rochester", home: { name: "Rochester", lat: 43.14, lng: -77.69 }, from: "Rochester", range: "within about an hour of Rochester, NY",
          view: 10, bounds: [[42.2, -79.0], [43.7, -76.3]], box: { minLat: 42.45, maxLat: 43.45, minLng: -78.55, maxLng: -76.75 },
          towns: TOWNS_ROC, near: "🚗 Within 30 min", far: "🛣️ 30–60 min", dist: "any", stored: false }
 };
@@ -1539,7 +1539,6 @@ function applyRegionMap() {
   map.setMaxBounds(null);
   map.setView([R.home.lat, R.home.lng], R.view, { animate: false });
   map.setMaxBounds(R.bounds);
-  homeMarker.setLatLng([R.home.lat, R.home.lng]).setPopupContent(`<div class="pop"><h3>${esc(R.home.name)}</h3></div>`);
   if (IS_PUBLIC_SITE) return;
   const stored = window.STORED_LAYER, useStored = !!stored && R.stored;
   if (window.TOWN_LAYER) map.removeLayer(window.TOWN_LAYER);
@@ -1588,8 +1587,7 @@ if (hasMap) {
     iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -19]
   });
 
-  homeMarker = L.marker([HOME.lat, HOME.lng], { icon: pinIcon("📍", null, "home"), zIndexOffset: 1000 })
-    .addTo(map).bindPopup(`<div class="pop"><h3>${esc(HOME.name)}</h3></div>`);
+  // (No home pin: the map is centered on each area, but its HQ isn't shown.)
 
   ALL_EVENTS.forEach(ev => {
     const t = TYPES[ev.type];
@@ -1826,8 +1824,6 @@ function renderFallbackMap() {
   const mk = (tag, a, txt) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (txt != null) n.textContent = txt; return n; };
   svg.innerHTML = "";
   REGIONS[region].towns.forEach(([n, la, ln]) => { const [x, y] = xy(la, ln); svg.appendChild(mk("text", { x, y, class: "ftown" }, n)); });
-  const [hx, hy] = xy(HOME.lat, HOME.lng);
-  svg.appendChild(mk("circle", { cx: hx, cy: hy, r: 8, fill: "#2f6fed" }));
   venueGroups(visibleEvents()).forEach(evs => {
     const ev = evs[0], t = mostCommonType(evs), [x, y] = xy(ev.lat, ev.lng);
     const g = mk("g", { class: "fpin" });
@@ -2515,7 +2511,7 @@ function renderHeroWeather() {
   const el = document.getElementById("hero-wx"), w = WEEKENDS[0];
   const line = WX && w && !ALL_PAST ? wxLine(HOME.lat, HOME.lng, [isoAddDays(w, -1), w, isoAddDays(w, 1)].filter(d => d >= todayIso())) : "";
   el.hidden = !line;
-  el.textContent = line ? "Forecast near HQ: " + line : "";
+  el.textContent = line ? "Forecast near " + REGIONS[region].home.name + ": " + line : "";
 }
 const todayIso = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 async function loadWeather() {
