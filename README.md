@@ -1,6 +1,6 @@
 # Adult Fun Finder
 
-A mobile-friendly map and list of things to do over the next few weekends within about 2 hours of West Orange, NJ: food festivals, shows, comedy, breweries and wineries, active outings, obstacle races, hikes, street fairs, and seasonal events.
+A mobile-friendly map and list of things to do over the next few weekends, with two area tabs: within about 2 hours of West Orange, NJ, and within about an hour of Rochester, NY. It covers food festivals, shows, comedy, breweries and wineries, active outings, obstacle races, hikes, street fairs, and seasonal events.
 
 **Live site:** https://tehdean.github.io/AdultFunFinder/
 

@@ -15,16 +15,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<meta name="description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends within about 2 hours of West Orange, NJ.">
+<meta name="description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends around West Orange, NJ and Rochester, NY.">
 <meta property="og:title" content="Adult Fun Finder">
-<meta property="og:description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends within about 2 hours of West Orange, NJ.">
+<meta property="og:description" content="Food festivals, comedy, breweries, shows, active outings and more over the next few weekends around West Orange, NJ and Rochester, NY.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tehdean.github.io/AdultFunFinder/">
 <meta property="og:site_name" content="Adult Fun Finder">
 <meta property="og:image" content="https://tehdean.github.io/AdultFunFinder/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Adult Fun Finder: things to do on weekends near West Orange, NJ">
+<meta property="og:image:alt" content="Adult Fun Finder: things to do on weekends near West Orange, NJ and Rochester, NY">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://tehdean.github.io/AdultFunFinder/og-image.jpg">
 
@@ -294,6 +294,10 @@
   .chips button:hover { border-color:rgba(255,79,216,.5); }
   .chips button.on { background:var(--grad); border-color:transparent; color:#fff; box-shadow:0 0 18px rgba(255,79,216,.40); }
   .count { color:var(--muted); }
+  /* Area tabs (New Jersey / Rochester) */
+  .region-tabs { margin-bottom:12px; }
+  .region-tabs button { font-weight:700; font-size:.95rem; padding:8px 16px; }
+  .region-tabs button.on { background:linear-gradient(90deg,#4be3ff,#9d7bff); box-shadow:0 0 18px rgba(75,227,255,.35); }
 
   /* Cards and list */
   .card { background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.10); box-shadow:0 10px 30px rgba(0,0,0,.25); }
@@ -464,9 +468,10 @@
     <div class="stats" id="hero-stats"></div>
     <div id="hero-wx" hidden></div>
     <div class="hero-btns"><button type="button" id="hero-whos" class="panel-btn" hidden>🙋 Who's interested</button><button type="button" id="hero-cmts" class="panel-btn" hidden>💬 Comments</button><button type="button" id="install-btn" hidden>📲 Install app</button><button type="button" id="suggest-btn" hidden>💡 Suggest an event</button></div>
-    <p class="sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
+    <p class="sub" id="hero-sub">Things to do over the next few weekends within about 2 hours of West Orange, NJ. Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.</p>
   </header>
 
+  <div class="chips region-tabs" id="region-tabs" role="tablist" aria-label="Area"></div>
   <div class="chips" id="weekend-filters"></div>
   <div class="chips" id="type-filters"></div>
   <div class="chips" id="extra-filters"></div>
@@ -529,7 +534,7 @@
   </div>
 
   <p class="note" id="install-tip">📲 Keep Fun Finder on your phone like an app: on iPhone tap Share, then <b>Add to Home Screen</b>; on Android tap the <b>📲 Install app</b> button at the top, or tap ⋮ and choose <b>Install and create shortcut</b> (older Chrome: <b>Add to Home screen</b>).</p>
-  <p class="note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
+  <p class="note" id="foot-note">Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from West Orange without traffic.</p>
 </div>
 
 <button type="button" id="whos-btn">🙋 Who's interested</button>
@@ -613,12 +618,12 @@ const TYPES = {
 };
 for (const t of Object.values(TYPES)) t.color = GROUPS[t.group].color;
 
-const HOME = { name: "Fun Finder HQ", lat: 40.7948, lng: -74.2391 };
 // The public website. Shared event links always point here so anyone can open them.
 const PUBLIC_URL = "https://tehdean.github.io/AdultFunFinder/";
 const IS_PUBLIC_SITE = true;   // build_public.py switches this on for the public website
 
-const EVENTS = [
+// Every event, in every area. `region` is "roc" for Rochester; events without one are in New Jersey.
+const ALL_EVENTS = [
   { id: "south-mountain-reservation-hikes", url: "https://essexcountyparks.org/parks/south-mountain-reservation", name: "South Mountain Reservation hikes", weekends: ["2026-10-17", "2026-10-24", "2026-10-31", "2026-11-07"], type: "hike", day: "both", free: true,
     lat: 40.7534061, lng: -74.2896523, when: "Open daily, 8:00 AM to 4:30 PM",
     where: "South Mountain Reservation, West Orange",
@@ -1229,6 +1234,202 @@ const EVENTS = [
     where: "Village Green, Summit",
     cost: "Free",
     about: "Summit's Halloween night on the green: monster mash dance party, a bonfire and an outdoor spooky movie. Bring a blanket. About 20 min away." },
+  // ---------------- Rochester, NY (region "roc"); drive times from 651 Hinchey Rd ----------------
+  { id: "roc-jeff-tweedy-rit", region: "roc", url: "https://www.rit.edu/events/jeff-tweedy-live-concert-rit-performing-arts-center", name: "Jeff Tweedy", weekends: ["2026-10-24"], type: "show", day: "fri", free: false, far: false,
+    lat: 43.0854179, lng: -77.6795609, when: "Friday, Oct 23, 7:30 PM",
+    where: "RIT Performing Arts Center, 250 Lomb Memorial Dr, Rochester",
+    cost: "Ticketed; check the listing.",
+    about: "Wilco's frontman on his solo tour, in RIT's new theater. About 10 min away." },
+  { id: "roc-martin-sexton-water-street", region: "roc", url: "https://www.tickpick.com/buy-martin-sexton-tickets-water-street-music-hall-10-23-26-7pm/8166791/", name: "Martin Sexton", weekends: ["2026-10-24"], type: "show", day: "fri", free: false, far: false,
+    lat: 43.1605527, lng: -77.6116928, when: "Friday, Oct 23, 7 PM",
+    where: "Water Street Music Hall, 204 N Water St, Rochester",
+    cost: "Ticketed; check the listing.",
+    about: "Soulful singer-songwriter known for big-voiced live shows, in a classic two-level downtown club. About 10 min away." },
+  { id: "roc-stayin-alive-bee-gees", region: "roc", url: "https://www.kodakcenter.com/events/2026/stayin-alive", name: "Stayin' Alive: One Night of the Bee Gees", weekends: ["2026-10-24"], type: "show", day: "fri", free: false, far: false,
+    lat: 43.1975043, lng: -77.6327701, when: "Friday, Oct 23, 7:30 PM (doors 6:30)",
+    where: "Kodak Center, 200 W Ridge Rd, Rochester",
+    cost: "Ticketed; see Ticketmaster for prices.",
+    about: "A Bee Gees tribute show with all the disco hits. About 15 min away." },
+  { id: "roc-big-jay-oakerson-carlson", region: "roc", url: "https://theater.guide/venue/comedy-at-the-carlson-main-showroom/", name: "Big Jay Oakerson", weekends: ["2026-10-24"], type: "comedy", day: "fri-sat", free: false, far: false,
+    lat: 43.150761, lng: -77.5607196, when: "Friday, Oct 23, 9 PM; Saturday, Oct 24, 7 PM and 9 PM",
+    where: "Comedy at the Carlson, 50 Carlson Rd, Rochester",
+    cost: "From about $45.",
+    about: "Raunchy, crowd-work-heavy stand-up from the host of the Legion of Skanks podcast. Food and drinks served at the club. About 15 min away." },
+  { id: "roc-neko-case-water-street", region: "roc", url: "https://app.opendate.io/e/neko-case-october-24-2026-683001", name: "Neko Case with Destroyer", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: false,
+    lat: 43.1605527, lng: -77.6116928, when: "Saturday, Oct 24, 7 PM (doors 6 PM)",
+    where: "Water Street Music Hall, 204 N Water St, Rochester",
+    cost: "Ticketed; check the listing. All ages.",
+    about: "Indie-country powerhouse Neko Case, with Destroyer on the bill. About 10 min away." },
+  { id: "roc-hocus-pocus-taste-along", region: "roc", url: "https://www.kodakcenter.com/events/2026/hocus-pocus-taste-a-long-experience", name: "Hocus Pocus Taste-Along", weekends: ["2026-10-24"], type: "movie", day: "sat", free: false, far: false,
+    lat: 43.1975043, lng: -77.6327701, when: "Saturday, Oct 24, 7 PM (doors 6 PM)",
+    where: "Kodak Center, 200 W Ridge Rd, Rochester",
+    cost: "Ticketed; every ticket includes a candy box. See Ticketmaster for prices.",
+    about: "Hocus Pocus on the big screen with themed treats timed to moments in the movie. Silly, very Halloween, good with friends. About 15 min away." },
+  { id: "roc-rpo-douglas-tchaikovsky", region: "roc", url: "https://rpo.org/rpo-piano-festival/", name: "RPO Piano Festival: Douglas Plays Tchaikovsky", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: false,
+    lat: 43.1580641, lng: -77.6009212, when: "Saturday, Oct 24, 7:30 PM",
+    where: "Kodak Hall at Eastman Theatre, 60 Gibbs St, Rochester",
+    cost: "Ticketed; check the RPO.",
+    about: "The Rochester Philharmonic with Barry Douglas playing Tchaikovsky's Piano Concerto No. 1. About 10 min away." },
+  { id: "roc-spirits-of-the-past-gcv", region: "roc", url: "https://www.gcv.org/spirits/", name: "Spirits of the Past: A Walk in the Dark", weekends: ["2026-10-24", "2026-10-31"], type: "fall", day: "fri-sun", free: false, far: false, outdoor: true,
+    lat: 42.9960498, lng: -77.8855475, when: "Fri–Sun, Oct 23–25, and Fri, Oct 30; tours between 5 and 9 PM",
+    where: "Genesee Country Village & Museum, 1410 Flint Hill Rd, Mumford",
+    cost: "Tickets online in advance; check the listing.",
+    about: "A 75-minute lantern-lit walk through a historic village with spooky stories along the way. Not for young kids. About 25 min away." },
+  { id: "roc-long-acre-moonlight-maze", region: "roc", url: "https://www.longacrefarms.com/moonlight-maze", name: "Moonlight Maze at Long Acre Farms", weekends: ["2026-10-24", "2026-10-31"], type: "fall", day: "fri-sat", free: false, far: true,
+    lat: 43.1166296, lng: -77.313961, when: "Fri, Oct 23, Sat, Oct 24 and Fri, Oct 30; timed entry, last entry 9 PM",
+    where: "Long Acre Farms, 1342 Eddy Rd, Macedon",
+    cost: "$22 online for 18+ ($27 at the gate); buy ahead.",
+    about: "A giant corn maze in the dark with flashlights and a bonfire. The farm also has a beer and wine shop. About 35 min away." },
+  { id: "roc-wickham-farms-fall-festival", region: "roc", url: "https://wickhamfarms.com/pages/attractions", name: "Wickham Farms Fall Festival & Pumpkin Destruction", weekends: ["2026-10-24", "2026-10-31"], type: "fall", day: "both", free: false, far: false,
+    lat: 43.1518408, lng: -77.4293025, when: "Daily except Wednesdays, 10 AM to 7 PM, through Nov 1; Pumpkin Destruction Oct 31 and Nov 1",
+    where: "Wickham Farms, 1315 Sweets Corners Rd, Penfield",
+    cost: "Ticketed; check the listing.",
+    about: "Corn maze, zip lines and fall games, plus hard cider in the barn. The last weekend is all about smashing and launching pumpkins. About 25 min away." },
+  { id: "roc-dinosaur-bbq-late-night-oct-24", region: "roc", url: "https://dinosaurbarbque.com/rochester-events", name: "Late Night at the Dino", weekends: ["2026-10-24"], type: "show", day: "sat", free: false, far: false,
+    lat: 43.153305, lng: -77.6081307, when: "Saturday, Oct 24, 9 to 11:30 PM",
+    where: "Dinosaur Bar-B-Que, 99 Court St, Rochester",
+    cost: "Cover not listed; food and drinks are paid.",
+    about: "Local bands in the bar at Rochester's famous BBQ spot on the river. About 10 min away." },
+  { id: "roc-dinosaur-bbq-late-night-oct-30", region: "roc", url: "https://dinosaurbarbque.com/rochester-events", name: "Late Night at the Dino (Halloween weekend)", weekends: ["2026-10-31"], type: "show", day: "fri-sat", free: false, far: false,
+    lat: 43.153305, lng: -77.6081307, when: "Friday, Oct 30 and Saturday, Oct 31, 9 to 11:30 PM",
+    where: "Dinosaur Bar-B-Que, 99 Court St, Rochester",
+    cost: "Cover not listed; food and drinks are paid.",
+    about: "Local bands in the bar at Rochester's famous BBQ spot on the river. About 10 min away." },
+  { id: "roc-sonnenberg-haunted-stroll", region: "roc", url: "https://www.sonnenberg.org/event/haunted-stroll-2026/", name: "Haunted Stroll at Sonnenberg Gardens", weekends: ["2026-10-24"], type: "fall", day: "sun", free: false, far: true,
+    lat: 42.8982616, lng: -77.272232, when: "Sunday, Oct 25, 5:30 to 8:30 PM (gates close at 8)",
+    where: "Sonnenberg Gardens & Mansion, 250 Gibson St, Canandaigua",
+    cost: "$10 general admission.",
+    about: "Costumed ghouls in historic mansion gardens after dark, with cider, doughnuts and adult drinks for sale. Rain or shine. About 40 min away." },
+  { id: "roc-topdog-underdog-geva", region: "roc", url: "https://gevatheatre.org/show/topdog-underdog/", name: "Topdog/Underdog at Geva Theatre", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "show", day: "both", free: false, far: false,
+    lat: 43.1526504, lng: -77.6052373, when: "Saturdays 3 and 8 PM, Sundays 2 PM (plus 7 PM on Oct 25 and Nov 8), through Nov 22",
+    where: "Geva Theatre, 75 Woodbury Blvd, Rochester",
+    cost: "From $48 including fees.",
+    about: "Suzan-Lori Parks's Pulitzer-winning play about two brothers and a card hustle. About 10 min away." },
+  { id: "roc-dryden-theatre-halloween-films", region: "roc", url: "https://www.eastman.org/dryden-theatre", name: "Halloween films at the Dryden Theatre", weekends: ["2026-10-24", "2026-10-31"], type: "movie", day: "fri-sat", free: false, far: false,
+    lat: 43.1528123, lng: -77.5802521, when: "Re-Animator Sat, Oct 24, 7:30 PM; Late Shift Fri, Oct 30, 7:30 PM; Abbott and Costello Meet Frankenstein Sat, Oct 31, 2 PM",
+    where: "Dryden Theatre, George Eastman Museum, 900 East Ave, Rochester",
+    cost: "$13 general admission.",
+    about: "Classic and cult horror on the big screen at the historic museum theater. About 15 min away." },
+  { id: "roc-eric-dalessandro-carlson", region: "roc", url: "https://theater.guide/venue/comedy-at-the-carlson-main-showroom/", name: "Eric D'Alessandro", weekends: ["2026-10-31"], type: "comedy", day: "fri", free: false, far: false,
+    lat: 43.150761, lng: -77.5607196, when: "Friday, Oct 30, 7 PM",
+    where: "Comedy at the Carlson, 50 Carlson Rd, Rochester",
+    cost: "From about $39.",
+    about: "Stand-up and impressions from the viral comedian. Food and drinks served at the club. About 15 min away." },
+  { id: "roc-grateful-shred-water-street", region: "roc", url: "https://www.tickpick.com/buy-grateful-shred-tickets-water-street-music-hall-10-30-26-8pm/7862688/", name: "Grateful Shred", weekends: ["2026-10-31"], type: "show", day: "fri", free: false, far: false,
+    lat: 43.1605527, lng: -77.6116928, when: "Friday, Oct 30, 8 PM",
+    where: "Water Street Music Hall, 204 N Water St, Rochester",
+    cost: "Ticketed; check the listing.",
+    about: "A fun, high-energy Grateful Dead tribute band on Halloween weekend. About 10 min away." },
+  { id: "roc-amerks-vs-phantoms", region: "roc", url: "https://www.amerks.com/news/detail/amerks-announce-2026-27-regular-season-schedule", name: "Rochester Americans vs. Lehigh Valley", weekends: ["2026-10-31"], type: "show", day: "fri", free: false, far: false,
+    lat: 43.1538374, lng: -77.6108832, when: "Friday, Oct 30, 7:05 PM",
+    where: "Blue Cross Arena, 1 War Memorial Sq, Rochester",
+    cost: "Ticketed; check the Amerks.",
+    about: "Pro hockey (the Buffalo Sabres' farm team) with cheap seats and a loud crowd. About 10 min away." },
+  { id: "roc-halloween-bar-crawl", region: "roc", url: "https://www.eventbrite.com/e/rochester-halloween-bar-crawl-2026-tickets-1611600503489", name: "Rochester Halloween Bar Crawl", weekends: ["2026-10-31"], type: "show", day: "sat", free: false, far: false,
+    lat: 43.156669, lng: -77.601232, when: "Saturday, Oct 31, 4 PM to midnight (check in 4 to 6 PM)",
+    where: "Starts at 3 Daughters Tap and Tavern, 109 East Ave, Rochester",
+    cost: "Ticket price on the listing; includes 1–2 drinks and no covers at the bars.",
+    about: "A costumed crawl through downtown bars with drink specials, photographers and an after party. About 10 min away." },
+  { id: "roc-gcv-murder-monsters-mayhem", region: "roc", url: "https://www.gcv.org/item/dinner-theater/", name: "Murder, Monsters & Mayhem Dinner Theater", weekends: ["2026-10-31"], type: "show", day: "sat", free: false, far: false,
+    lat: 42.9960498, lng: -77.8855475, when: "Saturday, Oct 31, 5:30 to 8:30 PM",
+    where: "Genesee Country Village & Museum, 1410 Flint Hill Rd, Mumford",
+    cost: "$68 including buffet dinner; cash bar.",
+    about: "A Halloween murder-mystery dinner with WNY Improv. Costumes encouraged; seats up to 8 per table. About 25 min away." },
+  { id: "roc-rpo-piano-festival-week-2", region: "roc", url: "https://rpo.org/rpo-piano-festival/", name: "RPO Piano Festival: Beethoven and Brahms", weekends: ["2026-10-31"], type: "show", day: "both", free: false, far: false,
+    lat: 43.1580641, lng: -77.6009212, when: "Saturday, Oct 31, 7:30 PM (Biss plays Beethoven's \"Emperor\"); Sunday, Nov 1, 2 PM (Hamelin plays Brahms)",
+    where: "Kodak Hall at Eastman Theatre, 60 Gibbs St, Rochester",
+    cost: "Ticketed; check the RPO.",
+    about: "The second weekend of the Rochester Philharmonic's piano festival. About 10 min away." },
+  { id: "roc-rochester-public-market", region: "roc", url: "https://marketspread.com/market/24666/city-of-rochester-public-market/events/87105/", name: "Rochester Public Market (Saturdays)", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "food", day: "sat", free: false, far: false,
+    lat: 43.165348, lng: -77.588588, when: "Saturdays, 6 AM to 3 PM",
+    where: "Rochester Public Market, 280 N Union St, Rochester",
+    cost: "No admission listed; free parking in city lots. Food is paid.",
+    about: "A huge year-round market with produce, bakeries, food stands and coffee. A classic Rochester Saturday morning. About 15 min away." },
+  { id: "roc-genesee-brew-house", region: "roc", url: "https://www.geneseebeer.com/brewhouse", name: "Genesee Brew House", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "brew", day: "fri-sun", free: false, far: false,
+    lat: 43.163626, lng: -77.6146588, when: "Fri and Sat 11 AM to 11 PM, Sun 11 AM to 10 PM",
+    where: "Genesee Brew House, 25 Cataract St, Rochester",
+    cost: "Free to visit; food and beer are paid.",
+    about: "Pub, pilot brewery and beer museum in the old Genesee brewery, with a rooftop view of High Falls. About 10 min away." },
+  { id: "roc-letchworth-state-park", region: "roc", url: "https://parks.ny.gov/parks/79/details.aspx", name: "Letchworth State Park", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "hike", day: "both", free: false, far: true,
+    lat: 42.6010498, lng: -78.0372025, when: "Open daily, 6 AM to 11 PM",
+    where: "Letchworth State Park, Castile entrance, Castile",
+    cost: "$10 per car (the fee is collected through Oct 25).",
+    about: "The \"Grand Canyon of the East\": a deep gorge, three big waterfalls and about 66 miles of trails. Peak foliage around late October. About an hour away." },
+  { id: "roc-mendon-ponds-park", region: "roc", name: "Mendon Ponds Park hikes", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "hike", day: "both", free: false, far: false,
+    lat: 43.01647, lng: -77.5662981, when: "Open daily, 6 AM to 10 PM",
+    where: "Mendon Ponds Park, 95 Douglas Rd, Honeoye Falls",
+    cost: "No entry fee listed.",
+    about: "Monroe County's biggest park, with ponds, glacial ridges and miles of wooded trails. About 25 min away." },
+  { id: "roc-high-falls-pont-de-rennes", region: "roc", url: "https://www.visitrochester.com/blog/post/free-things-to-do-in-rochester-ny/", name: "High Falls from the Pont de Rennes Bridge", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "hike", day: "fri-sun", free: true, far: false,
+    lat: 43.1625101, lng: -77.6157166, when: "Open any time",
+    where: "Pont de Rennes pedestrian bridge, High Falls, Rochester",
+    cost: "Free.",
+    about: "A 96-foot waterfall right downtown, best seen from this pedestrian bridge. Pair it with the Genesee Brew House next door. About 10 min away." },
+  { id: "roc-highland-park", region: "roc", url: "https://www.visitrochester.com/blog/post/free-things-to-do-in-rochester-ny/", name: "Highland Park walk", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "hike", day: "both", free: true, far: false,
+    lat: 43.1302755, lng: -77.6046441, when: "Open daily",
+    where: "Highland Park, 180 Reservoir Ave, Rochester",
+    cost: "Free.",
+    about: "An Olmsted-designed park with wide paths, big old trees and the Sunken Garden. About 15 min away." },
+  { id: "roc-cobbs-hill-sunset", region: "roc", url: "https://www.visitrochester.com/blog/post/free-things-to-do-in-rochester-ny/", name: "Cobbs Hill Park reservoir loop and sunset", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "hike", day: "fri-sun", free: true, far: false,
+    lat: 43.1423348, lng: -77.5726388, when: "Open daily, 6 AM to 9 PM",
+    where: "Cobbs Hill Park, 80 Culver Rd, Rochester",
+    cost: "Free.",
+    about: "A short walk around the hilltop reservoir with the best sunset view of the city skyline. About 15 min away." },
+  { id: "roc-erie-canalway-trail-pittsford", region: "roc", url: "https://www.visitrochester.com/blog/post/free-things-to-do-in-rochester-ny/", name: "Erie Canalway Trail at Pittsford", weekends: ["2026-10-24", "2026-10-31", "2026-11-07", "2026-11-14"], type: "active", day: "both", free: true, far: false,
+    lat: 43.0912, lng: -77.5449, when: "Open daily",
+    where: "Erie Canal trail at Lock 32, Pittsford",
+    cost: "Free.",
+    about: "Flat canal-side path for a long walk, run or bike ride, with Pittsford village's cafes and shops nearby. About 20 min away." },
+  { id: "roc-rpo-raiders-of-the-lost-ark", region: "roc", url: "https://rpo.org/event/raiders-of-the-lost-ark/", name: "Raiders of the Lost Ark in Concert (RPO)", weekends: ["2026-11-07"], type: "movie", day: "fri-sat", free: false, far: false,
+    lat: 43.1580641, lng: -77.6009212, when: "Friday, Nov 6 and Saturday, Nov 7, 7:30 PM",
+    where: "Kodak Hall at Eastman Theatre, 60 Gibbs St, Rochester",
+    cost: "Ticketed; check the RPO.",
+    about: "The full movie on the big screen while the Rochester Philharmonic plays John Williams's score live. About 10 min away." },
+  { id: "roc-hells-kitchen-musical", region: "roc", url: "https://rbtl.org/events/hells-kitchen/", name: "Hell's Kitchen (Broadway tour)", weekends: ["2026-11-07"], type: "show", day: "fri-sun", free: false, far: false,
+    lat: 43.1607408, lng: -77.5886594, when: "Fri, Nov 6, 7:30 PM; Sat, Nov 7, 2 and 7:30 PM; Sun, Nov 8, 1 and 6:30 PM",
+    where: "West Herr Auditorium Theatre, 885 E Main St, Rochester",
+    cost: "Ticketed; see Ticketmaster for prices.",
+    about: "The Tony-winning musical built on Alicia Keys's songs and life story. About 15 min away." },
+  { id: "roc-first-friday-nov-6", region: "roc", url: "https://www.firstfridayrochester.org/about/", name: "First Friday Rochester gallery night", weekends: ["2026-11-07"], type: "art", day: "fri", free: false, far: false,
+    lat: 43.157, lng: -77.6, when: "Friday, Nov 6, about 6 to 9 PM (some suburban spots 4 to 8 PM)",
+    where: "Galleries across Rochester; run by Rochester Contemporary Art Center, 137 East Ave (pin is approximate)",
+    cost: "Not listed.",
+    about: "A monthly citywide gallery night with openings at small and mid-sized art spaces. Easy to hop between a few with friends. About 10 min away." },
+  { id: "roc-dan-viola-carlson", region: "roc", url: "https://concertfix.com/concerts/rochester-ny+november-2026", name: "Dan Viola", weekends: ["2026-11-07"], type: "comedy", day: "sat", free: false, far: false,
+    lat: 43.150761, lng: -77.5607196, when: "Saturday, Nov 7, 6 PM and 8 PM",
+    where: "Comedy at the Carlson (Rickles Room), 50 Carlson Rd, Rochester",
+    cost: "Check the listing.",
+    about: "Stand-up in the club's smaller room. Food and drinks served. About 15 min away." },
+  { id: "roc-rush-tribute-project-kodak", region: "roc", url: "https://concertfix.com/concerts/rochester-ny+november-2026", name: "Rush Tribute Project", weekends: ["2026-11-07"], type: "show", day: "sun", free: false, far: false,
+    lat: 43.1975043, lng: -77.6327701, when: "Sunday, Nov 8, 7:30 PM",
+    where: "Kodak Center, 200 W Ridge Rd, Rochester",
+    cost: "Check the listing.",
+    about: "A full-production Rush tribute. About 15 min away." },
+  { id: "roc-phil-hanley-carlson", region: "roc", url: "https://theater.guide/venue/comedy-at-the-carlson-main-showroom/", name: "Phil Hanley", weekends: ["2026-11-14"], type: "comedy", day: "fri-sat", free: false, far: false,
+    lat: 43.150761, lng: -77.5607196, when: "Friday, Nov 13 and Saturday, Nov 14, 7 PM and 9 PM",
+    where: "Comedy at the Carlson, 50 Carlson Rd, Rochester",
+    cost: "From about $39.",
+    about: "Laid-back, charming stand-up from the Canadian comic. Food and drinks served at the club. About 15 min away." },
+  { id: "roc-rick-braun-chuck-mangione", region: "roc", url: "https://concertfix.com/concerts/rochester-ny+november-2026", name: "Rick Braun Plays Chuck Mangione", weekends: ["2026-11-14"], type: "show", day: "fri", free: false, far: false,
+    lat: 43.1975043, lng: -77.6327701, when: "Friday, Nov 13, 7:30 PM",
+    where: "Kodak Center, 200 W Ridge Rd, Rochester",
+    cost: "Check the listing.",
+    about: "The jazz trumpeter plays the music of Rochester's own Chuck Mangione. About 15 min away." },
+  { id: "roc-bill-engvall-kodak", region: "roc", url: "https://theater.guide/venue/kodak-center-theater/", name: "Bill Engvall", weekends: ["2026-11-14"], type: "comedy", day: "sat", free: false, far: false,
+    lat: 43.1975043, lng: -77.6327701, when: "Saturday, Nov 14, 7:30 PM",
+    where: "Kodak Center, 200 W Ridge Rd, Rochester",
+    cost: "Resale listings from about $79.",
+    about: "The Blue Collar Comedy Tour veteran. About 15 min away." },
+  { id: "roc-rpo-mozart-bartok", region: "roc", url: "https://concertfix.com/concerts/rochester-ny+november-2026", name: "RPO: Mozart & Bartók", weekends: ["2026-11-14"], type: "show", day: "sat", free: false, far: false,
+    lat: 43.1580641, lng: -77.6009212, when: "Saturday, Nov 14, 7:30 PM",
+    where: "Kodak Hall at Eastman Theatre, 60 Gibbs St, Rochester",
+    cost: "Ticketed; check the RPO.",
+    about: "The Rochester Philharmonic in its beautifully restored hall. About 10 min away." },
+  { id: "roc-world-oddities-expo", region: "roc", url: "https://worldodditiesexpo.com/rochester-ny/", name: "World Oddities Expo", weekends: ["2026-11-14"], type: "fair", day: "both", free: false, far: false, outdoor: false,
+    lat: 43.1558791, lng: -77.609055, when: "Saturday, Nov 14 and Sunday, Nov 15, 11 AM to 7 PM",
+    where: "Rochester Riverside Convention Center, 123 E Main St, Rochester",
+    cost: "$20 for one day ($30 two-day VIP).",
+    about: "A weird and wonderful indoor market: taxidermy, macabre art, curiosities, tattoos, workshops and live performances. About 10 min away." },
 ];
 /* ============================================================ */
 
@@ -1251,11 +1452,48 @@ const TOWNS = [
   ["Toms River", 39.9537, -74.1979], ["Atlantic City", 39.3643, -74.4229]
 ];
 
+// Rochester towns
+const TOWNS_ROC = [
+  ["Rochester", 43.1566, -77.6088, true], ["Greece", 43.2098, -77.6931], ["Gates", 43.1520, -77.7009], ["Chili", 43.0895, -77.7486],
+  ["Henrietta", 43.0592, -77.6122], ["Brighton", 43.1214, -77.5700], ["Pittsford", 43.0906, -77.5150], ["Fairport", 43.0987, -77.4419],
+  ["Webster", 43.2123, -77.4300], ["Irondequoit", 43.2134, -77.5797], ["Brockport", 43.2134, -77.9394], ["Spencerport", 43.1862, -77.8039],
+  ["Batavia", 42.9981, -78.1875, true], ["Le Roy", 42.9784, -77.9878], ["Avon", 42.9120, -77.7455], ["Geneseo", 42.7959, -77.8170],
+  ["Canandaigua", 42.8875, -77.2817, true], ["Victor", 42.9826, -77.4089], ["Honeoye Falls", 42.9523, -77.5903], ["Naples", 42.6151, -77.4022],
+  ["Geneva", 42.8687, -76.9777, true], ["Newark", 43.0467, -77.0950], ["Palmyra", 43.0637, -77.2333], ["Sodus", 43.2370, -77.0614],
+  ["Albion", 43.2465, -78.1936], ["Medina", 43.2200, -78.3870], ["Dansville", 42.5609, -77.6961], ["Penn Yan", 42.6609, -77.0539]
+];
+
+// The areas shown as tabs at the top. Each has its own HQ, map area and towns.
+const REGIONS = {
+  nj:  { label: "New Jersey", home: { name: "Fun Finder HQ", lat: 40.7948, lng: -74.2391 }, from: "West Orange", range: "within about 2 hours of West Orange, NJ",
+         view: 10, bounds: [[38.9, -76.6], [42.5, -72.2]], box: { minLat: 39.30, maxLat: 42.10, minLng: -76.00, maxLng: -72.80 },
+         towns: TOWNS, near: "🚗 Within 1 hr", far: "🛣️ 1–2 hrs", dist: "near", stored: true },
+  roc: { label: "Rochester", home: { name: "Rochester HQ (651 Hinchey Rd)", lat: 43.1385787, lng: -77.6890792 }, from: "651 Hinchey Rd", range: "within about an hour of 651 Hinchey Rd, Rochester",
+         view: 10, bounds: [[42.2, -79.0], [43.7, -76.3]], box: { minLat: 42.45, maxLat: 43.45, minLng: -78.55, maxLng: -76.75 },
+         towns: TOWNS_ROC, near: "🚗 Within 30 min", far: "🛣️ 30–60 min", dist: "any", stored: false }
+};
+const regionOf = ev => ev.region === "roc" ? "roc" : "nj";
+function initialRegion() {
+  try {
+    const q = new URLSearchParams(location.search), r = q.get("r");
+    if (REGIONS[r]) return r;
+    const id = q.get("e") || (location.hash.match(/(?:^#|&)e=([^&]+)/) || [])[1];
+    const ev = id && ALL_EVENTS.find(x => x.id === decodeURIComponent(id));
+    if (ev) return regionOf(ev);
+    const saved = JSON.parse(localStorage.getItem("aff-region"));
+    if (REGIONS[saved]) return saved;
+  } catch (e) {}
+  return "nj";
+}
+let region = initialRegion();
+let HOME = REGIONS[region].home;
+let EVENTS = ALL_EVENTS.filter(e => regionOf(e) === region);   // the events of the area being shown
+
 let activeTypes = new Set();   // selected categories; empty means All
 let searchText = "";
 let openEventId = null;
 let indoorOnly = false;   // the list item that's tapped open, kept open when the list refreshes
-let dayFilter = "any", freeOnly = false, distFilter = "near", savedOnly = false, sortByVotes = false;   // opens showing events within about 1 hour
+let dayFilter = "any", freeOnly = false, distFilter = REGIONS[region].dist, savedOnly = false, sortByVotes = false;   // NJ opens showing events within about 1 hour
 
 // Weekends are named by their Saturday (YYYY-MM-DD). Past weekends are hidden.
 // Which days of its weekend an event happens: any of "fri", "sat", "sun"
@@ -1267,10 +1505,14 @@ function weekendLabel(sat) {
   return a.getMonth() === b.getMonth() ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()}–${m(b)} ${b.getDate()}`;
 }
 const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
-const DATA_WEEKENDS = [...new Set(EVENTS.flatMap(e => e.weekends || []))].sort();
-let WEEKENDS = DATA_WEEKENDS.filter(sat => { const sun = new Date(sat + "T12:00:00"); sun.setDate(sun.getDate() + 1); sun.setHours(23, 59, 59); return sun >= TODAY; });
-const ALL_PAST = WEEKENDS.length === 0;
-if (ALL_PAST) WEEKENDS = DATA_WEEKENDS.slice(-1);   // nothing upcoming yet: show the latest so the page isn't empty
+let DATA_WEEKENDS, WEEKENDS, ALL_PAST;
+function computeWeekends() {
+  DATA_WEEKENDS = [...new Set(EVENTS.flatMap(e => e.weekends || []))].sort();
+  WEEKENDS = DATA_WEEKENDS.filter(sat => { const sun = new Date(sat + "T12:00:00"); sun.setDate(sun.getDate() + 1); sun.setHours(23, 59, 59); return sun >= TODAY; });
+  ALL_PAST = WEEKENDS.length === 0;
+  if (ALL_PAST) WEEKENDS = DATA_WEEKENDS.slice(-1);   // nothing upcoming yet: show the latest so the page isn't empty
+}
+computeWeekends();
 let selectedWeekends = new Set(WEEKENDS.slice(0, 1));
 
 function esc(s) {
@@ -1286,8 +1528,35 @@ if (!hasMap) {
   document.getElementById("fallback-map").style.display = "block";
 }
 
-let map;
+let map, homeMarker;
 const markers = new Map();
+// The street map for the area being shown. The Claude copy only stores New Jersey's street map,
+// so other areas show town names there; the public website has a live street map everywhere.
+const regionTownLayers = {};
+function applyRegionMap() {
+  if (!hasMap) return;
+  const R = REGIONS[region];
+  map.setMaxBounds(null);
+  map.setView([R.home.lat, R.home.lng], R.view, { animate: false });
+  map.setMaxBounds(R.bounds);
+  homeMarker.setLatLng([R.home.lat, R.home.lng]).setPopupContent(`<div class="pop"><h3>${esc(R.home.name)}</h3></div>`);
+  if (IS_PUBLIC_SITE) return;
+  const stored = window.STORED_LAYER, useStored = !!stored && R.stored;
+  if (window.TOWN_LAYER) map.removeLayer(window.TOWN_LAYER);
+  Object.entries(regionTownLayers).forEach(([k, l]) => { if (k !== region || useStored) map.removeLayer(l); });
+  if (stored) { if (useStored) stored.addTo(map); else map.removeLayer(stored); }
+  if (!useStored) {
+    regionTownLayers[region] = regionTownLayers[region] || L.layerGroup(R.towns.map(([n, la, ln, big]) =>
+      L.marker([la, ln], { interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "", html: `<div class="town-label${big ? " big" : ""}">${esc(n)}</div>`, iconSize: [0, 0] }) })));
+    regionTownLayers[region].addTo(map);
+  }
+  const note = document.getElementById("map-note");
+  note.style.display = useStored ? "none" : "block";
+  note.textContent = stored && !R.stored
+    ? "The street map for this area isn't stored in this copy, so town names are shown. Pins are in the right places, Directions opens Google Maps, and the public site (tehdean.github.io/AdultFunFinder) has the full street map."
+    : "The street map didn't load, so town names are shown for orientation. Pins are in the right places, and Directions opens each spot in Google Maps.";
+}
 
 if (hasMap) {
   map = L.map("map", { scrollWheelZoom: true, tap: true, zoomControl: false }).setView([HOME.lat, HOME.lng], 10);
@@ -1310,7 +1579,8 @@ if (hasMap) {
     }
   });
   map.setMinZoom(7);
-  map.setMaxBounds([[38.9, -76.6], [42.5, -72.2]]);
+  map.setMaxBounds(REGIONS[region].bounds);
+  window.TOWN_LAYER = townLayer;
 
   const pinIcon = (emoji, color, cls = "") => L.divIcon({
     className: "",
@@ -1318,10 +1588,10 @@ if (hasMap) {
     iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -19]
   });
 
-  L.marker([HOME.lat, HOME.lng], { icon: pinIcon("📍", null, "home"), zIndexOffset: 1000 })
+  homeMarker = L.marker([HOME.lat, HOME.lng], { icon: pinIcon("📍", null, "home"), zIndexOffset: 1000 })
     .addTo(map).bindPopup(`<div class="pop"><h3>${esc(HOME.name)}</h3></div>`);
 
-  EVENTS.forEach(ev => {
+  ALL_EVENTS.forEach(ev => {
     const t = TYPES[ev.type];
     const m = L.marker([ev.lat, ev.lng], { icon: pinIcon(t.emoji, t.color), title: ev.name });
     // Tapping the same pin again closes its card
@@ -1403,8 +1673,8 @@ function renderFilters() {
   if (votesOnline) chip(x, "🏆 Most interest", sortByVotes, () => { sortByVotes = !sortByVotes; render(false); });
   const d = document.getElementById("dist-filters"); d.innerHTML = "";
   chip(d, "Any distance", distFilter === "any", () => { distFilter = "any"; render(true); });
-  chip(d, "🚗 Within 1 hr", distFilter === "near", () => { distFilter = "near"; render(true); });
-  chip(d, "🛣️ 1–2 hrs", distFilter === "far", () => { distFilter = "far"; render(true); });
+  chip(d, REGIONS[region].near, distFilter === "near", () => { distFilter = "near"; render(true); });
+  chip(d, REGIONS[region].far, distFilter === "far", () => { distFilter = "far"; render(true); });
 }
 
 // Events at the same spot (within about 100 m) share one pin
@@ -1551,11 +1821,11 @@ function renderFallbackMap() {
   if (hasMap) return;
   const svg = document.getElementById("fallback-map");
   const NS = "http://www.w3.org/2000/svg", W = 600, H = 640, P = 24;
-  const B = { minLat: 39.30, maxLat: 42.10, minLng: -76.00, maxLng: -72.80 };
+  const B = REGIONS[region].box;
   const xy = (la, ln) => [P + (ln - B.minLng) / (B.maxLng - B.minLng) * (W - 2 * P), P + (B.maxLat - la) / (B.maxLat - B.minLat) * (H - 2 * P)];
   const mk = (tag, a, txt) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (txt != null) n.textContent = txt; return n; };
   svg.innerHTML = "";
-  TOWNS.forEach(([n, la, ln]) => { const [x, y] = xy(la, ln); svg.appendChild(mk("text", { x, y, class: "ftown" }, n)); });
+  REGIONS[region].towns.forEach(([n, la, ln]) => { const [x, y] = xy(la, ln); svg.appendChild(mk("text", { x, y, class: "ftown" }, n)); });
   const [hx, hy] = xy(HOME.lat, HOME.lng);
   svg.appendChild(mk("circle", { cx: hx, cy: hy, r: 8, fill: "#2f6fed" }));
   venueGroups(visibleEvents()).forEach(evs => {
@@ -2005,7 +2275,7 @@ function renderHero() {
     const ev = EVENTS.find(e => e.id === id);
     if (ev && upcomingWeekendsOf(ev).length) names.forEach(v => friends.add(v.name.trim().toLowerCase()));
   });
-  document.getElementById("hero-kicker").textContent =
+  document.getElementById("hero-kicker").textContent = "📍 " + REGIONS[region].label + " · " +
     (ALL_PAST ? "Last weekend" : isThisWeekend(w) ? "This weekend" : "Next weekend") + " · " + weekendLabel(w);
   const box = document.getElementById("hero-stats");
   box.innerHTML = "";
@@ -2016,7 +2286,42 @@ function renderHero() {
   renderHeroWeather();
 }
 
-function render(fit) { renderHero(); renderFilters(); renderMarkers(fit); renderList(); renderFallbackMap(); }
+function render(fit) { renderRegionTabs(); renderHero(); renderFilters(); renderMarkers(fit); renderList(); renderFallbackMap(); }
+
+function renderRegionTabs() {
+  const box = document.getElementById("region-tabs"); box.innerHTML = "";
+  Object.entries(REGIONS).forEach(([k, R]) => {
+    const b = document.createElement("button"); b.type = "button";
+    b.textContent = "📍 " + R.label; b.className = k === region ? "on" : "";
+    b.setAttribute("role", "tab"); b.setAttribute("aria-selected", k === region ? "true" : "false");
+    b.onclick = () => { if (k !== region) setRegion(k); };
+    box.appendChild(b);
+  });
+  const R = REGIONS[region];
+  document.getElementById("hero-sub").textContent = "Things to do over the next few weekends " + R.range + ". Tap a pin or an event for details. Listings come from web searches; confirm times and prices before you go.";
+  document.getElementById("foot-note").textContent = "Some pins are approximate (town centers or a typical viewing spot); those say so in their details. New weekends are added every Thursday. Drive times are rough estimates from " + R.from + " without traffic.";
+}
+
+// Switch between New Jersey and Rochester
+function setRegion(r, keepFilters) {
+  region = r;
+  try { localStorage.setItem("aff-region", JSON.stringify(r)); } catch (e) {}
+  HOME = REGIONS[r].home;
+  EVENTS = ALL_EVENTS.filter(e => regionOf(e) === r);
+  computeWeekends();
+  selectedWeekends = new Set(WEEKENDS.slice(0, 1));
+  if (!keepFilters) {
+    activeTypes.clear(); dayFilter = "any"; freeOnly = false; savedOnly = false; indoorOnly = false;
+    distFilter = REGIONS[r].dist;
+    searchText = ""; const si = document.getElementById("search"); if (si) si.value = "";
+    const sc = document.getElementById("search-clear"); if (sc) sc.hidden = true;
+  }
+  openEventId = null;
+  hideSheet();
+  applyRegionMap();
+  render(true);
+  refreshEventUI();
+}
 
 /* ============================================================
    SEARCH BOX
@@ -2071,7 +2376,8 @@ function openSharedEvent() {
   try { id = new URLSearchParams(location.search).get("e") || (location.hash.match(/(?:^#|&)e=([^&]+)/) || [])[1]; } catch (e) {}
   if (!id) return;
   id = decodeURIComponent(id);
-  const ev = EVENTS.find(x => x.id === id);
+  const ev = ALL_EVENTS.find(x => x.id === id);
+  if (ev && regionOf(ev) !== region) setRegion(regionOf(ev));
   if (ev && upcomingWeekendsOf(ev).length) setTimeout(() => jumpToEvent(ev), 300);
   else toast(ev ? "That event has already happened. Here's what's on now." : "That event isn't on the list anymore. Here's what's on now.");
 }
@@ -2213,7 +2519,7 @@ function renderHeroWeather() {
 }
 const todayIso = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 async function loadWeather() {
-  const keys = [...new Set([wxKey(HOME.lat, HOME.lng)].concat(EVENTS.map(e => wxKey(e.lat, e.lng))))];
+  const keys = [...new Set(Object.values(REGIONS).map(R => wxKey(R.home.lat, R.home.lng)).concat(ALL_EVENTS.map(e => wxKey(e.lat, e.lng))))];
   const url = "https://api.open-meteo.com/v1/forecast?latitude=" + keys.map(k => k.split(",")[0]).join(",") +
     "&longitude=" + keys.map(k => k.split(",")[1]).join(",") +
     "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
@@ -2402,6 +2708,7 @@ async function deleteComment(ev, id) {
   window.addEventListener("appinstalled", () => { btn.hidden = true; document.body.classList.remove("show-install"); toast("Fun Finder is on your home screen."); });
 })();
 
+applyRegionMap();
 render(true);
 openSharedEvent();
 loadWeather();

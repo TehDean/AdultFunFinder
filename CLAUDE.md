@@ -6,7 +6,10 @@ This repo is PUBLIC: never write keys, passwords or the review key into any file
 ## What this is
 
 A weekend-events site for Dean and his friends: a Leaflet map and a list of things to do
-Friday evening through Sunday, for the next ~4 weekends, within ~2 hours of West Orange.
+Friday evening through Sunday, for the next ~4 weekends. It has two area tabs:
+- **New Jersey**: within ~2 hours of West Orange, NJ (HQ 40.7948, -74.2391).
+- **Rochester, NY**: within ~1 hour of 651 Hinchey Rd, Rochester NY 14624 (HQ 43.1385787, -77.6890792).
+
 There are two copies of the same page:
 
 1. **The main copy (source of truth): a Claude artifact**
@@ -17,7 +20,9 @@ There are two copies of the same page:
      Publishing without it creates a separate new artifact (this happened once; the stray was deleted).
    - Publish only the page. Do not pass `files`, `capabilities` or a new icon. The artifact also
      stores ~100 street-map tile files (`tile-index.js`, `t7.js` … `t12_*.js`) that are kept
-     automatically; never touch, remove or re-upload them.
+     automatically; never touch, remove or re-upload them. They only cover New Jersey, so the
+     Claude copy shows town names (no street detail) on the Rochester tab. The public site's live
+     map covers both.
 
 2. **The public copy: GitHub Pages**, https://tehdean.github.io/AdultFunFinder/
    - `index.html` here is GENERATED. Don't hand-edit it.
@@ -29,7 +34,10 @@ There are two copies of the same page:
 
 ## Updating events
 
-Events live in one array in the page: `const EVENTS = [ ... ];` (inside the "EDIT HERE" block).
+Events for both areas live in one array in the page: `const ALL_EVENTS = [ ... ];` (inside the
+"EDIT HERE" block). `EVENTS` is the filtered list for the tab being shown; don't edit it.
+Rochester events have `region: "roc"`; events without `region` are New Jersey. Area settings
+(HQ, map box, towns, distance labels) are in `REGIONS`.
 
 ```js
 { id: "montclair-zombie-walk", url: "https://…", name: "…", weekends: ["2026-10-24"],
@@ -45,12 +53,17 @@ Events live in one array in the page: `const EVENTS = [ ... ];` (inside the "EDI
 - `type`: race, hike, active, food, brew, show, comedy, movie, art, fair, fall, holiday.
   `race` is ONLY obstacle/mud races; ordinary 5Ks, half marathons, etc. are excluded.
 - `outdoor`: optional override. By default race/hike/active/fair/fall/food count as outdoor.
-- `far`: true if more than ~1 hour's drive. `free`: true only when a source says free.
+- `far`: NJ: true if more than ~1 hour's drive from West Orange. Rochester: true if more than
+  ~30 min from 651 Hinchey Rd (its distance chips are "Within 30 min" / "30–60 min").
+  `free`: true only when a source says free.
 - `when`: write times like "Saturday, Oct 24, 10 AM to 4 PM". The calendar button and the
   list's time sorting read this format.
 - Same venue means the same exact lat/lng, so the map merges its events into one pin with a count.
 - Rules: no New York City events (the five boroughs). Friday means evening (5 PM+).
-- Stay inside the map box: lat 39.30–42.10, lng -76.00 to -72.80.
+- Stay inside the area's map box. NJ: lat 39.30–42.10, lng -76.00 to -72.80.
+  Rochester: lat 42.45–43.45, lng -78.55 to -76.75.
+- Rochester ids start with `roc-`. Share links with `?e=<id>` open the right tab automatically;
+  `?r=roc` opens the Rochester tab.
 
 ## The Thursday update (scheduled task)
 
