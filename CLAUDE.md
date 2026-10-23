@@ -81,7 +81,10 @@ favorite spots:
 - Montclair Brewery (via its public calendar feed)
 - Dwell New Jersey's Friday/Saturday/Sunday roundups
 
-It also reviews friends' suggestions, publishes the artifact and pushes `index.html`. Its full
+It also reviews friends' suggestions, publishes the artifact and pushes `index.html`.
+A second scheduled task, "Adult Fun Finder check-up" (Thursdays 7:10 PM Eastern), checks that the
+refresh ran, validates the events, pushes `index.html` if the public site is behind, spot-checks
+a few event links, and messages Dean. It never edits the artifact. Its full
 instructions live in the task itself. If you change how events are stored or add a rule, update
 the task's prompt too (claude-code-remote `update_trigger`; list it with `list_triggers`).
 
