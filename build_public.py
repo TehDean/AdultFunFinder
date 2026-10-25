@@ -5,10 +5,21 @@ Claude's shared pages block outside map images. A normal public website has
 no such limit, so this script swaps in a live street map instead.
 
 Usage:  python3 build_public.py <claude_dashboard.html> > index.html
+        python3 build_public.py <claude_dashboard.html> <events.js>   (writes index.html and events.js here)
 """
+import os
+import shutil
 import sys
 
 src = open(sys.argv[1], encoding="utf-8").read()
+
+# A copy saved from the Claude page comes wrapped in the viewer's own document shell; strip it.
+first, second = src.find("<!doctype html>"), src.find("<!doctype html>", src.find("<!doctype html>") + 1)
+if first >= 0 and second > first:
+    src = src[second:]
+    tail = src.rstrip()
+    if tail.endswith("</body></html>") and tail.count("</html>") > 1:
+        src = tail[:tail.rfind("</body></html>")].rstrip() + "\n"
 
 START = "  // Each piece of the map loads only when that area is on screen."
 END = "  map.setMinZoom(7);"
@@ -49,4 +60,11 @@ APP_TAGS = """<link rel="apple-touch-icon" href="icon-180.png">
 if '<link rel="apple-touch-icon" href="icon-180.png">' not in out:
     sys.exit("build_public.py: could not find the app icon tag")
 out = out.replace('<link rel="apple-touch-icon" href="icon-180.png">', APP_TAGS, 1)
-sys.stdout.write(out)
+if len(sys.argv) > 2:
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, "index.html"), "w", encoding="utf-8") as f:
+        f.write(out)
+    shutil.copyfile(sys.argv[2], os.path.join(here, "events.js"))
+    print("wrote index.html and events.js")
+else:
+    sys.stdout.write(out)

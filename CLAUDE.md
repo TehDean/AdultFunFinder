@@ -19,27 +19,36 @@ There are two copies of the same page:
 1. **The main copy (source of truth): a Claude artifact**
    https://claude.ai/artifact/SK7TqQ6xx118y2MYdzEVBp
    - Always edit THIS page, then derive the public site from it.
-   - To get its current HTML, use the Artifact tool with `action: "read"` and that url.
+   - It is two files: the page (`index.html` in the artifact) and `events.js` (the event list).
+     Read them with the Artifact tool: `action: "read"` with that url for the page, and
+     `action: "read"`, that url and `path: "events.js"` for the events. The page read comes
+     wrapped in a viewer shell (a second `<!doctype html>`); `build_public.py` strips it.
    - To publish, ALWAYS pass `url: "https://claude.ai/artifact/SK7TqQ6xx118y2MYdzEVBp"`.
      Publishing without it creates a separate new artifact (this happened once; the stray was deleted).
-   - Publish only the page. Do not pass `files`, `capabilities` or a new icon. The artifact also
+     Publishing is refused unless the current live version has been read in full first.
+   - Pass the page as `file_path` and the events as `files: {"events.js": "<path>"}`. Do not pass
+     `capabilities` or a new icon, and never list the map tiles in `files`. The artifact also
      stores ~100 street-map tile files (`tile-index.js`, `t7.js` … `t12_*.js`) that are kept
      automatically; never touch, remove or re-upload them. They only cover New Jersey, so the
      Claude copy shows town names (no street detail) on the Rochester tab. The public site's live
      map covers both.
+   - For an events-only update (the usual Thursday case), the page file can be published unchanged
+     along with the new `events.js`.
 
 2. **The public copy: GitHub Pages**, https://tehdean.github.io/AdultFunFinder/
-   - `index.html` here is GENERATED. Don't hand-edit it.
-   - Build it: `python3 build_public.py <dashboard.html> > index.html`
-     (swaps in a live Esri street map, sets `IS_PUBLIC_SITE = true`, adds manifest/app tags).
-     Check the output contains `World_Street_Map`, `IS_PUBLIC_SITE = true`, `manifest.webmanifest`
-     and no `tile-index.js`.
+   - `index.html` and `events.js` here are GENERATED. Don't hand-edit them.
+   - Build: `python3 build_public.py <page.html> <events.js>` writes both files into the repo
+     (swaps in a live Esri street map, sets `IS_PUBLIC_SITE = true`, adds manifest/app tags,
+     strips the viewer shell). Check `index.html` has ONE `<!doctype`, contains `World_Street_Map`,
+     `IS_PUBLIC_SITE = true`, `manifest.webmanifest`, `src="events.js"` and no `tile-index.js`;
+     `node --check events.js` must pass.
    - Commit and push to `main`. Pages redeploys in about a minute.
 
 ## Updating events
 
-Events for both areas live in one array in the page: `const ALL_EVENTS = [ ... ];` (inside the
-"EDIT HERE" block). `EVENTS` is the filtered list for the tab being shown; don't edit it.
+Events for both areas live in `events.js`: `const ALL_EVENTS = [ ... ];`. The page loads it with
+`<script src="events.js">` and shows "The event list didn't load" if it's missing or broken.
+`EVENTS` (in the page) is the filtered list for the tab being shown; don't edit it.
 Rochester events have `region: "roc"`; events without `region` are New Jersey. Area settings
 (HQ, map box, towns, distance labels) are in `REGIONS`.
 
@@ -72,6 +81,19 @@ Rochester events have `region: "roc"`; events without `region` are New Jersey. A
   on a first visit the page asks get.geojs.io for the visitor's rough (city-level) location and
   opens the nearest area (falls back to New Jersey).
 
+## Page layout (so tests and edits don't break it)
+
+- On phones (≤860px) the filter chips are hidden behind a "🎛️ Filters · n" button
+  (`body.filters-open` shows `#filter-panel`), and there is a List / Map switch
+  (`body.view-list` / `body.view-map`, remembered in localStorage `aff-view`; list is the default).
+  The Suggest button moves to the bottom (`#suggest-btn-2`). Desktop shows everything.
+- Closed list cards show one line of tags and only the ⭐ Interested button; opening a card shows
+  ✅ Going, Save, Directions and the rest.
+- On a Friday/Saturday/Sunday a "🌙 Tonight" / "☀️ Today" chip appears first in the weekend filters.
+- Light mode: the ☀️/🌙 button sets `data-theme="light"` on `<html>` (localStorage `aff-theme`).
+  Light-mode CSS lives in the `:root[data-theme="light"]` block; new colors need a light override.
+- Votes refresh from the database every 60 seconds while the page is visible.
+
 ## The Thursday update (scheduled task)
 
 "Adult Fun Finder refresh", Thursdays 5:55 PM Eastern, runs on its own (no approval needed).
@@ -81,10 +103,11 @@ favorite spots:
 - Montclair Brewery (via its public calendar feed)
 - Dwell New Jersey's Friday/Saturday/Sunday roundups
 
-It also reviews friends' suggestions, publishes the artifact and pushes `index.html`.
-A second scheduled task, "Adult Fun Finder check-up" (Thursdays 7:10 PM Eastern), checks that the
-refresh ran, validates the events, pushes `index.html` if the public site is behind, spot-checks
-a few event links, and messages Dean. It never edits the artifact. Its full
+It also reviews friends' suggestions, publishes the artifact (page + `events.js`) and pushes
+`index.html` and `events.js`. It runs on Opus; it only edits `events.js`, never the page's code.
+A second scheduled task, "Adult Fun Finder check-up" (Thursdays 7:10 PM Eastern, on Sonnet),
+checks that the refresh ran, validates `events.js`, pushes the built files if the public site is
+behind, spot-checks a few event links, and messages Dean. It never edits the artifact. Its full
 instructions live in the task itself. If you change how events are stored or add a rule, update
 the task's prompt too (claude-code-remote `update_trigger`; list it with `list_triggers`).
 
@@ -114,10 +137,11 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
 
 ## Testing before publishing
 
-1. Extract the main inline `<script>` and run `node --check` on it.
-2. Load the page in Playwright (Chromium is preinstalled), with Supabase and Open-Meteo requests
-   mocked. Check:
-   - filters, the list's day headings, opening events, combined venue pins, comments and sharing
+1. Extract the main inline `<script>` and run `node --check` on it; also `node --check events.js`.
+2. Load the page in Playwright (Chromium is preinstalled), with Supabase, Open-Meteo and
+   get.geojs.io requests mocked, and `events.js` served next to the page. Check:
+   - filters (open the Filters panel on phone widths first), the list's day headings, opening
+     events, the List/Map switch, combined venue pins, comments, sharing, light mode
    - no page errors
    - no horizontal overflow at 320 and 360px wide (phones zoomed out once because of this)
 3. Leaflet loads from cdnjs. If the network blocks it, the page falls back to an SVG map, so test
