@@ -131,7 +131,9 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
   - suggestions: `suggest_event`, `my_suggestions`, plus `review_suggestions(p_key)` and
     `mark_suggestion(p_key, …)` for the Thursday task
   - comments: the `comment_list` view, `add_comment`, `delete_comment`, `my_comment_ids`,
-    `rename_my_comments`, plus `remove_comment(p_key, id)` for moderation
+    `rename_my_comments`, plus `remove_comment(p_key, id)` for moderation (NOT yet created in the
+    playground project as of Oct 28, 2026: creating it was cancelled at the approval step; ask Dean
+    before adding it. The page doesn't use it.)
 - Moderation functions need the private review key. It lives only in the Thursday task's prompt.
   Never copy it into this repo, the page, a commit, or a chat summary.
 - Setup SQL: `supabase_move_to_playground.sql` is the current schema (applied Oct 28, 2026). The older
