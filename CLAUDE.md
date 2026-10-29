@@ -113,8 +113,13 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
 
 ## Database (Supabase)
 
-- Project "Adult Fun Finder", ref `bsdoccpgsoyixsmtsvsu`. Dean has another project ("Japan2026");
-  don't touch it.
+- Since Oct 28, 2026 the Fun Finder lives in Dean's shared "playground" project: "Japan2026",
+  ref `qsztbfixleqhxovkfaeg` (moved there to free a free-plan slot). The old "Adult Fun Finder"
+  project (`bsdoccpgsoyixsmtsvsu`) is paused as a backup; don't use it.
+- In that project the Fun Finder's tables start with `fun_` (`fun_votes`, `fun_suggestions`,
+  `fun_comments`, `fun_review_keys`). Function and view names are unchanged. Every other table and
+  function there (trip_*, ema_*, review_keys, the kitsune's edge function) belongs to Dean's Japan
+  trip site: never touch them.
 - The page uses only the publishable key. Never put a secret / service_role key in the page.
 - Tables are locked (RLS on, no direct access). Everything goes through functions:
   - votes (⭐ Interested / ✅ Going): `set_interest(p_event, p_device, p_name, p_status, p_type, p_title)`,
@@ -129,8 +134,10 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
     `rename_my_comments`, plus `remove_comment(p_key, id)` for moderation
 - Moderation functions need the private review key. It lives only in the Thursday task's prompt.
   Never copy it into this repo, the page, a commit, or a chat summary.
-- Setup SQL: `supabase_setup.sql`, `supabase_suggestions.sql`, `supabase_comments.sql`, `supabase_interest.sql`.
-  - All four are applied already. Write new SQL files so they're safe to run more than once.
+- Setup SQL: `supabase_move_to_playground.sql` is the current schema (applied Oct 28, 2026). The older
+  `supabase_setup.sql`, `supabase_suggestions.sql`, `supabase_comments.sql`, `supabase_interest.sql`
+  built the old project and use the old table names; keep them for history only.
+  - Everything is applied already. Write new SQL files so they're safe to run more than once.
   - The Supabase connector may be connected. If it is, apply schema changes with it, but only
     when Dean asks for a change. If not, send Dean the SQL to paste into the SQL Editor.
 - Don't delete or edit real votes or comments from friends.
