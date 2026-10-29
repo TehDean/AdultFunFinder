@@ -113,8 +113,8 @@ the task's prompt too (claude-code-remote `update_trigger`; list it with `list_t
 
 ## Database (Supabase)
 
-- Since Oct 28, 2026 the Fun Finder lives in Dean's shared "playground" project: "Japan2026",
-  ref `qsztbfixleqhxovkfaeg` (moved there to free a free-plan slot). The old "Adult Fun Finder"
+- Since Oct 28, 2026 the Fun Finder lives in Dean's shared playground project "Playground 1"
+  (formerly "Japan2026"), ref `qsztbfixleqhxovkfaeg` (moved there to free a free-plan slot). The old "Adult Fun Finder"
   project (`bsdoccpgsoyixsmtsvsu`) is paused as a backup; don't use it.
 - In that project the Fun Finder's tables start with `fun_` (`fun_votes`, `fun_suggestions`,
   `fun_comments`, `fun_review_keys`). Function and view names are unchanged. Every other table and
